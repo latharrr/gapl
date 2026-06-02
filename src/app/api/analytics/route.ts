@@ -34,17 +34,22 @@ export async function POST(req: NextRequest) {
       await getAdminDb().collection("analytics_events").add(eventDoc);
 
       // Trigger Welcome Email on signup event
-      if (event === "signup" && userId !== "anonymous" && decodedToken) {
+      if (event === "signup") {
         (async () => {
           try {
-            const userSnap = await getAdminDb().collection("users").doc(userId).get();
+            const metadata = body.metadata || {};
+            const finalUserId = userId !== "anonymous" ? userId : (metadata.userId || "anonymous");
+
+            if (finalUserId === "anonymous") return;
+
+            const userSnap = await getAdminDb().collection("users").doc(finalUserId).get();
             const userData = userSnap.exists ? userSnap.data() : {};
-            const email = decodedToken.email || userData?.email;
-            const name = userData?.displayName || decodedToken.name || "Explorer";
+            const email = metadata.email || decodedToken?.email || userData?.email;
+            const name = metadata.name || userData?.displayName || decodedToken?.name || "Explorer";
 
             if (email) {
               const { sendWelcomeEmail } = await import("@/lib/email-service");
-              await sendWelcomeEmail(userId, email, name);
+              await sendWelcomeEmail(finalUserId, email, name);
             }
           } catch (emailErr) {
             console.error("Welcome email dispatch failed:", emailErr);

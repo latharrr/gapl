@@ -35,7 +35,11 @@ export default function SignupPage() {
       } catch {
         console.warn("Firestore not configured yet — skipping user document creation");
       }
-      trackEvent("signup");
+      trackEvent("signup", {
+        userId: result.user.uid,
+        email: result.user.email || email,
+        name: name,
+      });
       router.push("/dashboard");
     } catch (err: unknown) {
       const error = err as { message?: string };
@@ -54,7 +58,11 @@ export default function SignupPage() {
       } catch {
         console.warn("Firestore not configured yet — skipping user document creation");
       }
-      trackEvent("signup");
+      trackEvent("signup", {
+        userId: result.user.uid,
+        email: result.user.email || "",
+        name: result.user.displayName || "Explorer",
+      });
       router.push("/dashboard");
     } catch (err: unknown) {
       const error = err as { message?: string };

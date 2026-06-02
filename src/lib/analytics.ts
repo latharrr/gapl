@@ -1,6 +1,6 @@
 import { auth } from "./firebase";
 
-export async function trackEvent(event: string) {
+export async function trackEvent(event: string, metadata?: any) {
   try {
     const user = auth.currentUser;
     const headers: Record<string, string> = {
@@ -22,6 +22,7 @@ export async function trackEvent(event: string) {
       body: JSON.stringify({
         event,
         sessionId: sid || undefined,
+        metadata,
       }),
     });
   } catch (err) {
