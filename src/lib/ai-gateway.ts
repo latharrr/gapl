@@ -18,6 +18,7 @@ export interface GatewayOptions {
   correlationId?: string;
   temperature?: number;
   zodSchema?: any; // optional schema validation
+  isJson?: boolean; // set false for raw plain text responses
 }
 
 // Direct fetch callers to avoid heavy SDK dependencies in edge runtimes
@@ -224,13 +225,8 @@ export async function generateAICall(
       let content = "";
       let usage = { prompt_tokens: 0, completion_tokens: 0 };
 
-      // Route execution — only use FreeModel on attempt 1; real failover on 2 & 3
-      if (attempt === 1 && process.env.FREEMODEL_API_KEY) {
-        currentModel = process.env.FREEMODEL_MODEL || currentModel;
-        const result = await callFreeModel(currentModel, prompt, temperature);
-        content = result.content;
-        usage = result.usage;
-      } else if (currentProvider === "OpenAI" && process.env.OPENAI_API_KEY) {
+      // Route execution — determine how to execute based on available API keys
+      if (currentProvider === "OpenAI" && process.env.OPENAI_API_KEY) {
         const result = await callOpenAI(currentModel, prompt, temperature);
         content = result.content;
         usage = result.usage;
@@ -242,10 +238,20 @@ export async function generateAICall(
         const result = await callGemini(currentModel, prompt, temperature);
         content = result.content;
         usage = result.usage;
+      } else if (process.env.FREEMODEL_API_KEY) {
+        // If the targeted provider key is missing but FreeModel key is present, route to FreeModel
+        // Use FREEMODEL_MODEL if defined, otherwise fallback to gpt-4o-mini for non-OpenAI models
+        const modelToUse = process.env.FREEMODEL_MODEL || 
+          (currentModel.startsWith("gpt-") ? currentModel : "gpt-4o-mini");
+        const result = await callFreeModel(modelToUse, prompt, temperature);
+        content = result.content;
+        usage = result.usage;
       } else {
-        // Default to Groq SDK
+        // Default fallback to Groq SDK
+        // Force use of a supported Groq model (like openai/gpt-oss-120b) if the currentModel is not a Groq model
+        const groqModel = currentModel.includes("gpt-oss") ? currentModel : ANALYSIS_MODEL;
         const completion = await groq.chat.completions.create({
-          model: currentModel,
+          model: groqModel,
           messages: [{ role: "user", content: prompt }],
           temperature,
           max_completion_tokens: 4096,
@@ -257,23 +263,26 @@ export async function generateAICall(
         };
       }
 
+
       rawResponse = content;
       const latency = Date.now() - attemptStartTime;
 
       // Zod/Schema Validation check
       let parsedJson: any = null;
-      const jsonMatch = rawResponse.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        try {
-          parsedJson = JSON.parse(jsonMatch[0]);
-          if (options.zodSchema) {
-            options.zodSchema.parse(parsedJson); 
+      if (options.isJson !== false) {
+        const jsonMatch = rawResponse.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          try {
+            parsedJson = JSON.parse(jsonMatch[0]);
+            if (options.zodSchema) {
+              options.zodSchema.parse(parsedJson); 
+            }
+          } catch (e) {
+            throw new Error("JSON response failed schema validation check.");
           }
-        } catch (e) {
-          throw new Error("JSON response failed schema validation check.");
+        } else {
+          throw new Error("AI returned malformed or non-JSON output.");
         }
-      } else {
-        throw new Error("AI returned malformed or non-JSON output.");
       }
 
       // Cost calculations

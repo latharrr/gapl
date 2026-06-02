@@ -23,6 +23,7 @@ ${message}`;
 
     const aiRes = await generateAICall("email_rewrite", prompt, {
       temperature: 0.7,
+      isJson: false,
     });
 
     return NextResponse.json({ rewritten: aiRes.text.trim() });
