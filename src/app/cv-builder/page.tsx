@@ -13,7 +13,7 @@ import { saveCV } from "@/lib/firebase";
 import { authFetch } from "@/lib/auth-fetch";
 import {
   Upload, FileText, ChevronRight, AlertCircle,
-  Download, ArrowLeft, Sparkles, Target, ArrowUp, Check, CloudCheck,
+  Download, ArrowLeft, Sparkles, Target, ArrowUp, Check, CloudCheck, Mail,
 } from "lucide-react";
 
 const ROLES = ["SDE Intern", "SDE Full Time", "Frontend Engineer", "Backend Engineer",
@@ -58,11 +58,36 @@ function StepDot({ n, current, label }: { n: number; current: number; label: str
 }
 
 export default function CVBuilderPage() {
-  // Step: 1=target, 2=upload, 3=loading, 4=result
   const { user } = useAuth();
   const [step, setStep] = useState(1);
   const [loadingStage, setLoadingStage] = useState(0);
   const [savedId, setSavedId] = useState<string | null>(null);
+  const [emailing, setEmailing] = useState(false);
+
+  const emailCV = async () => {
+    if (!result) return;
+    setEmailing(true);
+    try {
+      const res = await authFetch("/api/cv-builder/email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cv: result }),
+      });
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        throw new Error(json.error || "Failed to send email");
+      }
+      import("react-hot-toast").then(({ default: toast }) => {
+        toast.success("CV sent to your email successfully!");
+      });
+    } catch (err: any) {
+      import("react-hot-toast").then(({ default: toast }) => {
+        toast.error(err.message || "Failed to send email");
+      });
+    } finally {
+      setEmailing(false);
+    }
+  };
 
   // Form state
   const [role, setRole] = useState("");
@@ -255,9 +280,20 @@ export default function CVBuilderPage() {
                   </p>
                 )}
               </div>
-              <Button variant="primary" size="sm" className="gap-1.5 print:hidden" onClick={downloadPDF}>
-                <Download size={14} /> Download PDF
-              </Button>
+              <div className="flex items-center gap-2 print:hidden">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={emailCV}
+                  disabled={emailing}
+                >
+                  <Mail size={14} /> {emailing ? "Emailing..." : "Email me this"}
+                </Button>
+                <Button variant="primary" size="sm" className="gap-1.5" onClick={downloadPDF}>
+                  <Download size={14} /> Download PDF
+                </Button>
+              </div>
             </div>
 
             {/* Score banner */}
@@ -333,9 +369,20 @@ export default function CVBuilderPage() {
                   ))}
                 </div>
 
-                <Button variant="primary" size="lg" className="w-full gap-2" onClick={downloadPDF}>
-                  <Download size={16} /> Download as PDF
-                </Button>
+                <div className="flex flex-col gap-2">
+                  <Button variant="primary" size="lg" className="w-full gap-2" onClick={downloadPDF}>
+                    <Download size={16} /> Download as PDF
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="w-full gap-2"
+                    onClick={emailCV}
+                    disabled={emailing}
+                  >
+                    <Mail size={16} /> {emailing ? "Emailing..." : "Email me this"}
+                  </Button>
+                </div>
               </div>
             </div>
           </div>

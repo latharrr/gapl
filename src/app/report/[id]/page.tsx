@@ -26,6 +26,7 @@ import {
   CheckCircle2,
   AlertCircle,
   ArrowLeft,
+  Mail,
 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
@@ -39,6 +40,29 @@ export default function ReportPage() {
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [shared, setShared] = useState(false);
+  const [emailing, setEmailing] = useState(false);
+
+  const emailReport = async () => {
+    setEmailing(true);
+    try {
+      const res = await authFetch(`/api/reports/${params.id}/email`, {
+        method: "POST",
+      });
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        throw new Error(json.error || "Failed to send email");
+      }
+      import("react-hot-toast").then(({ default: toast }) => {
+        toast.success("Report summary emailed successfully!");
+      });
+    } catch (err: any) {
+      import("react-hot-toast").then(({ default: toast }) => {
+        toast.error(err.message || "Failed to send email");
+      });
+    } finally {
+      setEmailing(false);
+    }
+  };
   const [activeTab, setActiveTab] = useState<"overview" | "verdict" | "skills" | "roadmap">("overview");
   const [shareCardType, setShareCardType] = useState<"verdict" | "readiness" | "gaps">("verdict");
   const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
@@ -247,7 +271,16 @@ export default function ReportPage() {
               </div>
               <h1 className="text-xl font-bold text-[#111111]">Analysis Report</h1>
             </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-2 flex-shrink-0 print:hidden">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                onClick={emailReport}
+                disabled={emailing}
+              >
+                <Mail size={14} /> {emailing ? "Emailing..." : "Email me this"}
+              </Button>
               <Button variant="outline" size="sm" className="gap-1.5" onClick={shareSummary}>
                 <Share2 size={14} /> {shared ? "Shared" : "Share summary"}
               </Button>
