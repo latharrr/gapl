@@ -82,6 +82,9 @@ export async function POST(req: NextRequest) {
     const reportRef = getAdminDb().collection("reports").doc();
     const result: AnalysisResult = { id: reportRef.id, createdAt, role, companyTier: tier, ...safePayload };
 
+    const { getLastTouchAttribution } = await import("@/lib/link-tracker");
+    const attribution = await getLastTouchAttribution(user.uid);
+
     await reportRef.set({
       ...result,
       userId: user.uid,
@@ -89,7 +92,24 @@ export async function POST(req: NextRequest) {
       traceId,
       createdAt: FieldValue.serverTimestamp(),
       createdAtIso: createdAt,
+      ...(attribution ? {
+        attributedCampaignId: attribution.campaignId,
+        attributedEmailId: attribution.emailId,
+        attributedAt: createdAt,
+      } : {}),
     });
+
+    // Trigger Report Ready Email
+    if (user.email) {
+      const { sendReportReadyEmail } = await import("@/lib/email-service");
+      sendReportReadyEmail(
+        user.uid,
+        user.email,
+        reportRef.id,
+        safePayload.atsScore || 70,
+        safePayload.readiness || 65
+      ).catch((err) => console.error("Failed to send Report Ready email:", err));
+    }
 
     return NextResponse.json({ result });
   } catch (error) {

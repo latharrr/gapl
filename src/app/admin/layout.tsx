@@ -21,6 +21,10 @@ import {
   ExternalLink,
   ChevronRight,
   Sparkles,
+  Mail,
+  Link as LinkIcon,
+  HeartPulse,
+  BellRing,
 } from "lucide-react";
 
 const SIDEBAR_ITEMS = [
@@ -29,6 +33,11 @@ const SIDEBAR_ITEMS = [
   { label: "Reports", href: "/admin/reports", icon: FileText },
   { label: "AI Calls", href: "/admin/ai-calls", icon: Cpu },
   { label: "Payments", href: "/admin/payments", icon: CreditCard },
+  { label: "Emails Control", href: "/admin/emails", icon: Mail },
+  { label: "Trackable Links", href: "/admin/links", icon: LinkIcon },
+  { label: "Email Health", href: "/admin/email-health", icon: HeartPulse },
+  { label: "Email Insights", href: "/admin/email-insights", icon: Sparkles },
+  { label: "Founder Alerts", href: "/admin/alerts", icon: BellRing },
   { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
   { label: "Audit Logs", href: "/admin/audit", icon: History },
   { label: "System Health", href: "/admin/health", icon: Activity },

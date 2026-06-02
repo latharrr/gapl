@@ -51,6 +51,9 @@ export async function POST(req: NextRequest) {
     const paymentRef = db.collection("payments").doc(paymentId);
     const userRef = db.collection("users").doc(userId);
 
+    const { getLastTouchAttribution } = await import("@/lib/link-tracker");
+    const attribution = await getLastTouchAttribution(userId);
+
     await db.runTransaction(async (transaction) => {
       const orderSnapshot = await transaction.get(orderRef);
       if (!orderSnapshot.exists) throw new Error("Webhook order was not created by Gapl.");
@@ -72,10 +75,36 @@ export async function POST(req: NextRequest) {
         source: "webhook",
         createdAt: FieldValue.serverTimestamp(),
         timestamp: new Date().toISOString(),
+        ...(attribution ? {
+          attributedCampaignId: attribution.campaignId,
+          attributedEmailId: attribution.emailId,
+          attributedAt: new Date().toISOString(),
+        } : {}),
       }, { merge: true });
       transaction.set(orderRef, { status: "captured", paymentId, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
       transaction.set(userRef, { plan, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
     });
+
+    // Send Payment Success Email
+    try {
+      const userSnap = await db.collection("users").doc(userId).get();
+      if (userSnap.exists) {
+        const userData = userSnap.data() || {};
+        const email = userData.email;
+        if (email) {
+          const { sendPaymentSuccessEmail } = await import("@/lib/email-service");
+          sendPaymentSuccessEmail(
+            userId,
+            email,
+            paymentId,
+            plan,
+            PLAN_PRICES_INR[plan as any] || 0
+          ).catch(console.error);
+        }
+      }
+    } catch (emailErr) {
+      console.error("Webhook payment success email failed to send:", emailErr);
+    }
 
     return NextResponse.json({ received: true });
   } catch (error) {

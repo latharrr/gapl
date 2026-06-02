@@ -41,6 +41,9 @@ export async function POST(req: NextRequest) {
     const paymentRef = db.collection("payments").doc(paymentId);
     const userRef = db.collection("users").doc(user.uid);
 
+    const { getLastTouchAttribution } = await import("@/lib/link-tracker");
+    const attribution = await getLastTouchAttribution(user.uid);
+
     let verifiedPlan = "";
     await db.runTransaction(async (transaction) => {
       const orderSnapshot = await transaction.get(orderRef);
@@ -65,10 +68,27 @@ export async function POST(req: NextRequest) {
         source: "checkout-verification",
         createdAt: FieldValue.serverTimestamp(),
         timestamp: new Date().toISOString(),
+        ...(attribution ? {
+          attributedCampaignId: attribution.campaignId,
+          attributedEmailId: attribution.emailId,
+          attributedAt: new Date().toISOString(),
+        } : {}),
       }, { merge: true });
       transaction.set(orderRef, { status: "verified", paymentId, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
       transaction.set(userRef, { plan, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
     });
+
+    // Trigger Payment Success Email
+    if (user.email) {
+      const { sendPaymentSuccessEmail } = await import("@/lib/email-service");
+      sendPaymentSuccessEmail(
+        user.uid,
+        user.email,
+        paymentId,
+        verifiedPlan,
+        PLAN_PRICES_INR[verifiedPlan as any] || 0
+      ).catch((err) => console.error("Failed to send Payment Success email:", err));
+    }
 
     return NextResponse.json({ success: true, plan: verifiedPlan });
   } catch (error) {

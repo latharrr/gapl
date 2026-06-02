@@ -86,12 +86,39 @@ export async function PATCH(
       .collection("roadmaps")
       .doc(id);
 
+    const snap = await roadmapDocRef.get();
+    const currentData = snap.exists ? snap.data() ?? {} : {};
+    const oldPct = currentData.completionPercentage || 0;
+    const sentMilestones = currentData.sentMilestones || [];
+
+    const newPct = typeof completionPercentage === "number" ? completionPercentage : 0;
     const updateData: Record<string, any> = {
       completedTasks,
-      completionPercentage: typeof completionPercentage === "number" ? completionPercentage : 0,
+      completionPercentage: newPct,
       currentReadiness: typeof currentReadiness === "number" ? currentReadiness : 65,
       updatedAt: new Date().toISOString(),
     };
+
+    // Check for milestone transitions
+    const milestones = [25, 50, 75, 100];
+    const hitMilestone = milestones.find((m) => newPct >= m && oldPct < m && !sentMilestones.includes(m));
+
+    if (hitMilestone && user.email) {
+      const { sendRoadmapMilestoneEmail } = await import("@/lib/email-service");
+      const readinessVal = typeof currentReadiness === "number" ? currentReadiness : (currentData.currentReadiness || 65);
+      const targetReadinessVal = currentData.targetReadiness || 85;
+
+      sendRoadmapMilestoneEmail(
+        user.uid,
+        user.email,
+        id,
+        hitMilestone,
+        readinessVal,
+        targetReadinessVal
+      ).catch((err) => console.error(`Failed to send milestone ${hitMilestone}% email:`, err));
+
+      updateData.sentMilestones = [...sentMilestones, hitMilestone];
+    }
 
     await roadmapDocRef.update(updateData);
 
