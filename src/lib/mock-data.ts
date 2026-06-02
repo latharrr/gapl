@@ -42,14 +42,14 @@ export const PRICING_PLANS = [
   {
     name: "Basic",
     price: 49,
-    period: "month",
-    description: "For serious job seekers.",
+    period: "one-time",
+    description: "For a focused application sprint.",
     features: [
       "5 resume analyses",
       "Full recruiter simulation",
       "Career gap analysis",
       "4-week roadmap",
-      "PDF export",
+      "Printable CV export",
     ],
     cta: "Get Basic",
     highlighted: false,
@@ -57,34 +57,17 @@ export const PRICING_PLANS = [
   {
     name: "Pro",
     price: 149,
-    period: "month",
-    description: "Track progress over time.",
+    period: "one-time",
+    description: "For an active job search.",
     features: [
-      "Unlimited analyses",
+      "20 analyses each month",
       "Progress tracking",
       "Return user delta",
       "JD matching",
-      "Shareable report card",
-      "Priority support",
+      "Shareable report summary",
     ],
     cta: "Get Pro",
     highlighted: true,
-  },
-  {
-    name: "Premium",
-    price: 299,
-    period: "month",
-    description: "For placement cells & bootcamps.",
-    features: [
-      "Everything in Pro",
-      "Team dashboard",
-      "Bulk uploads",
-      "Custom branding",
-      "LaTeX resume export",
-      "Dedicated support",
-    ],
-    cta: "Get Premium",
-    highlighted: false,
   },
 ];
 
@@ -116,9 +99,9 @@ export const HOW_IT_WORKS_STEPS = [
 ];
 
 export const ANALYSIS_STAGES = [
-  { id: "parse", label: "Parsing Resume", duration: 1800 },
-  { id: "role", label: "Understanding Role", duration: 1400 },
-  { id: "ats", label: "Running ATS Check", duration: 2000 },
-  { id: "recruiter", label: "Simulating Recruiter", duration: 2200 },
-  { id: "roadmap", label: "Building Roadmap", duration: 1800 },
+  { id: "parse", label: "Parsing Resume" },
+  { id: "jd", label: "Comparing with Job Description" },
+  { id: "recruiter", label: "Simulating Recruiter" },
+  { id: "roadmap", label: "Building Roadmap" },
+  { id: "readiness", label: "Calculating Readiness" },
 ];

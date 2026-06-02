@@ -63,7 +63,7 @@ export default function MyCVsPage() {
           </div>
           <h2 className="text-sm font-semibold text-ink mb-1">No CVs yet</h2>
           <p className="text-xs text-ink-muted mb-6 max-w-xs">
-            Build your first AI-optimised resume targeting 90+ ATS score.
+            Build your first AI-assisted resume around evidence-based ATS fit.
           </p>
           <Link href="/cv-builder">
             <Button variant="primary" size="sm" className="gap-1.5">

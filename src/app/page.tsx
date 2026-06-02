@@ -4,7 +4,6 @@ import { Footer } from "@/components/layout/Footer";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { HowItWorks } from "@/components/landing/HowItWorks";
 import { FeaturesSection } from "@/components/landing/FeaturesSection";
-import { Testimonials } from "@/components/landing/Testimonials";
 import { PricingSection } from "@/components/landing/PricingSection";
 import { FAQ } from "@/components/landing/FAQ";
 import { CTASection } from "@/components/landing/CTASection";
@@ -43,7 +42,6 @@ export default function HomePage() {
       <HeroSection />
       <HowItWorks />
       <FeaturesSection />
-      <Testimonials />
       <PricingSection />
       <FAQ />
       <CTASection />

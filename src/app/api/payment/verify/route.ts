@@ -1,57 +1,78 @@
-import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
-import { db } from "@/lib/firebase";
-import { doc, updateDoc } from "firebase/firestore";
+import { FieldValue } from "firebase-admin/firestore";
+import { NextRequest, NextResponse } from "next/server";
+import { getAdminDb, requireUser } from "@/lib/firebase-admin";
+import { normalizePlan, PLAN_PRICES_INR } from "@/lib/plans";
+import { takeRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
+function signaturesMatch(received: string, expected: string) {
+  const receivedBuffer = Buffer.from(received, "utf8");
+  const expectedBuffer = Buffer.from(expected, "utf8");
+  return receivedBuffer.length === expectedBuffer.length && crypto.timingSafeEqual(receivedBuffer, expectedBuffer);
+}
+
 export async function POST(req: NextRequest) {
+  const userOrError = await requireUser(req);
+  if (userOrError instanceof NextResponse) return userOrError;
+  const user = userOrError;
+
+  if (!takeRateLimit(`payment-verify:${user.uid}`, 12, 10 * 60 * 1000)) {
+    return NextResponse.json({ error: "Too many verification attempts. Please wait and try again." }, { status: 429 });
+  }
+
   try {
     const keySecret = process.env.RAZORPAY_KEY_SECRET;
-    if (!keySecret) {
-      return NextResponse.json(
-        { error: "Razorpay secret key not configured." },
-        { status: 500 }
-      );
+    if (!keySecret) return NextResponse.json({ error: "Payment gateway is not configured." }, { status: 503 });
+
+    const { orderId, paymentId, signature } = await req.json();
+    if (![orderId, paymentId, signature].every((value) => typeof value === "string" && value.length > 0)) {
+      return NextResponse.json({ error: "Missing payment verification details." }, { status: 400 });
     }
 
-    const { orderId, paymentId, signature, userId, plan } = await req.json();
-
-    if (!orderId || !paymentId || !signature || !userId || !plan) {
-      return NextResponse.json(
-        { error: "Missing required verification parameters." },
-        { status: 400 }
-      );
+    const expected = crypto.createHmac("sha256", keySecret).update(`${orderId}|${paymentId}`).digest("hex");
+    if (!signaturesMatch(signature, expected)) {
+      return NextResponse.json({ error: "Payment signature verification failed." }, { status: 400 });
     }
 
-    // 1. Verify Razorpay signature
-    const text = `${orderId}|${paymentId}`;
-    const generatedSignature = crypto
-      .createHmac("sha256", keySecret)
-      .update(text)
-      .digest("hex");
+    const db = getAdminDb();
+    const orderRef = db.collection("payment_orders").doc(orderId);
+    const paymentRef = db.collection("payments").doc(paymentId);
+    const userRef = db.collection("users").doc(user.uid);
 
-    if (generatedSignature !== signature) {
-      return NextResponse.json(
-        { error: "Invalid payment signature. Verification failed." },
-        { status: 400 }
-      );
-    }
+    let verifiedPlan = "";
+    await db.runTransaction(async (transaction) => {
+      const orderSnapshot = await transaction.get(orderRef);
+      if (!orderSnapshot.exists) throw new Error("Payment order was not found.");
 
-    // 2. Update user plan in Firestore
-    const userRef = doc(db, "users", userId);
-    await updateDoc(userRef, {
-      plan: plan.toLowerCase(),
-      updatedAt: new Date().toISOString(),
+      const order = orderSnapshot.data() ?? {};
+      const plan = normalizePlan(order.plan);
+      if (!plan || plan === "free" || order.userId !== user.uid || order.amount !== PLAN_PRICES_INR[plan]) {
+        throw new Error("Payment order details do not match this account.");
+      }
+
+      verifiedPlan = plan;
+      transaction.set(paymentRef, {
+        paymentId,
+        orderId,
+        userId: user.uid,
+        plan,
+        amount: order.amount,
+        currency: order.currency || "INR",
+        status: "captured",
+        refunded: false,
+        source: "checkout-verification",
+        createdAt: FieldValue.serverTimestamp(),
+        timestamp: new Date().toISOString(),
+      }, { merge: true });
+      transaction.set(orderRef, { status: "verified", paymentId, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
+      transaction.set(userRef, { plan, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
     });
 
-    return NextResponse.json({ success: true, plan });
-  } catch (err: unknown) {
-    const error = err as { message?: string };
+    return NextResponse.json({ success: true, plan: verifiedPlan });
+  } catch (error) {
     console.error("Payment verification error:", error);
-    return NextResponse.json(
-      { error: error?.message || "Internal server error during verification." },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Payment verification failed." }, { status: 400 });
   }
 }

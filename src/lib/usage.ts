@@ -2,7 +2,7 @@
 // Free tier: FREE_LIMIT analyses per month
 // Stored in localStorage (client-side). Replace with Firestore for server enforcement.
 
-export const FREE_LIMIT = 3;
+export const FREE_LIMIT = 1;
 const STORAGE_KEY = "gapl_usage";
 
 interface UsageRecord {

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/firebase";
-import { collection, getDocs, doc, getDoc, updateDoc, deleteDoc, query, orderBy, limit, startAfter } from "firebase/firestore";
+import { db, collection, getDocs, doc, getDoc, updateDoc, deleteDoc, query, orderBy, limit, startAfter } from "@/lib/server-firestore";
 import { logAuditAction } from "@/lib/audit-logger";
 import { requireAdmin } from "@/lib/firebase-admin";
 

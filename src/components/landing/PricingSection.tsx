@@ -80,7 +80,7 @@ export function PricingSection() {
                   </span>
                   {plan.price > 0 && (
                     <span className={cn("text-xs mb-1", plan.highlighted ? "text-zinc-400" : "text-ink-muted")}>
-                      /{plan.period}
+                      {plan.period}
                     </span>
                   )}
                 </div>

@@ -1,72 +1,85 @@
-import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
-import { db } from "@/lib/firebase";
-import { doc, updateDoc, setDoc } from "firebase/firestore";
+import { FieldValue } from "firebase-admin/firestore";
+import { NextRequest, NextResponse } from "next/server";
+import { getAdminDb } from "@/lib/firebase-admin";
+import { normalizePlan, PLAN_PRICES_INR } from "@/lib/plans";
 
 export const runtime = "nodejs";
+
+interface RazorpayPaymentEntity {
+  id?: string;
+  order_id?: string;
+  amount?: number;
+  currency?: string;
+  notes?: { plan?: string; userId?: string };
+}
+
+function signaturesMatch(received: string, expected: string) {
+  const receivedBuffer = Buffer.from(received, "utf8");
+  const expectedBuffer = Buffer.from(expected, "utf8");
+  return receivedBuffer.length === expectedBuffer.length && crypto.timingSafeEqual(receivedBuffer, expectedBuffer);
+}
 
 export async function POST(req: NextRequest) {
   try {
     const signature = req.headers.get("x-razorpay-signature");
-    if (!signature) {
-      return NextResponse.json({ error: "Missing webhook signature" }, { status: 400 });
-    }
-
     const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
-    if (!webhookSecret) {
-      console.warn("Razorpay Webhook Secret not configured in server variables.");
-      return NextResponse.json({ error: "Server secret configuration missing" }, { status: 500 });
-    }
+    if (!signature || !webhookSecret) return NextResponse.json({ error: "Webhook is not configured." }, { status: 400 });
 
     const rawBody = await req.text();
-    const expectedSignature = crypto
-      .createHmac("sha256", webhookSecret)
-      .update(rawBody)
-      .digest("hex");
+    const expected = crypto.createHmac("sha256", webhookSecret).update(rawBody).digest("hex");
+    if (!signaturesMatch(signature, expected)) return NextResponse.json({ error: "Invalid signature." }, { status: 400 });
 
-    if (expectedSignature !== signature) {
-      console.error("Razorpay webhook signature verification failed.");
-      return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
+    const event = JSON.parse(rawBody) as {
+      event?: string;
+      payload?: { payment?: { entity?: RazorpayPaymentEntity } };
+    };
+    if (event.event !== "payment.captured") return NextResponse.json({ received: true });
+
+    const payment = event.payload?.payment?.entity;
+    const plan = normalizePlan(payment?.notes?.plan);
+    const userId = payment?.notes?.userId;
+    const paymentId = payment?.id;
+    const orderId = payment?.order_id;
+
+    if (!paymentId || !orderId || !userId || !plan || plan === "free" || payment.amount !== PLAN_PRICES_INR[plan] * 100) {
+      return NextResponse.json({ error: "Webhook payment details are invalid." }, { status: 400 });
     }
 
-    const eventData = JSON.parse(rawBody);
-    console.log("Verified Razorpay Webhook Received:", eventData.event);
+    const db = getAdminDb();
+    const orderRef = db.collection("payment_orders").doc(orderId);
+    const paymentRef = db.collection("payments").doc(paymentId);
+    const userRef = db.collection("users").doc(userId);
 
-    if (eventData.event === "payment.captured") {
-      const paymentEntity = eventData.payload.payment.entity;
-      const orderId = paymentEntity.order_id;
-      const amount = paymentEntity.amount / 100; // in INR
-      const plan = paymentEntity.notes?.plan || "free";
-      const userId = paymentEntity.notes?.userId;
+    await db.runTransaction(async (transaction) => {
+      const orderSnapshot = await transaction.get(orderRef);
+      if (!orderSnapshot.exists) throw new Error("Webhook order was not created by Gapl.");
 
-      if (userId && userId !== "anonymous") {
-        console.log(`Processing plan upgrade for user: ${userId} to plan: ${plan}`);
-        
-        // 1. Upgrade user tier in Firestore database
-        const userRef = doc(db, "users", userId);
-        await updateDoc(userRef, {
-          plan: plan.toLowerCase(),
-          updatedAt: new Date().toISOString(),
-        });
-
-        // 2. Track/log payment transaction in Firestore under payments collection
-        const payRef = doc(db, "payments", orderId || `pay_${Date.now()}`);
-        await setDoc(payRef, {
-          id: orderId || `pay_${Date.now()}`,
-          userId,
-          amount,
-          plan: plan.toLowerCase(),
-          status: "captured",
-          timestamp: new Date().toISOString(),
-        });
-      } else {
-        console.warn("Webhook received payment entity without user mapping notes.");
+      const order = orderSnapshot.data() ?? {};
+      if (order.userId !== userId || order.plan !== plan || order.amount !== PLAN_PRICES_INR[plan]) {
+        throw new Error("Webhook order does not match its server-side record.");
       }
-    }
+
+      transaction.set(paymentRef, {
+        paymentId,
+        orderId,
+        userId,
+        plan,
+        amount: PLAN_PRICES_INR[plan],
+        currency: payment.currency || "INR",
+        status: "captured",
+        refunded: false,
+        source: "webhook",
+        createdAt: FieldValue.serverTimestamp(),
+        timestamp: new Date().toISOString(),
+      }, { merge: true });
+      transaction.set(orderRef, { status: "captured", paymentId, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
+      transaction.set(userRef, { plan, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
+    });
 
     return NextResponse.json({ received: true });
-  } catch (err: any) {
-    console.error("Webhook receiver processing exception:", err);
-    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
+  } catch (error) {
+    console.error("Webhook processing error:", error);
+    return NextResponse.json({ error: "Webhook processing failed." }, { status: 500 });
   }
 }

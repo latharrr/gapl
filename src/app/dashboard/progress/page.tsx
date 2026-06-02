@@ -86,7 +86,7 @@ export default function ProgressPage() {
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
         <Card variant="default" padding="md">
           <h2 className="text-sm font-semibold text-[#111111] mb-1">Readiness Components</h2>
-          <p className="text-xs text-[#71717a] mb-5">AI-scored across four dimensions</p>
+          <p className="text-xs text-[#71717a] mb-5">Estimated from the evidence visible in your resume</p>
           <div className="space-y-4">
             {[
               { label: "Skill Match (40%)", score: result.readinessBreakdown.skillMatch.score, color: "primary" as const },

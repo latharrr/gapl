@@ -64,21 +64,21 @@ export default function LoginPage() {
 
         <div>
           <blockquote className="text-2xl font-medium text-white leading-snug mb-4 text-balance">
-            &ldquo;I got shortlisted by Razorpay within 4 weeks of following Gapl&apos;s roadmap. The recruiter simulation was eerily accurate.&rdquo;
+            See the evidence gaps behind your applications, then work through the next most valuable improvement.
           </blockquote>
           <div className="flex items-center gap-3 mt-6">
             <div className="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white text-xs font-bold">
-              AM
+              G
             </div>
             <div>
-              <p className="text-sm font-medium text-white">Aryan Mehta</p>
-              <p className="text-xs text-zinc-400">SDE Intern · Razorpay</p>
+              <p className="text-sm font-medium text-white">Application readiness intelligence</p>
+              <p className="text-xs text-zinc-400">Evidence before guesswork</p>
             </div>
           </div>
         </div>
 
         <p className="text-xs text-zinc-600">
-          Trusted by 2,400+ students across India
+          Scores are estimates. The reasons stay visible.
         </p>
       </div>
 

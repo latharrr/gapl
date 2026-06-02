@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/firebase";
-import { collection, getDocs, doc, getDoc, setDoc, addDoc, query, where, orderBy } from "firebase/firestore";
+import { db, collection, getDocs, doc, getDoc, setDoc, addDoc } from "@/lib/server-firestore";
 import { logAuditAction } from "@/lib/audit-logger";
 import { requireAdmin } from "@/lib/firebase-admin";
 
@@ -46,6 +45,9 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Prompt not found." }, { status: 404 });
       }
       const activePrompt = promptSnap.data();
+      if (!activePrompt) {
+        return NextResponse.json({ error: "Prompt content is empty." }, { status: 500 });
+      }
 
       // 1. Archive current version to prompt_versions
       const historyRef = collection(db, "prompt_versions");
@@ -85,19 +87,25 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Prompt not found." }, { status: 404 });
       }
       const activePrompt = promptSnap.data();
+      if (!activePrompt) {
+        return NextResponse.json({ error: "Prompt content is empty." }, { status: 500 });
+      }
 
       // Find the version content to rollback to
       const versionsRef = collection(db, "prompt_versions");
       const snap = await getDocs(versionsRef);
       const targetDoc = snap.docs.find(d => {
         const data = d.data();
-        return data.promptId === promptId && data.version === targetVersion;
+        return data?.promptId === promptId && data?.version === targetVersion;
       });
 
       if (!targetDoc) {
         return NextResponse.json({ error: "Target rollback version not found." }, { status: 404 });
       }
       const targetData = targetDoc.data();
+      if (!targetData) {
+        return NextResponse.json({ error: "Target rollback version is empty." }, { status: 500 });
+      }
 
       // 1. Archive current active prompt before rolling back
       await addDoc(versionsRef, {

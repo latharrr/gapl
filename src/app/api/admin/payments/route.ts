@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/firebase";
-import { collection, getDocs, doc, getDoc, updateDoc, query, orderBy, limit } from "firebase/firestore";
+import { db, collection, getDocs, doc, getDoc, updateDoc, query, orderBy, limit } from "@/lib/server-firestore";
 import { logAuditAction } from "@/lib/audit-logger";
 import { requireAdmin, requireSuperAdmin } from "@/lib/firebase-admin";
 
@@ -39,6 +38,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Payment record not found." }, { status: 404 });
     }
     const payment = paymentSnap.data();
+    if (!payment) {
+      return NextResponse.json({ error: "Payment record is empty." }, { status: 500 });
+    }
 
     if (action === "refund") {
       // Only super_admin can issue refunds

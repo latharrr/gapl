@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { PRICING_PLANS } from "@/lib/mock-data";
 import { Card } from "@/components/ui/Card";
@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Check, Zap, Loader2, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
-import { getRemainingAnalyses, FREE_LIMIT } from "@/lib/usage";
+import { authFetch } from "@/lib/auth-fetch";
 
 // Load Razorpay script dynamically
 function loadRazorpay(): Promise<boolean> {
@@ -24,19 +24,18 @@ function loadRazorpay(): Promise<boolean> {
 }
 
 export default function BillingPage() {
-  const { user } = useAuth();
+  const { user, userDoc } = useAuth();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [successPlan, setSuccessPlan] = useState<string | null>(null);
   const [error, setError] = useState("");
-  const [remaining, setRemaining] = useState(FREE_LIMIT);
 
-  useEffect(() => { setRemaining(getRemainingAnalyses()); }, []);
-
-  const handleUpgrade = async (planName: string, price: number) => {
+  const handleUpgrade = async (planName: string) => {
     setError("");
     setLoadingPlan(planName);
 
     try {
+      import("@/lib/analytics").then(({ trackEvent }) => trackEvent("payment_started"));
+
       // 1. Load Razorpay script
       const loaded = await loadRazorpay();
       if (!loaded) {
@@ -46,10 +45,10 @@ export default function BillingPage() {
       }
 
       // 2. Create order on server
-      const res = await fetch("/api/payment/order", {
+      const res = await authFetch("/api/payment/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: planName, userId: user?.uid }),
+        body: JSON.stringify({ plan: planName }),
       });
       const data = await res.json();
 
@@ -67,8 +66,7 @@ export default function BillingPage() {
         currency: data.currency,
         order_id: data.orderId,
         name: "Gapl",
-        description: `${planName} Plan — Monthly`,
-        image: "/logo.png",
+        description: `${planName} Plan — Beta access`,
         prefill: {
           name: user?.displayName || "",
           email: user?.email || "",
@@ -80,20 +78,19 @@ export default function BillingPage() {
         handler: async (response: Record<string, string>) => {
           setLoadingPlan(planName);
           try {
-            const verifyRes = await fetch("/api/payment/verify", {
+            const verifyRes = await authFetch("/api/payment/verify", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 orderId: data.orderId,
                 paymentId: response.razorpay_payment_id,
                 signature: response.razorpay_signature,
-                userId: user?.uid,
-                plan: planName,
               }),
             });
             const verifyData = await verifyRes.json();
 
             if (verifyRes.ok && verifyData.success) {
+              import("@/lib/analytics").then(({ trackEvent }) => trackEvent("payment_success"));
               setSuccessPlan(planName);
               setTimeout(() => {
                 window.location.reload();
@@ -136,7 +133,7 @@ export default function BillingPage() {
           <CheckCircle2 size={16} className="text-[#16a34a] flex-shrink-0" />
           <div>
             <p className="text-sm font-semibold text-[#16a34a]">Payment successful!</p>
-            <p className="text-xs text-[#15803d] mt-0.5">You're now on the <strong>{successPlan}</strong> plan. Enjoy unlimited access.</p>
+            <p className="text-xs text-[#15803d] mt-0.5">You&apos;re now on the <strong>{successPlan}</strong> plan.</p>
           </div>
         </motion.div>
       )}
@@ -155,11 +152,11 @@ export default function BillingPage() {
             <div>
               <p className="text-xs text-ink-muted mb-1">Current plan</p>
               <div className="flex items-center gap-2">
-                <p className="text-lg font-bold text-ink capitalize">{successPlan ?? "Free"}</p>
+                <p className="text-lg font-bold text-ink capitalize">{successPlan ?? String(userDoc?.plan || "free")}</p>
                 <Badge variant="default">Active</Badge>
               </div>
               <p className="text-xs text-ink-muted mt-1">
-                {remaining}/{FREE_LIMIT} free analyses remaining this month
+                Usage resets monthly. Your plan controls the available analysis credits.
               </p>
             </div>
             <div className="p-3 bg-surface-subtle rounded-xl border border-border-DEFAULT">
@@ -200,7 +197,7 @@ export default function BillingPage() {
                   <span className={cn("text-2xl font-bold", plan.highlighted ? "text-white" : "text-ink")}>
                     ₹{plan.price}
                   </span>
-                  <span className={cn("text-xs mb-0.5", plan.highlighted ? "text-zinc-400" : "text-ink-muted")}>/mo</span>
+                  <span className={cn("text-xs mb-0.5", plan.highlighted ? "text-zinc-400" : "text-ink-muted")}> one-time</span>
                 </div>
                 <ul className="space-y-2 mb-5 flex-1">
                   {plan.features.map((f) => (
@@ -215,7 +212,7 @@ export default function BillingPage() {
                   variant={plan.highlighted ? "secondary" : "outline"}
                   className="w-full gap-2"
                   disabled={isLoading || isSuccess}
-                  onClick={() => handleUpgrade(plan.name, plan.price)}
+                  onClick={() => handleUpgrade(plan.name)}
                 >
                   {isSuccess ? (
                     <><CheckCircle2 size={13} /> Active</>
@@ -231,7 +228,7 @@ export default function BillingPage() {
         </div>
 
         <p className="text-xs text-ink-muted mt-4 text-center">
-          Payments processed securely by Razorpay · Cancel anytime
+          One-time beta access payments processed by Razorpay
         </p>
       </div>
     </div>

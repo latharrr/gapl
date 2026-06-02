@@ -9,6 +9,7 @@ import { ResumePreview, type CVData } from "@/components/cv/ResumePreview";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import { saveCV } from "@/lib/firebase";
+import { authFetch } from "@/lib/auth-fetch";
 import {
   Upload, FileText, ChevronRight, AlertCircle,
   Download, ArrowLeft, Sparkles, Target, ArrowUp, Check, CloudCheck,
@@ -31,7 +32,7 @@ const STAGES = [
   "Identifying keyword gaps…",
   "Injecting ATS keywords…",
   "Rewriting bullets for impact…",
-  "Optimising for 90+ ATS score…",
+  "Checking ATS fit signals…",
   "Finalising your CV…",
 ];
 
@@ -83,7 +84,7 @@ export default function CVBuilderPage() {
   // Dropzone
   const onDrop = useCallback((accepted: File[], rejected: { file: File }[]) => {
     setFileError("");
-    if (rejected.length > 0) { setFileError("Only PDF, DOC, DOCX, TXT files under 5 MB."); return; }
+    if (rejected.length > 0) { setFileError("Only PDF and TXT files under 5 MB. Paste DOCX content directly."); return; }
     if (accepted[0]) setResumeFile(accepted[0]);
   }, []);
 
@@ -91,8 +92,6 @@ export default function CVBuilderPage() {
     onDrop,
     accept: {
       "application/pdf": [".pdf"],
-      "application/msword": [".doc"],
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
       "text/plain": [".txt"],
     },
     maxFiles: 1,
@@ -125,8 +124,8 @@ export default function CVBuilderPage() {
         if (resumeFile.type === "text/plain") {
           text = await resumeFile.text();
         } else {
-          // For PDF/DOC — send file via FormData to cv-builder which handles extraction
-          const res2 = await fetch("/api/cv-builder", {
+          // Send PDF files to the server for text extraction.
+          const res2 = await authFetch("/api/cv-builder", {
             method: "POST",
             body: (() => {
               const f = new FormData();
@@ -148,7 +147,7 @@ export default function CVBuilderPage() {
         }
       }
 
-      const res = await fetch("/api/cv-builder", {
+      const res = await authFetch("/api/cv-builder", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ resumeText: text, role: finalRole, seniority, companyType, companyName, jdText }),
@@ -202,7 +201,7 @@ export default function CVBuilderPage() {
                 <Target size={22} className="text-[#4F46E5]" />
               </div>
             </div>
-            <h2 className="text-lg font-bold text-[#111] mb-2">Building your 90+ ATS CV</h2>
+            <h2 className="text-lg font-bold text-[#111] mb-2">Building your ATS-ready CV</h2>
             <AnimatePresence mode="wait">
               <motion.p
                 key={loadingStage}
@@ -478,7 +477,7 @@ export default function CVBuilderPage() {
                   Targeting <strong className="text-[#111]">{finalRole}</strong> · <strong className="text-[#111]">{companyType}</strong>
                   {companyName && <> · <strong className="text-[#111]">{companyName}</strong></>}
                 </p>
-                <p className="text-xs text-[#4F46E5] font-medium mb-8">Goal: 90+ ATS Score</p>
+                <p className="text-xs text-[#4F46E5] font-medium mb-8">Goal: stronger, evidence-based ATS fit</p>
 
                 {error && (
                   <div className="flex items-start gap-2 p-3 bg-[#fef2f2] border border-[#fecaca] rounded-xl mb-4">
@@ -515,7 +514,7 @@ export default function CVBuilderPage() {
                         <>
                           <Upload size={28} className="text-[#a1a1aa] mx-auto mb-3" />
                           <p className="text-sm font-medium text-[#111]">Drop your CV here</p>
-                          <p className="text-xs text-[#71717a] mt-1">PDF, DOC, DOCX, TXT · max 5 MB</p>
+                          <p className="text-xs text-[#71717a] mt-1">PDF or TXT · max 5 MB</p>
                         </>
                       )}
                     </div>
@@ -535,7 +534,7 @@ export default function CVBuilderPage() {
 
                 <div className="mt-6">
                   <Button size="lg" variant="primary" className="w-full gap-2" disabled={!step2Valid} onClick={build}>
-                    <Sparkles size={16} /> Build 90+ ATS CV
+                    <Sparkles size={16} /> Build ATS-ready CV
                   </Button>
                   <p className="text-center text-xs text-[#a1a1aa] mt-3">~20 seconds · AI-powered · No Overleaf needed</p>
                 </div>

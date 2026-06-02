@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { db, doc, getDoc, setDoc } from "@/lib/server-firestore";
 import { requireAdmin, requireSuperAdmin } from "@/lib/firebase-admin";
 
 export const runtime = "nodejs";
+
+function providerForModel(model: string) {
+  if (model.startsWith("claude")) return "Anthropic";
+  if (model.startsWith("gemini")) return "Gemini";
+  if (model.startsWith("gpt-")) return "OpenAI";
+  return "Groq";
+}
 
 /**
  * GET /api/admin/settings — Read platform settings (any admin role)
@@ -64,13 +70,13 @@ export async function POST(req: NextRequest) {
           const model = modelRouting[task].model;
           payload[task] = {
             model,
-            provider: model?.includes("claude") ? "Anthropic" : "Groq",
+            provider: providerForModel(model),
           };
         }
       }
     }
 
-    await setDoc(routeRef, payload);
+    await setDoc(routeRef, payload, { merge: true });
 
     return NextResponse.json({ success: true, message: "Settings saved successfully." });
   } catch (err: any) {

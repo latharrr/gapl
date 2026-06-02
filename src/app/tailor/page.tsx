@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { type AnalysisResult } from "@/types/analysis";
 import { Navbar } from "@/components/layout/Navbar";
@@ -24,6 +23,7 @@ import {
   Link2,
 } from "lucide-react";
 import Link from "next/link";
+import { authFetch } from "@/lib/auth-fetch";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface TailoredResume {
@@ -178,7 +178,6 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function TailorPage() {
-  const router = useRouter();
   const printRef = useRef<HTMLDivElement>(null);
 
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
@@ -200,7 +199,7 @@ export default function TailorPage() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/tailor", {
+      const res = await authFetch("/api/tailor", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

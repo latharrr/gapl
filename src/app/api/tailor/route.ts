@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateAICall } from "@/lib/ai-gateway";
+import { releaseAnalysis, reserveAnalysis, UsageLimitError } from "@/lib/analysis-usage";
+import { requireUser } from "@/lib/firebase-admin";
+import { takeRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -81,6 +84,15 @@ Rules: changes 4-8 items, afterAtsScore > beforeAtsScore, valid JSON no trailing
 }
 
 export async function POST(req: NextRequest) {
+  const userOrError = await requireUser(req);
+  if (userOrError instanceof NextResponse) return userOrError;
+  const user = userOrError;
+
+  if (!takeRateLimit(`tailor:${user.uid}`, 6, 10 * 60 * 1000)) {
+    return NextResponse.json({ error: "Too many tailoring requests. Please wait a few minutes." }, { status: 429 });
+  }
+
+  let reserved = false;
   try {
     const body = await req.json();
     const { resumeText, role, tier, jdText } = body as {
@@ -96,18 +108,28 @@ export async function POST(req: NextRequest) {
     if (resumeText.trim().length < 100) {
       return NextResponse.json({ error: "Resume text is too short to tailor." }, { status: 400 });
     }
+    if (resumeText.length > 50000 || (jdText && jdText.length > 10000) || role.length > 80 || tier.length > 80) {
+      return NextResponse.json({ error: "One or more fields are too long." }, { status: 400 });
+    }
 
     const prompt = buildTailorPrompt(resumeText, role, tier, jdText);
 
     try {
+      await reserveAnalysis(user.uid, user.plan);
+      reserved = true;
       const { parsed } = await generateAICall("resume-optimization", prompt, {
+        userId: user.uid,
         temperature: 0.7,
       });
 
       return NextResponse.json({ result: parsed });
-    } catch (err: any) {
+    } catch (err: unknown) {
+      if (reserved) await releaseAnalysis(user.uid).catch(console.error);
+      if (err instanceof UsageLimitError) {
+        return NextResponse.json({ error: err.message, code: "LIMIT_REACHED" }, { status: 403 });
+      }
       return NextResponse.json(
-        { error: err?.message || "Tailoring failed. Please try again." },
+        { error: err instanceof Error ? err.message : "Tailoring failed. Please try again." },
         { status: 500 }
       );
     }

@@ -36,9 +36,9 @@ const FEATURES = [
   },
   {
     icon: Download,
-    title: "Exportable Reports",
+    title: "Actionable Reports",
     description:
-      "Download your analysis as PDF, share a beautiful report card on LinkedIn, or export your improved resume in LaTeX.",
+      "Print your tailored CV, share a concise report summary, and keep a clear record of the gaps you are working to close.",
   },
 ];
 

@@ -64,7 +64,7 @@ export function CTASection() {
           transition={{ delay: 0.4 }}
           className="mt-6 text-xs text-zinc-600"
         >
-          No credit card required · Free tier available · Cancel anytime
+          No credit card required · Free tier available · Scores are explained
         </motion.p>
       </div>
     </section>

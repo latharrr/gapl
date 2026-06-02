@@ -1,5 +1,3 @@
-import { type AnalysisResult } from "@/types/analysis";
-
 // Free Groq tier: 8000 TPM — keep prompt under ~5500 tokens to leave room for output
 const MAX_RESUME_CHARS = 3500; // ≈ 875 tokens
 const MAX_JD_CHARS = 1000;     // ≈ 250 tokens
@@ -28,7 +26,7 @@ ${jd ? `\nJob Description:\n${jd}\n` : ""}
 Resume:
 ${resume}
 
-Be brutally honest. Think like a recruiter spending 6 seconds on this resume.
+Be direct and evidence-based. Treat scores and verdicts as estimates, not guarantees.
 
 Return ONLY valid JSON — no markdown, no explanation:
 
@@ -57,7 +55,7 @@ Return ONLY valid JSON — no markdown, no explanation:
       "recommendedProject": <specific project to build>,
       "difficulty": <"Easy"|"Medium"|"Hard">,
       "estimatedWeeks": <number>,
-      "expectedReadinessAfter": <0-100>
+      "expectedReadinessAfter": <0-100 estimate>
     }
   ],
   "roadmap": [

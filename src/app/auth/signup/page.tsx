@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { signUpWithEmail, signInWithGoogle, createUserDocument } from "@/lib/firebase";
 import { ArrowLeft } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
 
 export default function SignupPage() {
   const [name, setName] = useState("");
@@ -34,6 +35,7 @@ export default function SignupPage() {
       } catch {
         console.warn("Firestore not configured yet — skipping user document creation");
       }
+      trackEvent("signup");
       router.push("/dashboard");
     } catch (err: unknown) {
       const error = err as { message?: string };
@@ -52,6 +54,7 @@ export default function SignupPage() {
       } catch {
         console.warn("Firestore not configured yet — skipping user document creation");
       }
+      trackEvent("signup");
       router.push("/dashboard");
     } catch (err: unknown) {
       const error = err as { message?: string };
@@ -79,12 +82,12 @@ export default function SignupPage() {
                 <span className="text-danger text-xs font-bold">✕</span>
               </div>
               <div>
-                <p className="text-xs text-zinc-400">Before Gapl</p>
-                <p className="text-sm font-medium text-white">Readiness: 42%</p>
+                <p className="text-xs text-zinc-400">Start with evidence</p>
+                <p className="text-sm font-medium text-white">Understand the rejection risk</p>
               </div>
             </div>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              Applied to 23 companies. 0 responses. Resume looked complete but lacked deployment evidence.
+              Find the visible skill, project, and deployment gaps that weaken your application.
             </p>
           </div>
 
@@ -98,12 +101,12 @@ export default function SignupPage() {
                 <span className="text-success text-xs font-bold">✓</span>
               </div>
               <div>
-                <p className="text-xs text-zinc-400">After 3 weeks</p>
-                <p className="text-sm font-medium text-white">Readiness: 81%</p>
+                <p className="text-xs text-zinc-400">Build the next signal</p>
+                <p className="text-sm font-medium text-white">Work through a focused roadmap</p>
               </div>
             </div>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              Built Expense Tracker SaaS. Deployed. Got shortlisted by 4 product startups in week 1.
+              Return with stronger evidence and compare how your readiness estimate changes.
             </p>
           </div>
         </div>

@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateAICall } from "@/lib/ai-gateway";
+import { releaseAnalysis, reserveAnalysis, UsageLimitError } from "@/lib/analysis-usage";
+import { requireUser } from "@/lib/firebase-admin";
+import { takeRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -22,16 +25,16 @@ function buildCVPrompt(
   const resume = truncate(resumeText.trim(), MAX_RESUME_CHARS);
   const jd = jdText ? truncate(jdText.trim(), MAX_JD_CHARS) : null;
 
-  return `You are a world-class resume writer with 20 years of experience placing candidates at ${companyType} companies. Your goal is to produce a resume that scores 90+ on ATS systems for a ${seniority} ${role} role${companyName ? ` at ${companyName}` : ""}.
+  return `You are an evidence-focused resume editor. Improve ATS fit for a ${seniority} ${role} role${companyName ? ` at ${companyName}` : ""} without inventing facts.
 
 ${jd ? `Job Description:\n${jd}\n` : ""}
 Original Resume:
 ${resume}
 
-ATS 90+ RULES (strictly follow all):
-1. Use EXACT keywords from the job description and role — frequency matters
+ATS FIT RULES (strictly follow all):
+1. Use relevant keywords from the job description and role when the candidate's evidence supports them
 2. Every bullet MUST start with a strong past-tense action verb (Led, Built, Engineered, Reduced, Improved, Designed, Deployed, Increased, Automated, Optimised)
-3. Every bullet MUST have a quantified metric — if the original has none, infer a realistic one from context
+3. Use quantified metrics only when they exist in the original resume. Never invent or infer metrics.
 4. Skills section MUST contain all major technical keywords for a ${seniority} ${role} in ${companyType} companies
 5. Objective must mention the exact role title and company type
 6. Education section must list relevant coursework matching the role
@@ -76,7 +79,7 @@ Return ONLY valid JSON:
     }
   ],
   "activities": [<string>],
-  "atsScore": <estimated ATS score 0-100, must be 90+ if you followed all rules>,
+  "atsScore": <honest estimated ATS fit score 0-100>,
   "originalAtsScore": <estimated original ATS score>,
   "keywordsInjected": [<all keywords you added, max 15>],
   "bulletsImproved": <count of bullets you rewrote>,
@@ -87,6 +90,15 @@ Valid JSON only — no trailing commas, no markdown.`;
 }
 
 export async function POST(req: NextRequest) {
+  const userOrError = await requireUser(req);
+  if (userOrError instanceof NextResponse) return userOrError;
+  const user = userOrError;
+
+  if (!takeRateLimit(`cv-builder:${user.uid}`, 6, 10 * 60 * 1000)) {
+    return NextResponse.json({ error: "Too many CV builder requests. Please wait a few minutes." }, { status: 429 });
+  }
+
+  let reserved = false;
   try {
     let resumeText = "";
     let role = "";
@@ -109,6 +121,9 @@ export async function POST(req: NextRequest) {
       const file = form.get("resumeFile") as File | null;
       if (!file) {
         return NextResponse.json({ error: "No file uploaded." }, { status: 400 });
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        return NextResponse.json({ error: "Upload a resume under 5 MB." }, { status: 400 });
       }
 
       const bytes = await file.arrayBuffer();
@@ -136,8 +151,10 @@ export async function POST(req: NextRequest) {
           }
         }
       } else {
-        // DOC/DOCX — best effort: read as text
-        resumeText = buffer.toString("utf-8");
+        return NextResponse.json(
+          { error: "Upload a PDF or TXT resume. For DOCX files, paste the resume text." },
+          { status: 400 }
+        );
       }
     } else {
       // ── JSON / paste path ─────────────────────────────────────────────────
@@ -163,18 +180,28 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+    if (resumeText.length > 50000 || jdText.length > 10000 || role.length > 80 || seniority.length > 40 || companyType.length > 80 || companyName.length > 120) {
+      return NextResponse.json({ error: "One or more fields are too long." }, { status: 400 });
+    }
 
     const prompt = buildCVPrompt(resumeText, role, seniority, companyType, companyName, jdText);
 
     try {
+      await reserveAnalysis(user.uid, user.plan);
+      reserved = true;
       const { parsed } = await generateAICall("resume-optimization", prompt, {
+        userId: user.uid,
         temperature: 0.6,
       });
 
       return NextResponse.json({ result: parsed });
-    } catch (err: any) {
+    } catch (err: unknown) {
+      if (reserved) await releaseAnalysis(user.uid).catch(console.error);
+      if (err instanceof UsageLimitError) {
+        return NextResponse.json({ error: err.message, code: "LIMIT_REACHED" }, { status: 403 });
+      }
       return NextResponse.json(
-        { error: err?.message || "CV generation failed. Please try again." },
+        { error: err instanceof Error ? err.message : "CV generation failed. Please try again." },
         { status: 500 }
       );
     }

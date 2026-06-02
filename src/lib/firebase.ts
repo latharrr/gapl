@@ -100,14 +100,22 @@ export const getUserReports = async (uid: string) => {
   const reportsRef = collection(db, "reports");
   const q = query(reportsRef, where("userId", "==", uid), orderBy("createdAt", "desc"));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+  return snapshot.docs.map((d) => normalizeCreatedAt({ id: d.id, ...d.data() }));
 };
 
 export const getReport = async (reportId: string) => {
   const docRef = doc(db, "reports", reportId);
   const snapshot = await getDoc(docRef);
-  return snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null;
+  return snapshot.exists() ? normalizeCreatedAt({ id: snapshot.id, ...snapshot.data() }) : null;
 };
+
+function normalizeCreatedAt<T extends Record<string, unknown>>(value: T): T {
+  const createdAt = value.createdAt as { toDate?: () => Date } | string | undefined;
+  if (createdAt && typeof createdAt === "object" && typeof createdAt.toDate === "function") {
+    return { ...value, createdAt: createdAt.toDate().toISOString() };
+  }
+  return value;
+}
 
 // ── Roadmaps ──────────────────────────────────────────────────────────────────
 export const saveRoadmap = async (uid: string, roadmap: Record<string, unknown>) => {

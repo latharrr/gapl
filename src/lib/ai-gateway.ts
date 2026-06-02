@@ -1,5 +1,4 @@
-import { db } from "./firebase";
-import { doc, getDoc, updateDoc, setDoc, collection, addDoc } from "firebase/firestore";
+import { db, doc, getDoc, updateDoc, setDoc, collection, addDoc } from "./server-firestore";
 import { groq, ANALYSIS_MODEL } from "./groq";
 
 // Cost configuration for different providers/models
@@ -26,10 +25,10 @@ async function callFreeModel(model: string, prompt: string, temperature: number)
   const apiKey = process.env.FREEMODEL_API_KEY;
   if (!apiKey) throw new Error("FREEMODEL_API_KEY is not configured.");
 
-  // Map to FreeModel's specific model string (gpt-5.4)
-  const targetModel = "gpt-5.4";
+  const targetModel = process.env.FREEMODEL_MODEL || model;
+  const apiUrl = process.env.FREEMODEL_API_URL || "https://api.freemodel.dev/v1/chat/completions";
 
-  const res = await fetch("https://api.freemodel.dev/v1/chat/completions", {
+  const res = await fetch(apiUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -227,7 +226,7 @@ export async function generateAICall(
 
       // Route execution — only use FreeModel on attempt 1; real failover on 2 & 3
       if (attempt === 1 && process.env.FREEMODEL_API_KEY) {
-        currentModel = "gpt-5.4";
+        currentModel = process.env.FREEMODEL_MODEL || currentModel;
         const result = await callFreeModel(currentModel, prompt, temperature);
         content = result.content;
         usage = result.usage;
@@ -294,8 +293,7 @@ export async function generateAICall(
         cost: parseFloat(calculatedCost.toFixed(6)),
         latency: Date.now() - startTime,
         status: "success",
-        prompt,
-        response: rawResponse,
+        ...buildContentLog(prompt, rawResponse),
       });
 
       await updateProviderHealth(currentProvider, true, latency);
@@ -325,12 +323,17 @@ export async function generateAICall(
     cost: 0,
     latency: errorLatency,
     status: "error",
-    prompt,
-    response: "",
+    ...buildContentLog(prompt, ""),
     error: lastError?.message || "Execution collapsed",
   });
 
   throw lastError || new Error("AI gateway call failed on all providers.");
+}
+
+function buildContentLog(prompt: string, response: string) {
+  const metadata = { promptChars: prompt.length, responseChars: response.length };
+  if (process.env.AI_LOG_CONTENT === "true") return { ...metadata, prompt, response };
+  return { ...metadata, prompt: "[redacted]", response: "[redacted]" };
 }
 
 async function logAICallToDB(log: any) {

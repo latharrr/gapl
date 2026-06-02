@@ -1,13 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { db } from "@/lib/firebase";
-import { doc, updateDoc } from "firebase/firestore";
 import {
   LayoutDashboard,
   Users,
@@ -41,7 +39,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { user, userDoc, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const [promoting, setPromoting] = useState(false);
 
   // Auto redirect unauthenticated users to login
   useEffect(() => {

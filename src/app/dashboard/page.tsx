@@ -141,13 +141,13 @@ function DashboardWithData({
         className="grid grid-cols-2 lg:grid-cols-4 gap-4"
       >
         <Card variant="default" padding="md">
-          <p className="text-xs text-[#71717a] font-medium mb-2">ATS Score</p>
+          <p className="text-xs text-[#71717a] font-medium mb-2">ATS Fit Estimate</p>
           <span className={`text-2xl font-bold ${r.atsScore >= 70 ? "text-[#16a34a]" : "text-[#f59e0b]"}`}>{r.atsScore}</span>
           <span className="text-sm text-[#71717a]">%</span>
           <p className="text-[0.625rem] text-[#a1a1aa] mt-1">Keyword & format compliance</p>
         </Card>
         <Card variant="default" padding="md">
-          <p className="text-xs text-[#71717a] font-medium mb-2">Readiness</p>
+          <p className="text-xs text-[#71717a] font-medium mb-2">Readiness Estimate</p>
           <span className="text-2xl font-bold text-[#111111]">{r.readiness}</span>
           <span className="text-sm text-[#71717a]">%</span>
           <p className="text-[0.625rem] text-[#a1a1aa] mt-1">Composite recruiter signal</p>
@@ -245,7 +245,7 @@ function DashboardWithData({
           <div className="flex items-center justify-between mb-5">
             <div>
               <h2 className="text-sm font-semibold text-[#111111]">Critical Gaps</h2>
-              <p className="text-xs text-[#71717a] mt-0.5">AI-identified blockers</p>
+              <p className="text-xs text-[#71717a] mt-0.5">Evidence gaps estimated from your resume</p>
             </div>
             <Link href={`/report/${r.id}`}>
               <Button variant="ghost" size="sm" className="gap-1 text-[#71717a]">

@@ -1,11 +1,17 @@
 "use client";
 
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
 
 export function HeroSection() {
+  useEffect(() => {
+    trackEvent("landing_view");
+  }, []);
+
   return (
     <section className="relative min-h-screen flex items-center bg-[#FAFAFA] overflow-hidden pt-14">
       {/* Subtle grid pattern */}
@@ -19,10 +25,6 @@ export function HeroSection() {
           backgroundSize: "64px 64px",
         }}
       />
-
-      {/* Soft ambient blobs */}
-      <div className="absolute top-1/4 right-0 w-[600px] h-[600px] rounded-full bg-[#4F46E5]/[0.04] blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-[#4F46E5]/[0.03] blur-3xl pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-24 lg:py-32 relative z-10 w-full">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
@@ -38,7 +40,7 @@ export function HeroSection() {
             >
               <Sparkles size={12} className="text-[#4F46E5]" />
               <span className="text-xs text-[#3f3f46] font-medium">
-                Recruiter simulation powered by real hiring patterns
+                Evidence-based application readiness review
               </span>
             </motion.div>
 
@@ -54,16 +56,35 @@ export function HeroSection() {
               <span className="text-[#71717a]">Getting Shortlisted.</span>
             </motion.h1>
 
-            {/* Subheadline */}
-            <motion.p
+            {/* Compressed outcome highlights for students */}
+            <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.35 }}
-              className="mt-6 text-lg text-[#71717a] max-w-xl leading-relaxed"
+              className="mt-8 space-y-4 max-w-xl"
             >
-              Gapl analyzes your resume, simulates recruiter review, identifies skill gaps,
-              and tells you exactly what to build next.
-            </motion.p>
+              <div className="flex gap-3 items-start">
+                <span className="w-5 h-5 rounded-full bg-[#fef2f2] text-[#dc2626] font-bold text-xs flex items-center justify-center flex-shrink-0 mt-0.5">✕</span>
+                <div>
+                  <h3 className="text-sm font-bold text-[#111111]">Why am I getting rejected?</h3>
+                  <p className="text-xs text-[#71717a] mt-0.5 font-normal leading-relaxed">Simulate a recruiter&apos;s 6-second review. See exactly what flags get your CV thrown out.</p>
+                </div>
+              </div>
+              <div className="flex gap-3 items-start">
+                <span className="w-5 h-5 rounded-full bg-[#fffbeb] text-[#d97706] font-bold text-xs flex items-center justify-center flex-shrink-0 mt-0.5">?</span>
+                <div>
+                  <h3 className="text-sm font-bold text-[#111111]">What am I missing?</h3>
+                  <p className="text-xs text-[#71717a] mt-0.5 font-normal leading-relaxed">Audit your skill match, project depth, and deployment evidence against target company tiers.</p>
+                </div>
+              </div>
+              <div className="flex gap-3 items-start">
+                <span className="w-5 h-5 rounded-full bg-[#f0fdf4] text-[#16a34a] font-bold text-xs flex items-center justify-center flex-shrink-0 mt-0.5">✓</span>
+                <div>
+                  <h3 className="text-sm font-bold text-[#111111]">What should I build?</h3>
+                  <p className="text-xs text-[#71717a] mt-0.5 font-normal leading-relaxed font-normal">Receive a week-by-week roadmap specifying the exact projects and features to close your gaps.</p>
+                </div>
+              </div>
+            </motion.div>
 
             {/* CTAs */}
             <motion.div
@@ -104,8 +125,8 @@ export function HeroSection() {
                 ))}
               </div>
               <div>
-                <p className="text-sm font-medium text-[#111111]">2,400+ students analyzed</p>
-                <p className="text-xs text-[#71717a]">68% got shortlisted within 30 days</p>
+                <p className="text-sm font-medium text-[#111111]">Built for a clearer next step</p>
+                <p className="text-xs text-[#71717a]">Scores are estimates, with the gaps behind them explained.</p>
               </div>
             </motion.div>
           </div>

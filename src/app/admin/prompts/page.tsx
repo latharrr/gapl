@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Card } from "@/components/ui/Card";
 import { adminFetch } from "@/lib/admin-fetch";
+import { authFetch } from "@/lib/auth-fetch";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import {
@@ -30,7 +31,7 @@ export default function AdminPromptsPage() {
   const [successMsg, setSuccessMsg] = useState("");
 
   // Sandbox testing state
-  const [sandboxResume, setSandboxResume] = useState("Name: John Doe\nRole: SDE\nSkills: Java, Spring Boot, Git\nExperience:\n- Built microservices using Spring Boot, increasing speed by 25%.");
+  const [sandboxResume, setSandboxResume] = useState("Name: John Doe\nEducation: B.Tech Computer Science\nSkills: Java, Spring Boot, Git, SQL\nExperience:\n- Built microservices using Spring Boot, increasing speed by 25%.\nProjects:\n- Deployed a REST API with authentication, PostgreSQL, and CI/CD.");
   const [sandboxRole, setSandboxRole] = useState("Senior Backend Engineer");
   const [sandboxTier, setSandboxTier] = useState("Product Startup");
   const [sandboxOutput, setSandboxOutput] = useState("");
@@ -140,7 +141,7 @@ export default function AdminPromptsPage() {
       formData.append("tier", sandboxTier);
       formData.append("userId", user?.uid || "");
       
-      const res = await fetch("/api/analyze", {
+      const res = await authFetch("/api/analyze", {
         method: "POST",
         body: formData,
       });

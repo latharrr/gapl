@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/firebase";
-import { collection, getDocs, doc, setDoc, addDoc, getDoc } from "firebase/firestore";
+import { db, collection, doc, setDoc, addDoc } from "@/lib/server-firestore";
 import { requireSuperAdmin } from "@/lib/firebase-admin";
 
 export const runtime = "nodejs";

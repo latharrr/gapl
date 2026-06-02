@@ -1,5 +1,4 @@
-import { db } from "./firebase";
-import { collection, addDoc } from "firebase/firestore";
+import { db, collection, addDoc } from "./server-firestore";
 
 export interface AICallLog {
   timestamp: string;

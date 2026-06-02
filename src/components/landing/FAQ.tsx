@@ -11,7 +11,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "How accurate is the recruiter simulation?",
-    a: "Our simulation is trained on real hiring feedback patterns from product startups, top tech companies, and mass recruiters. It accurately identifies the signals that lead to shortlisting vs rejection in 73% of cases based on user feedback.",
+    a: "Treat it as an evidence-based AI estimate, not a hiring guarantee. Gapl explains the signals behind each verdict so you can decide which improvements are worth acting on.",
   },
   {
     q: "What's the difference between ATS score and readiness?",
@@ -27,7 +27,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Is my resume data stored securely?",
-    a: "Your resume content is processed for analysis and stored encrypted in Firebase. We never share your data with third parties. You can request deletion at any time.",
+    a: "Your resume is sent to the configured AI provider for processing. Gapl stores the resulting report for your account, while raw prompt logging is disabled by default. Do not upload information you would not want processed by an AI service.",
   },
 ];
 

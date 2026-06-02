@@ -33,6 +33,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isDemo, setIsDemo] = useState(false);
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      let sid = localStorage.getItem("gapl_session_id");
+      if (!sid) {
+        sid = "sess_" + Math.random().toString(36).substring(2, 15) + "_" + Date.now();
+        localStorage.setItem("gapl_session_id", sid);
+      }
+    }
+
     let unsubscribeDoc: (() => void) | null = null;
 
     const unsubscribeAuth = onAuthChange(async (firebaseUser) => {

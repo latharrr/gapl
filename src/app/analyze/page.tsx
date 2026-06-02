@@ -7,14 +7,9 @@ import { useDropzone } from "react-dropzone";
 import { Button } from "@/components/ui/Button";
 import { ANALYSIS_STAGES } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
-import {
-  canRunAnalysis,
-  getRemainingAnalyses,
-  incrementUsage,
-  FREE_LIMIT,
-} from "@/lib/usage";
+import { PLAN_LIMITS } from "@/lib/plans";
 import { useAuth } from "@/context/AuthContext";
-import { saveReport } from "@/lib/firebase";
+import { authFetch } from "@/lib/auth-fetch";
 import {
   Check,
   Upload,
@@ -42,7 +37,12 @@ function looksLikeResume(text: string): boolean {
   return RESUME_SIGNALS.filter((s) => lower.includes(s)).length >= 3;
 }
 
-const ALLOWED_EXTENSIONS = new Set([".pdf", ".doc", ".docx", ".txt"]);
+function currentUsageMonth(): string {
+  const now = new Date();
+  return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+
+const ALLOWED_EXTENSIONS = new Set([".pdf", ".txt"]);
 
 const ROLES = ["SDE Intern", "SDE Full Time", "Data Analyst", "AI/ML Engineer", "Product Manager"];
 const TIERS = [
@@ -54,7 +54,7 @@ const TIERS = [
 type Stage = "role" | "tier" | "resume" | "jd" | "loading";
 
 export default function AnalyzePage() {
-  const { user } = useAuth();
+  const { user, userDoc } = useAuth();
   const [stage, setStage] = useState<Stage>("role");
   const [selectedRole, setSelectedRole] = useState("");
   const [selectedTier, setSelectedTier] = useState("");
@@ -67,13 +67,22 @@ export default function AnalyzePage() {
   const [loadingStep, setLoadingStep] = useState(0);
   const [loadingError, setLoadingError] = useState("");
   const [showPaywall, setShowPaywall] = useState(false);
-  const [remaining, setRemaining] = useState(FREE_LIMIT);
   const router = useRouter();
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    setRemaining(getRemainingAnalyses());
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
   }, []);
+
+  const currentPlan = String(userDoc?.plan || "free").toLowerCase();
+  const monthlyLimit = PLAN_LIMITS[currentPlan] ?? PLAN_LIMITS.free;
+  const usageCount =
+    userDoc?.analysisUsageMonth === currentUsageMonth()
+      ? Math.max(0, Number(userDoc?.analysisUsageCount || 0))
+      : 0;
+  const usageLabel = `${Math.min(usageCount, monthlyLimit)}/${monthlyLimit} ${currentPlan}`;
 
   const onResumeDrop = useCallback((acceptedFiles: File[], rejectedFiles: { file: File }[]) => {
     setFileError("");
@@ -82,10 +91,10 @@ export default function AnalyzePage() {
       const ext = rejected.name.slice(rejected.name.lastIndexOf(".")).toLowerCase();
       if (!ALLOWED_EXTENSIONS.has(ext)) {
         setFileError(
-          `"${rejected.name}" is not a supported file type. Please upload a PDF, DOC, DOCX, or TXT resume.`
+          `"${rejected.name}" is not supported. Upload a PDF or TXT resume, or paste the text directly.`
         );
       } else {
-        setFileError("File rejected. Please upload a PDF, DOC, DOCX, or TXT file under 5 MB.");
+        setFileError("File rejected. Upload a PDF or TXT file under 5 MB.");
       }
       return;
     }
@@ -94,7 +103,7 @@ export default function AnalyzePage() {
       const file = acceptedFiles[0];
       const ext = file.name.slice(file.name.lastIndexOf(".")).toLowerCase();
       if (!ALLOWED_EXTENSIONS.has(ext)) {
-        setFileError(`Only PDF, DOC, DOCX, and TXT files are accepted. "${ext}" is not supported.`);
+        setFileError(`Only PDF and TXT files are accepted. "${ext}" is not supported.`);
         return;
       }
       if (file.size > 5 * 1024 * 1024) {
@@ -104,6 +113,7 @@ export default function AnalyzePage() {
       setResumeFile(file);
       setShowPaste(false);
       setResumeText("");
+      import("@/lib/analytics").then(({ trackEvent }) => trackEvent("resume_uploaded"));
     }
   }, []);
 
@@ -111,8 +121,6 @@ export default function AnalyzePage() {
     onDrop: onResumeDrop,
     accept: {
       "application/pdf": [".pdf"],
-      "application/msword": [".doc"],
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
       "text/plain": [".txt"],
     },
     maxFiles: 1,
@@ -130,20 +138,26 @@ export default function AnalyzePage() {
         );
         return;
       }
+      import("@/lib/analytics").then(({ trackEvent }) => trackEvent("resume_uploaded"));
     }
     setPasteError("");
     setStage("jd");
   };
 
   const runAnalysis = async () => {
-    // ── Quota check ────────────────────────────────────────────────────────
-    if (!canRunAnalysis()) {
-      setShowPaywall(true);
+    if (!user) {
+      router.push("/auth/login?next=/analyze");
       return;
     }
 
+    // Server-side quota enforcement happens inside /api/analyze.
     setStage("loading");
     setLoadingError("");
+    setLoadingStep(0);
+
+    import("@/lib/analytics").then(({ trackEvent }) => {
+      trackEvent("analysis_started");
+    });
 
     // Animate loading steps while API call runs
     let step = 0;
@@ -154,23 +168,22 @@ export default function AnalyzePage() {
       } else {
         if (intervalRef.current) clearInterval(intervalRef.current);
       }
-    }, 2000);
+    }, 2500);
     try {
       const formData = new FormData();
       formData.append("role", selectedRole);
       formData.append("tier", selectedTier);
-      if (jdText.trim()) formData.append("jdText", jdText.trim());
-      if (user) {
-        formData.append("userId", user.uid);
+      if (jdText.trim()) {
+        formData.append("jdText", jdText.trim());
+        import("@/lib/analytics").then(({ trackEvent }) => trackEvent("jd_uploaded"));
       }
-
       if (resumeFile) {
         formData.append("resume", resumeFile);
       } else if (resumeText.trim()) {
         formData.append("resumeText", resumeText.trim());
       }
 
-      const response = await fetch("/api/analyze", {
+      const response = await authFetch("/api/analyze", {
         method: "POST",
         body: formData,
       });
@@ -192,22 +205,13 @@ export default function AnalyzePage() {
         return;
       }
 
-      let reportId = data.result.id;
-      if (user) {
-        try {
-          const docRef = await saveReport(user.uid, data.result);
-          reportId = docRef.id;
-          data.result.id = reportId; // sync object ID with firestore doc ID
-        } catch (e) {
-          console.warn("Could not save analysis report to Firestore:", e);
-        }
-      }
+      import("@/lib/analytics").then(({ trackEvent }) => trackEvent("analysis_completed"));
 
-      // Store result + increment usage counter
+      const reportId = data.result.id;
+
+      // Store result for immediate report rendering before Firestore catches up.
       sessionStorage.setItem("gapl_last_report", JSON.stringify(data.result));
       sessionStorage.setItem("gapl_report_id", reportId);
-      incrementUsage();
-      setRemaining(getRemainingAnalyses());
 
       // Brief pause before redirect for UX
       await new Promise((r) => setTimeout(r, 500));
@@ -245,12 +249,12 @@ export default function AnalyzePage() {
             <div className="w-12 h-12 bg-[#f4f4f5] rounded-2xl flex items-center justify-center mx-auto mb-4">
               <Lock size={20} className="text-[#71717a]" />
             </div>
-            <h2 className="text-lg font-bold text-[#111111] mb-2">Free limit reached</h2>
+            <h2 className="text-lg font-bold text-[#111111] mb-2">Plan limit reached</h2>
             <p className="text-sm text-[#71717a] mb-1">
-              You&apos;ve used all <strong>{FREE_LIMIT}</strong> free analyses this month.
+              You&apos;ve used all <strong>{monthlyLimit}</strong> analyses included in your {currentPlan} plan this month.
             </p>
             <p className="text-xs text-[#a1a1aa] mb-8">
-              Upgrade to Pro for unlimited analyses, deeper gap reports, and priority AI processing.
+              Upgrade for more monthly analyses and keep working through your roadmap.
             </p>
             <div className="space-y-3">
               <Link href="/pricing">
@@ -289,13 +293,13 @@ export default function AnalyzePage() {
             <div className="ml-auto flex items-center gap-1.5">
               <span className={cn(
                 "text-xs font-medium px-2 py-0.5 rounded-full",
-                remaining === 0
+                usageCount >= monthlyLimit
                   ? "bg-[#fef2f2] text-[#dc2626]"
-                  : remaining === 1
+                  : monthlyLimit - usageCount === 1
                   ? "bg-[#fefce8] text-[#b45309]"
                   : "bg-[#f0fdf4] text-[#16a34a]"
               )}>
-                {remaining}/{FREE_LIMIT} free
+                {usageLabel}
               </span>
             </div>
           </div>
@@ -337,12 +341,58 @@ export default function AnalyzePage() {
         </div>
       </div>
 
-      {/* Error banner */}
+      {/* Error Card */}
       {loadingError && (
-        <div className="max-w-2xl mx-auto w-full px-4 pt-4">
-          <div className="flex items-start gap-2 p-3 bg-[#fef2f2] border border-[#fecaca] rounded-xl">
-            <AlertCircle size={14} className="text-[#dc2626] mt-0.5 flex-shrink-0" />
-            <p className="text-sm text-[#dc2626]">{loadingError}</p>
+        <div className="max-w-md mx-auto w-full px-4 pt-8 animate-in fade-in-50 duration-200">
+          <div className="bg-white border border-[#fecaca] rounded-2xl p-6 shadow-sm space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 bg-[#fef2f2] rounded-xl flex items-center justify-center flex-shrink-0">
+                <AlertCircle size={18} className="text-[#dc2626]" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-[#111111]">Analysis Interrupted</h3>
+                <p className="text-xs text-[#71717a] mt-0.5">We couldn&apos;t complete your resume evaluation.</p>
+              </div>
+            </div>
+
+            <div className="p-3.5 bg-[#fef2f2]/40 rounded-xl border border-[#fecaca]/50 text-xs text-[#b91c1c] leading-relaxed">
+              {loadingError}
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-xs font-semibold text-[#111111]">Troubleshooting checklist:</p>
+              <ul className="text-xs text-[#71717a] list-disc list-inside space-y-1">
+                <li>Check your internet connection and try again.</li>
+                <li>Make sure your PDF has selectable text (not a scanned image).</li>
+                <li>Ensure the resume has clear sections (Skills, Projects, Education).</li>
+                <li>If the file upload continues to fail, try pasting the text directly.</li>
+              </ul>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1"
+                onClick={() => {
+                  setLoadingError("");
+                  setStage("resume");
+                }}
+              >
+                Reset Upload
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                className="flex-1 bg-[#111111]"
+                onClick={() => {
+                  setLoadingError("");
+                  runAnalysis();
+                }}
+              >
+                Retry Analysis
+              </Button>
+            </div>
           </div>
         </div>
       )}
@@ -437,7 +487,7 @@ export default function AnalyzePage() {
                 exit={{ opacity: 0, x: -16 }}
               >
                 <h2 className="text-xl font-bold text-[#111111] mb-1">Upload your resume</h2>
-                <p className="text-sm text-[#71717a] mb-6">PDF, DOC, or DOCX. Or paste text directly.</p>
+                <p className="text-sm text-[#71717a] mb-6">PDF or TXT. For DOCX files, paste the text directly.</p>
 
                 {/* File type error */}
                 {fileError && (
@@ -475,7 +525,7 @@ export default function AnalyzePage() {
                         <p className="text-sm font-semibold text-[#111111]">
                           {isDragActive ? "Drop it here" : "Drag & drop your resume"}
                         </p>
-                        <p className="text-xs text-[#71717a] mt-1">or click to browse · PDF, DOC, DOCX, TXT</p>
+                        <p className="text-xs text-[#71717a] mt-1">or click to browse · PDF or TXT</p>
                       </div>
                     )}
                   </div>
@@ -560,45 +610,76 @@ export default function AnalyzePage() {
 }
 
 function LoadingScreen({ loadingStep }: { loadingStep: number }) {
+  const STAGE_DETAILS = [
+    "Extracting skills, project complexity, and experience details...",
+    "Matching keywords and filtering missing requirements...",
+    "Running simulated 6-second recruiter screening heuristic...",
+    "Synthesizing custom 4-week task list to address critical gaps...",
+    "Weighting overall scores and determining readiness percentage...",
+  ];
+
+  const activeStage = ANALYSIS_STAGES[loadingStep] || ANALYSIS_STAGES[ANALYSIS_STAGES.length - 1];
+  const activeDetail = STAGE_DETAILS[loadingStep] || "Finalizing report details...";
+  const progressPct = Math.round((Math.min(loadingStep, ANALYSIS_STAGES.length) / ANALYSIS_STAGES.length) * 100);
+
   return (
-    <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center">
-      <div className="text-center max-w-sm w-full px-4">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-          className="w-12 h-12 mx-auto mb-8 border-2 border-[#4F46E5]/20 border-t-[#4F46E5] rounded-full"
-        />
-        <h2 className="text-lg font-bold text-[#111111] mb-2">Analyzing your resume</h2>
-        <p className="text-sm text-[#71717a] mb-10">
-          GPT-OSS-120B is reviewing your profile. This takes ~15 seconds.
-        </p>
-        <div className="space-y-3 text-left">
+    <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center p-6">
+      <div className="max-w-md w-full bg-white border border-[#e4e4e7] rounded-3xl p-8 shadow-sm space-y-8">
+        <div className="text-center space-y-2">
+          {/* Pulsing state icon */}
+          <div className="relative w-16 h-16 mx-auto mb-4 flex items-center justify-center bg-[#4F46E5]/10 rounded-2xl">
+            <Loader2 size={24} className="text-[#4F46E5] animate-spin" />
+            <span className="absolute inline-flex h-full w-full rounded-2xl bg-[#4F46E5]/5 animate-ping opacity-75" />
+          </div>
+          <h2 className="text-xl font-extrabold text-[#111111] tracking-tight">{activeStage.label}...</h2>
+          <p className="text-xs text-[#71717a] font-mono leading-relaxed h-8">
+            {activeDetail}
+          </p>
+        </div>
+
+        {/* Progress bar */}
+        <div className="space-y-1.5">
+          <div className="flex justify-between items-center text-[10px] font-bold text-[#a1a1aa] uppercase tracking-wider">
+            <span>Analysis Progress</span>
+            <span>{progressPct}%</span>
+          </div>
+          <div className="w-full h-1.5 bg-[#f4f4f5] rounded-full overflow-hidden border border-[#e4e4e7]/45">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${progressPct}%` }}
+              className="h-full bg-gradient-to-r from-[#4f46e5] to-[#818cf8] rounded-full"
+              transition={{ duration: 0.3 }}
+            />
+          </div>
+        </div>
+
+        {/* Checklist of stages */}
+        <div className="space-y-3 pt-2 border-t border-[#f4f4f5]">
           {ANALYSIS_STAGES.map((s, i) => {
             const done = i < loadingStep;
             const active = i === loadingStep;
             return (
               <motion.div
                 key={s.id}
-                initial={{ opacity: 0, x: -8 }}
-                animate={{ opacity: done || active ? 1 : 0.4, x: 0 }}
-                transition={{ delay: i * 0.1 }}
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: done || active ? 1 : 0.35, y: 0 }}
                 className="flex items-center gap-3"
               >
                 <div className={cn(
-                  "w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0",
-                  done ? "bg-[#16a34a]" : active ? "bg-[#4F46E5]" : "bg-[#e4e4e7]"
+                  "w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 transition-colors duration-300",
+                  done ? "bg-[#16a34a] text-white" : active ? "bg-[#4F46E5] text-white" : "bg-[#f4f4f5] border border-[#e4e4e7] text-[#a1a1aa]"
                 )}>
                   {done ? (
                     <Check size={10} className="text-white" />
                   ) : active ? (
                     <Loader2 size={10} className="text-white animate-spin" />
                   ) : (
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#a1a1aa]" />
+                    <span className="text-[10px] font-bold font-mono">{i + 1}</span>
                   )}
                 </div>
                 <span className={cn(
-                  "text-sm",
-                  done ? "text-[#71717a] line-through" : active ? "text-[#111111] font-medium" : "text-[#a1a1aa]"
+                  "text-xs tracking-wide",
+                  done ? "text-[#71717a] line-through font-normal" : active ? "text-[#111111] font-bold" : "text-[#a1a1aa] font-normal"
                 )}>
                   {s.label}
                 </span>
