@@ -66,7 +66,6 @@ export async function POST(req: NextRequest) {
       html: bodyHtml,
       tags: [
         { name: "campaign_id", value: campaignId },
-        { name: "recipient_email", value: email.trim() },
       ],
     });
 
