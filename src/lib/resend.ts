@@ -24,7 +24,7 @@ Tags: ${JSON.stringify(tags || [])}
 
   try {
     const response = await resend.emails.send({
-      from: "Gapl <onboarding@resend.dev>",
+      from: process.env.RESEND_FROM_EMAIL || "Gapl <onboarding@resend.dev>",
       to,
       subject,
       html,
