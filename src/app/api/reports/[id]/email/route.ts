@@ -83,11 +83,26 @@ export async function POST(
       </div>
     `;
 
+    const userRef = db.collection("users").doc(user.uid);
+    const userSnap = await userRef.get();
+    const userData = userSnap.exists ? userSnap.data() : {};
+    const summaryEmailCount = userData?.summaryEmailCount || 0;
+
+    if (summaryEmailCount >= 5) {
+      return NextResponse.json(
+        { error: "Rate limit exceeded. You can only email this summary up to 5 times." },
+        { status: 429 }
+      );
+    }
+
     await sendEmail({
       to: user.email,
       subject: `Gapl Report Summary: ${report.role}`,
       html: bodyHtml,
     });
+
+    const { FieldValue } = await import("firebase-admin/firestore");
+    await userRef.set({ summaryEmailCount: FieldValue.increment(1) }, { merge: true });
 
     return NextResponse.json({ success: true });
   } catch (err: any) {

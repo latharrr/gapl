@@ -27,6 +27,71 @@ export default function AdminEmailsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [refreshing, setRefreshing] = useState(false);
+  // Send Email State
+  const [recipientEmail, setRecipientEmail] = useState("");
+  const [emailSubject, setEmailSubject] = useState("");
+  const [emailMessage, setEmailMessage] = useState("");
+  const [aiRewriting, setAiRewriting] = useState(false);
+  const [sendingEmail, setSendingEmail] = useState(false);
+  const [sendCount, setSendCount] = useState(0);
+  const [sendSuccessMsg, setSendSuccessMsg] = useState("");
+  const [sendError, setSendError] = useState("");
+
+  const handleAiRewrite = async () => {
+    if (!emailMessage) return;
+    setAiRewriting(true);
+    setSendError("");
+    try {
+      const res = await adminFetch("/api/admin/emails/rewrite", {
+        method: "POST",
+        body: JSON.stringify({ message: emailMessage }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Failed to rewrite message");
+      setEmailMessage(json.rewritten);
+      setSendSuccessMsg("");
+    } catch (err: any) {
+      setSendError(err.message);
+    } finally {
+      setAiRewriting(false);
+    }
+  };
+
+  const handleSendEmail = async () => {
+    if (!recipientEmail || !emailSubject || !emailMessage) {
+      setSendError("Please fill out all fields.");
+      return;
+    }
+    if (sendCount >= 5) {
+      setSendError("Maximum of 5 sends reached for this message.");
+      return;
+    }
+    setSendingEmail(true);
+    setSendError("");
+    try {
+      const res = await adminFetch("/api/admin/emails/send", {
+        method: "POST",
+        body: JSON.stringify({
+          email: recipientEmail,
+          subject: emailSubject,
+          message: emailMessage,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Failed to send email");
+      
+      const newCount = sendCount + 1;
+      setSendCount(newCount);
+      setSendSuccessMsg(`Email successfully sent! (Dispatch #${newCount} of 5)`);
+      
+      // Auto refresh the logs list to show the new manual email dispatch
+      fetchMetrics(true);
+    } catch (err: any) {
+      setSendError(err.message);
+    } finally {
+      setSendingEmail(false);
+    }
+  };
 
   const fetchMetrics = async (isSilent = false) => {
     if (!user) return;
@@ -130,6 +195,146 @@ export default function AdminEmailsPage() {
             </div>
           );
         })}
+      </div>
+
+      {/* Admin Email Dispatcher */}
+      <div className="bg-[#18181b] border border-[#27272a] rounded-xl p-6 space-y-6">
+        <div className="flex items-center justify-between border-b border-[#27272a] pb-4">
+          <div className="flex items-center gap-2">
+            <Send size={16} className="text-[#6366f1]" />
+            <h2 className="text-sm font-semibold text-white">Send Email to Candidate</h2>
+          </div>
+          {sendCount > 0 && (
+            <Badge variant={sendCount >= 5 ? "danger" : "success"}>
+              Dispatched {sendCount}/5 times
+            </Badge>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <label className="text-[10px] uppercase font-bold text-[#71717a] tracking-wider">Candidate Email</label>
+            <input
+              type="email"
+              placeholder="candidate@example.com"
+              value={recipientEmail}
+              onChange={(e) => {
+                setRecipientEmail(e.target.value);
+                setSendCount(0);
+                setSendSuccessMsg("");
+                setSendError("");
+              }}
+              className="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#6366f1] transition-colors"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-[10px] uppercase font-bold text-[#71717a] tracking-wider">Subject Line</label>
+            <input
+              type="text"
+              placeholder="e.g. Your application review update"
+              value={emailSubject}
+              onChange={(e) => {
+                setEmailSubject(e.target.value);
+                setSendCount(0);
+                setSendSuccessMsg("");
+                setSendError("");
+              }}
+              className="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#6366f1] transition-colors"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <label className="text-[10px] uppercase font-bold text-[#71717a] tracking-wider">Message Body</label>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleAiRewrite}
+              disabled={aiRewriting || !emailMessage}
+              className="h-7 text-[10px] px-2 bg-[#09090b] border-[#27272a] text-[#a1a1aa] hover:text-white"
+            >
+              {aiRewriting ? (
+                <>
+                  <Loader2 className="w-3 h-3 mr-1 animate-spin text-[#6366f1]" />
+                  Rewriting...
+                </>
+              ) : (
+                <>
+                  <Sparkles size={11} className="mr-1 text-[#6366f1]" />
+                  AI Rewrite
+                </>
+              )}
+            </Button>
+          </div>
+          <textarea
+            placeholder="Write your email body here. Placeholders and line breaks are fully supported."
+            value={emailMessage}
+            onChange={(e) => {
+              setEmailMessage(e.target.value);
+              setSendSuccessMsg("");
+              setSendError("");
+            }}
+            rows={5}
+            className="w-full bg-[#09090b] border border-[#27272a] rounded-lg p-3 text-xs text-white focus:outline-none focus:border-[#6366f1] transition-colors font-sans resize-y"
+          />
+        </div>
+
+        {sendSuccessMsg && (
+          <div className="bg-emerald-950/20 border border-emerald-800/40 rounded-lg p-3 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs text-emerald-400">
+              <CheckCircle size={14} className="shrink-0" />
+              <span>{sendSuccessMsg}</span>
+            </div>
+            {sendCount < 5 && (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleSendEmail}
+                disabled={sendingEmail}
+                className="h-7 text-[10px] px-3 bg-emerald-600 hover:bg-emerald-500 text-white border-none"
+              >
+                {sendingEmail ? (
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                ) : (
+                  "Send Again?"
+                )}
+              </Button>
+            )}
+          </div>
+        )}
+
+        {sendError && (
+          <div className="bg-rose-950/20 border border-rose-800/40 rounded-lg p-3 flex items-center gap-2 text-xs text-rose-400">
+            <AlertOctagon size={14} className="shrink-0" />
+            <span>{sendError}</span>
+          </div>
+        )}
+
+        {!sendSuccessMsg && (
+          <div className="flex justify-end">
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleSendEmail}
+              disabled={sendingEmail || !recipientEmail || !emailSubject || !emailMessage || sendCount >= 5}
+              className="bg-[#6366f1] hover:bg-[#4f46e5] text-white"
+            >
+              {sendingEmail ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Send size={13} className="mr-2" />
+                  Send Email
+                </>
+              )}
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Attribution Conversion Funnel */}

@@ -128,11 +128,28 @@ export async function POST(req: NextRequest) {
       </div>
     `;
 
+    const { getAdminDb } = await import("@/lib/firebase-admin");
+    const db = getAdminDb();
+    const userRef = db.collection("users").doc(user.uid);
+    const userSnap = await userRef.get();
+    const userData = userSnap.exists ? userSnap.data() : {};
+    const cvEmailCount = userData?.cvEmailCount || 0;
+
+    if (cvEmailCount >= 5) {
+      return NextResponse.json(
+        { error: "Rate limit exceeded. You can only email your CV up to 5 times." },
+        { status: 429 }
+      );
+    }
+
     await sendEmail({
       to: user.email,
       subject: `Gapl Generated CV: ${cv.name}`,
       html: bodyHtml,
     });
+
+    const { FieldValue } = await import("firebase-admin/firestore");
+    await userRef.set({ cvEmailCount: FieldValue.increment(1) }, { merge: true });
 
     return NextResponse.json({ success: true });
   } catch (err: any) {
