@@ -54,8 +54,9 @@ export async function createTrackableLink({
     await docRef.set(linkDoc);
   }
 
-  // Tracking shortlinks always target the sub-domain links.gapl.in
-  return `https://links.gapl.in/${shortId}`;
+  // Tracking shortlinks target the sub-domain links.gapl.in or custom env domain
+  const trackingDomain = process.env.NEXT_PUBLIC_TRACKING_DOMAIN || "links.gapl.in";
+  return `https://${trackingDomain}/${shortId}`;
 }
 
 export async function getLastTouchAttribution(userId: string) {

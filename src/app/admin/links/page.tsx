@@ -281,7 +281,8 @@ export default function AdminLinksPage() {
                 </tr>
               ) : (
                 links.map((link: any) => {
-                  const shortUrl = `https://links.gapl.in/${link.id}`;
+                  const trackingDomain = process.env.NEXT_PUBLIC_TRACKING_DOMAIN || "links.gapl.in";
+                  const shortUrl = `https://${trackingDomain}/${link.id}`;
                   return (
                     <tr key={link.id} className="hover:bg-[#18181b]/55 transition-colors">
                       <td className="px-6 py-4">
