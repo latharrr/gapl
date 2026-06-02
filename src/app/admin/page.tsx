@@ -34,7 +34,6 @@ export default function AdminDashboardPage() {
   const { user } = useAuth();
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [seeding, setSeeding] = useState(false);
   const [error, setError] = useState("");
 
   const fetchStats = async () => {
@@ -50,20 +49,6 @@ export default function AdminDashboardPage() {
       setError(e.message);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleSeed = async () => {
-    setSeeding(true);
-    try {
-      const res = await adminFetch("/api/admin/seed", { method: "POST" });
-      if (res.ok) {
-        await fetchStats();
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setSeeding(false);
     }
   };
 
@@ -90,9 +75,6 @@ export default function AdminDashboardPage() {
         <div className="flex gap-2 justify-center">
           <Button variant="primary" size="sm" onClick={fetchStats}>
             Retry Fetch
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleSeed} loading={seeding} className="text-white border-[#27272a] hover:bg-[#27272a]">
-            Seed Demo Database
           </Button>
         </div>
       </div>
@@ -124,9 +106,6 @@ export default function AdminDashboardPage() {
           <p className="text-xs text-[#a1a1aa] mt-0.5">Real-time SaaS operations overview</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={handleSeed} loading={seeding} className="text-xs text-white border-[#27272a] hover:bg-[#27272a]">
-            Re-seed Data
-          </Button>
           <button onClick={fetchStats} className="p-2 border border-[#27272a] rounded-lg hover:bg-[#18181b] transition-colors text-[#a1a1aa] hover:text-white">
             <RotateCcw size={14} />
           </button>
