@@ -117,10 +117,24 @@ export async function POST(req: NextRequest) {
       if (file.type === "text/plain") {
         resumeText = buffer.toString("utf-8");
       } else if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
-        // Extract text from PDF using unpdf
-        const { extractText } = await import("unpdf");
-        const result = await extractText(new Uint8Array(buffer), { mergePages: true });
-        resumeText = Array.isArray(result.text) ? result.text.join(" ") : (result.text as string);
+        try {
+          // Extract text from PDF using unpdf
+          const { extractText } = await import("unpdf");
+          const result = await extractText(new Uint8Array(buffer), { mergePages: true });
+          resumeText = Array.isArray(result.text) ? result.text.join(" ") : (result.text as string);
+        } catch (pdfErr) {
+          console.warn("unpdf extraction failed, trying pdf-parse fallback...", pdfErr);
+          try {
+            const pdf = await import("pdf-parse");
+            const parser = ((pdf as any).default || pdf) as any;
+            const data = await parser(buffer);
+            resumeText = data.text || "";
+          } catch (pdfErr2) {
+            console.error("All PDF extraction libraries failed:", pdfErr2);
+            // Last resort: extract printable ASCII characters
+            resumeText = buffer.toString("utf-8").replace(/[^\x20-\x7E\n\r\t]/g, " ");
+          }
+        }
       } else {
         // DOC/DOCX — best effort: read as text
         resumeText = buffer.toString("utf-8");
