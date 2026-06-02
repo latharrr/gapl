@@ -25,12 +25,15 @@ async function callFreeModel(model: string, prompt: string, temperature: number)
   const apiKey = process.env.FREEMODEL_API_KEY;
   if (!apiKey) throw new Error("FREEMODEL_API_KEY is not configured.");
 
-  // Map user-friendly model strings to FreeModel's specific provider strings if needed
-  let targetModel = model;
-  if (model === "gpt-4o-mini") targetModel = "gpt-4o-mini";
-  else if (model === "gpt-4o") targetModel = "gpt-4o";
-  else if (model === "claude-3-5-sonnet") targetModel = "claude-3-5-sonnet";
-  else if (model === "gemini-1.5-flash") targetModel = "gemini-1.5-flash";
+  // Map requested model names to FreeModel's supported strings (FRE-5.5 for flagship / FRE-5.4 for standard/faster model)
+  let targetModel = "FRE-5.5";
+  if (model === "gpt-4o-mini" || model === "gemini-1.5-flash" || model === "openai/gpt-oss-120b") {
+    targetModel = "FRE-5.4";
+  } else if (model === "claude-3-5-sonnet" || model === "gpt-4o" || model === "gemini-1.5-pro") {
+    targetModel = "FRE-5.5";
+  } else if (model === "FRE-5.4" || model === "FRE-5.5") {
+    targetModel = model;
+  }
 
   const res = await fetch("https://api.freemodel.dev/v1/chat/completions", {
     method: "POST",
