@@ -30,10 +30,10 @@ export default function AdminSettingsPage() {
   // Per-task routing configurations
   const [modelParsing, setModelParsing] = useState("openai/gpt-oss-120b");
   const [modelJd, setModelJd] = useState("openai/gpt-oss-120b");
-  const [modelOptimization, setModelOptimization] = useState("claude-3-5-sonnet");
+  const [modelOptimization, setModelOptimization] = useState("openai/gpt-oss-120b");
   const [modelAts, setModelAts] = useState("openai/gpt-oss-120b");
-  const [modelRecruiter, setModelRecruiter] = useState("claude-3-opus");
-  const [modelGap, setModelGap] = useState("claude-3-opus");
+  const [modelRecruiter, setModelRecruiter] = useState("openai/gpt-oss-120b");
+  const [modelGap, setModelGap] = useState("openai/gpt-oss-120b");
 
   useEffect(() => {
     const loadSettings = async () => {
