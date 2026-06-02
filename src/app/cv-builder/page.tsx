@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import Link from "next/link";
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
 import { Navbar } from "@/components/layout/Navbar";
@@ -237,9 +238,15 @@ export default function CVBuilderPage() {
             {/* Header */}
             <div className="flex items-start justify-between gap-4 flex-wrap">
               <div>
-                <button onClick={() => setStep(2)} className="inline-flex items-center gap-1.5 text-xs text-[#71717a] hover:text-[#111] mb-3 transition-colors">
-                  <ArrowLeft size={12} /> Rebuild
-                </button>
+                <div className="flex items-center gap-3 mb-3 print:hidden">
+                  <button onClick={() => setStep(2)} className="inline-flex items-center gap-1.5 text-xs text-[#71717a] hover:text-[#111] transition-colors">
+                    <ArrowLeft size={12} /> Rebuild
+                  </button>
+                  <span className="text-[#d4d4d8] text-xs">|</span>
+                  <Link href="/dashboard" className="text-xs text-[#71717a] hover:text-[#111] transition-colors">
+                    Dashboard
+                  </Link>
+                </div>
                 <h1 className="text-xl font-bold text-[#111]">Your Improved CV</h1>
                 <p className="text-xs text-[#71717a] mt-0.5">{finalRole} · {companyType}</p>
                 {savedId && (
@@ -386,6 +393,9 @@ export default function CVBuilderPage() {
             {/* ── Step 1: Target ────────────────────────────────────────────── */}
             {step === 1 && (
               <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                <Link href="/dashboard" className="inline-flex items-center gap-1.5 text-xs text-[#71717a] hover:text-[#111] mb-6 transition-colors">
+                  <ArrowLeft size={12} /> Back to Dashboard
+                </Link>
                 <h1 className="text-2xl font-bold text-[#111] mb-1">What are you targeting?</h1>
                 <p className="text-sm text-[#71717a] mb-8">Tell us your goal — we'll build your CV around it.</p>
 

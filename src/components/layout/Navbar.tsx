@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/Button";
 import { Menu, X } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 const navLinks = [
   { label: "How it works", href: "/#how-it-works" },
@@ -17,6 +18,7 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
+  const { user, loading } = useAuth();
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 12);
@@ -38,7 +40,7 @@ export function Navbar() {
       >
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
+          <Link href={user ? "/dashboard" : "/"} className="flex items-center gap-2 group">
             <div className="w-7 h-7 bg-[#111111] rounded-lg flex items-center justify-center">
               <span className="text-white text-xs font-bold tracking-tight">G</span>
             </div>
@@ -60,16 +62,28 @@ export function Navbar() {
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-2">
-            <Link href="/auth/login">
-              <Button variant="ghost" size="sm">
-                Sign in
-              </Button>
-            </Link>
-            <Link href="/auth/signup">
-              <Button variant="primary" size="sm">
-                Get started
-              </Button>
-            </Link>
+            {loading ? (
+              <div className="w-20 h-8 bg-surface-subtle animate-pulse rounded-md" />
+            ) : user ? (
+              <Link href="/dashboard">
+                <Button variant="primary" size="sm">
+                  Dashboard
+                </Button>
+              </Link>
+            ) : (
+              <>
+                <Link href="/auth/login">
+                  <Button variant="ghost" size="sm">
+                    Sign in
+                  </Button>
+                </Link>
+                <Link href="/auth/signup">
+                  <Button variant="primary" size="sm">
+                    Get started
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile menu toggle */}
@@ -104,16 +118,28 @@ export function Navbar() {
                 </Link>
               ))}
               <div className="pt-2 border-t border-border-DEFAULT mt-2 flex flex-col gap-2">
-                <Link href="/auth/login" className="w-full">
-                  <Button variant="outline" size="md" className="w-full">
-                    Sign in
-                  </Button>
-                </Link>
-                <Link href="/auth/signup" className="w-full">
-                  <Button variant="primary" size="md" className="w-full">
-                    Get started
-                  </Button>
-                </Link>
+                {loading ? (
+                  <div className="h-10 bg-surface-subtle animate-pulse rounded-md" />
+                ) : user ? (
+                  <Link href="/dashboard" className="w-full">
+                    <Button variant="primary" size="md" className="w-full">
+                      Dashboard
+                    </Button>
+                  </Link>
+                ) : (
+                  <>
+                    <Link href="/auth/login" className="w-full">
+                      <Button variant="outline" size="md" className="w-full">
+                        Sign in
+                      </Button>
+                    </Link>
+                    <Link href="/auth/signup" className="w-full">
+                      <Button variant="primary" size="md" className="w-full">
+                        Get started
+                      </Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>
