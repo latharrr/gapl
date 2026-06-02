@@ -1,28 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, doc, getDoc, updateDoc } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc, updateDoc, query, orderBy, limit } from "firebase/firestore";
 import { logAuditAction } from "@/lib/audit-logger";
+import { requireAdmin, requireSuperAdmin } from "@/lib/firebase-admin";
 
 export const runtime = "nodejs";
 
-async function getAdminUser(req: NextRequest) {
-  const adminUid = req.headers.get("x-admin-uid");
-  if (!adminUid) return null;
-  const userRef = doc(db, "users", adminUid);
-  const snap = await getDoc(userRef);
-  if (!snap.exists()) return null;
-  return { uid: snap.id, ...snap.data() } as any;
-}
-
 export async function GET(req: NextRequest) {
   try {
-    const adminUser = await getAdminUser(req);
-    if (!adminUser || !["super_admin", "admin", "support", "readonly"].includes(adminUser.role)) {
-      return NextResponse.json({ error: "Unauthorized access." }, { status: 403 });
-    }
+    const adminOrError = await requireAdmin(req);
+    if (adminOrError instanceof NextResponse) return adminOrError;
 
     const paymentsRef = collection(db, "payments");
-    const snap = await getDocs(paymentsRef);
+    const q = query(paymentsRef, orderBy("timestamp", "desc"), limit(200));
+    const snap = await getDocs(q);
     const payments = snap.docs.map((d) => ({ paymentId: d.id, ...d.data() }));
 
     return NextResponse.json({ payments });
@@ -33,10 +24,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const adminUser = await getAdminUser(req);
-    if (!adminUser) {
-      return NextResponse.json({ error: "Unauthorized access." }, { status: 403 });
-    }
+    const adminOrError = await requireAdmin(req);
+    if (adminOrError instanceof NextResponse) return adminOrError;
+    const adminUser = adminOrError;
 
     const { action, paymentId } = await req.json();
     if (!action || !paymentId) {

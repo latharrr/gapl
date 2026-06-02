@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Card } from "@/components/ui/Card";
+import { adminFetch } from "@/lib/admin-fetch";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
@@ -41,9 +42,7 @@ export default function AdminUsersPage() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/admin/users", {
-        headers: { "x-admin-uid": user.uid },
-      });
+      const res = await adminFetch("/api/admin/users");
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to load users");
       setUsers(data.users || []);
@@ -63,11 +62,10 @@ export default function AdminUsersPage() {
     setUpdatingUser(true);
     setActionError("");
     try {
-      const res = await fetch("/api/admin/users", {
+      const res = await adminFetch("/api/admin/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-admin-uid": user.uid,
         },
         body: JSON.stringify({
           action,
@@ -268,7 +266,6 @@ export default function AdminUsersPage() {
           actionError={actionError}
           handleAction={handleAction}
           onClose={() => setSelectedUser(null)}
-          adminUid={user?.uid || ""}
         />
       )}
     </div>
@@ -282,7 +279,6 @@ function UserDetailDrawer({
   actionError,
   handleAction,
   onClose,
-  adminUid,
 }: {
   selectedUser: any;
   isSuperAdmin: boolean;
@@ -290,7 +286,6 @@ function UserDetailDrawer({
   actionError: string;
   handleAction: any;
   onClose: () => void;
-  adminUid: string;
 }) {
   const [timeline, setTimeline] = useState<any[]>([]);
   const [loadingTimeline, setLoadingTimeline] = useState(true);
@@ -299,9 +294,7 @@ function UserDetailDrawer({
     const fetchTimeline = async () => {
       setLoadingTimeline(true);
       try {
-        const res = await fetch(`/api/admin/users/journey?userId=${selectedUser.uid}`, {
-          headers: { "x-admin-uid": adminUid },
-        });
+        const res = await adminFetch(`/api/admin/users/journey?userId=${selectedUser.uid}`);
         const data = await res.json();
         if (res.ok) {
           setTimeline(data.timeline || []);
@@ -313,7 +306,7 @@ function UserDetailDrawer({
       }
     };
     fetchTimeline();
-  }, [selectedUser, adminUid]);
+  }, [selectedUser]);
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Card } from "@/components/ui/Card";
+import { adminFetch } from "@/lib/admin-fetch";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
@@ -39,9 +40,7 @@ export default function AdminReportsPage() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/admin/reports", {
-        headers: { "x-admin-uid": user.uid },
-      });
+      const res = await adminFetch("/api/admin/reports");
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to load reports");
       setReports(data.reports || []);
@@ -62,11 +61,10 @@ export default function AdminReportsPage() {
     
     setDeletingId(reportId);
     try {
-      const res = await fetch("/api/admin/reports", {
+      const res = await adminFetch("/api/admin/reports", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-admin-uid": user.uid,
         },
         body: JSON.stringify({ action: "delete", reportId }),
       });

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Card } from "@/components/ui/Card";
+import { adminFetch } from "@/lib/admin-fetch";
 import { Badge } from "@/components/ui/Badge";
 import {
   History,
@@ -25,9 +26,7 @@ export default function AdminAuditPage() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/admin/audit-logs", {
-        headers: { "x-admin-uid": user.uid },
-      });
+      const res = await adminFetch("/api/admin/audit-logs");
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to load audit logs");
       

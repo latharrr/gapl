@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Card } from "@/components/ui/Card";
+import { adminFetch } from "@/lib/admin-fetch";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import {
@@ -40,9 +41,7 @@ export default function AdminPromptsPage() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/admin/prompts", {
-        headers: { "x-admin-uid": user.uid },
-      });
+      const res = await adminFetch("/api/admin/prompts");
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to load prompts");
       setPrompts(data.prompts || []);
@@ -76,11 +75,10 @@ export default function AdminPromptsPage() {
     setSuccessMsg("");
     setError("");
     try {
-      const res = await fetch("/api/admin/prompts", {
+      const res = await adminFetch("/api/admin/prompts", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-admin-uid": user.uid,
         },
         body: JSON.stringify({
           action: "update",
@@ -108,11 +106,10 @@ export default function AdminPromptsPage() {
     setSuccessMsg("");
     setError("");
     try {
-      const res = await fetch("/api/admin/prompts", {
+      const res = await adminFetch("/api/admin/prompts", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-admin-uid": user.uid,
         },
         body: JSON.stringify({
           action: "rollback",

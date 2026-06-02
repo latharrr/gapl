@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Card } from "@/components/ui/Card";
+import { adminFetch } from "@/lib/admin-fetch";
 import { Progress } from "@/components/ui/Progress";
 import { Badge } from "@/components/ui/Badge";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
@@ -26,9 +27,7 @@ export default function AdminAnalyticsPage() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/admin/stats", {
-        headers: { "x-admin-uid": user.uid },
-      });
+      const res = await adminFetch("/api/admin/stats");
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to load analytics");
       setStats(data);
@@ -60,21 +59,6 @@ export default function AdminAnalyticsPage() {
   }
 
   const { charts, costStats } = stats;
-
-  const funnelSteps = [
-    { step: "Landing / Visits", count: 1240, pct: 100 },
-    { step: "Created Accounts", count: 820, pct: 66 },
-    { step: "Uploaded Resumes", count: 560, pct: 45 },
-    { step: "Ran Analysis", count: 480, pct: 38 },
-    { step: "Upgraded Subscriptions", count: 38, pct: 3.1 },
-  ];
-
-  const retentionWeeks = [
-    { label: "Week 1", rate: 84 },
-    { label: "Week 2", rate: 68 },
-    { label: "Week 3", rate: 52 },
-    { label: "Week 4", rate: 45 },
-  ];
 
   const profitability = costStats?.profitability || {
     revenue: 0,
@@ -171,15 +155,19 @@ export default function AdminAnalyticsPage() {
             <p className="text-[10px] text-[#71717a]">Weekly aggregate onboarding milestones</p>
           </div>
           <div className="space-y-4">
-            {funnelSteps.map((f) => (
-              <div key={f.step} className="space-y-1.5">
-                <div className="flex justify-between items-center text-xs text-white">
-                  <span className="font-medium">{f.step}</span>
-                  <span className="font-mono text-[#a1a1aa]">{f.count} ({f.pct}%)</span>
+            {charts?.conversionFunnel?.map((f: any, idx: number, arr: any[]) => {
+              const baseValue = arr[0]?.value || 1;
+              const pct = baseValue > 0 ? Math.round((f.value / baseValue) * 100) : 0;
+              return (
+                <div key={f.name} className="space-y-1.5">
+                  <div className="flex justify-between items-center text-xs text-white">
+                    <span className="font-medium">{f.name}</span>
+                    <span className="font-mono text-[#a1a1aa]">{f.value} ({pct}%)</span>
+                  </div>
+                  <Progress value={pct} className="h-1.5 bg-[#09090b] indicator-bg-[#6366f1]" />
                 </div>
-                <Progress value={f.pct} className="h-1.5 bg-[#09090b] indicator-bg-[#6366f1]" />
-              </div>
-            ))}
+              );
+            })}
           </div>
         </Card>
 
@@ -189,16 +177,8 @@ export default function AdminAnalyticsPage() {
             <h2 className="text-sm font-bold text-white">Weekly User Retention Cohort</h2>
             <p className="text-[10px] text-[#71717a]">Proportion of active users returning weekly</p>
           </div>
-          <div className="space-y-4">
-            {retentionWeeks.map((w) => (
-              <div key={w.label} className="space-y-1.5">
-                <div className="flex justify-between items-center text-xs text-white">
-                  <span className="font-medium">{w.label}</span>
-                  <span className="font-mono text-[#a1a1aa]">{w.rate}%</span>
-                </div>
-                <Progress value={w.rate} className="h-1.5 bg-[#09090b] indicator-bg-emerald-400" />
-              </div>
-            ))}
+          <div className="text-center py-12 text-[#71717a] text-xs border border-dashed border-[#27272a] rounded-xl">
+            Retention cohort tracking not yet implemented. Requires session-level analytics integration.
           </div>
         </Card>
 

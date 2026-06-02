@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Card } from "@/components/ui/Card";
+import { adminFetch } from "@/lib/admin-fetch";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import {
@@ -31,9 +32,7 @@ export default function AdminAICallsPage() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/admin/ai-calls", {
-        headers: { "x-admin-uid": user.uid },
-      });
+      const res = await adminFetch("/api/admin/ai-calls");
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to load AI logs");
       

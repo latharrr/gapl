@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Card } from "@/components/ui/Card";
+import { adminFetch } from "@/lib/admin-fetch";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import {
@@ -30,9 +31,7 @@ export default function AdminPaymentsPage() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/admin/payments", {
-        headers: { "x-admin-uid": user.uid },
-      });
+      const res = await adminFetch("/api/admin/payments");
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to load payment logs");
       
@@ -58,11 +57,10 @@ export default function AdminPaymentsPage() {
 
     setProcessingId(paymentId);
     try {
-      const res = await fetch("/api/admin/payments", {
+      const res = await adminFetch("/api/admin/payments", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-admin-uid": user.uid,
         },
         body: JSON.stringify({ action: "refund", paymentId }),
       });

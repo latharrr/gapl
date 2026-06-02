@@ -1,27 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, doc, getDoc } from "firebase/firestore";
+import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
+import { requireAdmin } from "@/lib/firebase-admin";
 
 export const runtime = "nodejs";
 
-async function getAdminUser(req: NextRequest) {
-  const adminUid = req.headers.get("x-admin-uid");
-  if (!adminUid) return null;
-  const userRef = doc(db, "users", adminUid);
-  const snap = await getDoc(userRef);
-  if (!snap.exists()) return null;
-  return { uid: snap.id, ...snap.data() } as any;
-}
-
 export async function GET(req: NextRequest) {
   try {
-    const adminUser = await getAdminUser(req);
-    if (!adminUser || !["super_admin", "admin", "support", "readonly"].includes(adminUser.role)) {
-      return NextResponse.json({ error: "Unauthorized access." }, { status: 403 });
-    }
+    const adminOrError = await requireAdmin(req);
+    if (adminOrError instanceof NextResponse) return adminOrError;
 
     const callsRef = collection(db, "ai_calls");
-    const snap = await getDocs(callsRef);
+    const q = query(callsRef, orderBy("timestamp", "desc"), limit(200));
+    const snap = await getDocs(q);
     const calls = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 
     return NextResponse.json({ calls });

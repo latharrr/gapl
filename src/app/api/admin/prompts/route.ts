@@ -2,24 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, doc, getDoc, setDoc, addDoc, query, where, orderBy } from "firebase/firestore";
 import { logAuditAction } from "@/lib/audit-logger";
+import { requireAdmin } from "@/lib/firebase-admin";
 
 export const runtime = "nodejs";
 
-async function getAdminUser(req: NextRequest) {
-  const adminUid = req.headers.get("x-admin-uid");
-  if (!adminUid) return null;
-  const userRef = doc(db, "users", adminUid);
-  const snap = await getDoc(userRef);
-  if (!snap.exists()) return null;
-  return { uid: snap.id, ...snap.data() } as any;
-}
-
 export async function GET(req: NextRequest) {
   try {
-    const adminUser = await getAdminUser(req);
-    if (!adminUser || !["super_admin", "admin", "support", "readonly"].includes(adminUser.role)) {
-      return NextResponse.json({ error: "Unauthorized access." }, { status: 403 });
-    }
+    const adminOrError = await requireAdmin(req);
+    if (adminOrError instanceof NextResponse) return adminOrError;
 
     // Get active prompt templates
     const promptsRef = collection(db, "prompts");
@@ -39,9 +29,11 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const adminUser = await getAdminUser(req);
+    const adminOrError = await requireAdmin(req);
+    if (adminOrError instanceof NextResponse) return adminOrError;
+    const adminUser = adminOrError;
     // Only super_admin, admin can modify prompt configurations
-    if (!adminUser || !["super_admin", "admin"].includes(adminUser.role)) {
+    if (!["super_admin", "admin"].includes(adminUser.role)) {
       return NextResponse.json({ error: "Unauthorized role for prompt modification." }, { status: 403 });
     }
 

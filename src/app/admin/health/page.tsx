@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Card } from "@/components/ui/Card";
+import { adminFetch } from "@/lib/admin-fetch";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import {
@@ -18,13 +19,13 @@ import {
 } from "lucide-react";
 
 const PROVIDERS_LIST = [
-  { key: "groq", name: "Groq API", defaultUptime: 99.8, defaultLatency: 450 },
-  { key: "openai", name: "OpenAI API", defaultUptime: 99.9, defaultLatency: 820 },
-  { key: "anthropic", name: "Anthropic API", defaultUptime: 99.5, defaultLatency: 1250 },
-  { key: "gemini", name: "Gemini API", defaultUptime: 99.1, defaultLatency: 980 },
-  { key: "deepseek", name: "DeepSeek API", defaultUptime: 92.4, defaultLatency: 2200 },
-  { key: "mistral", name: "Mistral API", defaultUptime: 98.7, defaultLatency: 640 },
-  { key: "openrouter", name: "OpenRouter", defaultUptime: 99.2, defaultLatency: 710 },
+  { key: "groq", name: "Groq API" },
+  { key: "openai", name: "OpenAI API" },
+  { key: "anthropic", name: "Anthropic API" },
+  { key: "gemini", name: "Gemini API" },
+  { key: "deepseek", name: "DeepSeek API" },
+  { key: "mistral", name: "Mistral API" },
+  { key: "openrouter", name: "OpenRouter" },
 ];
 
 export default function AdminHealthPage() {
@@ -32,14 +33,11 @@ export default function AdminHealthPage() {
   const [loading, setLoading] = useState(true);
   const [pinging, setPinging] = useState(false);
   const [healthData, setHealthData] = useState<any[]>([]);
-  const [dbSize, setDbSize] = useState(1.4);
 
   const fetchHealth = async () => {
     if (!user) return;
     try {
-      const res = await fetch("/api/admin/stats", {
-        headers: { "x-admin-uid": user.uid },
-      });
+      const res = await adminFetch("/api/admin/stats");
       const data = await res.ok ? await res.json() : null;
       if (data && data.providerHealth) {
         setHealthData(data.providerHealth);
@@ -60,7 +58,6 @@ export default function AdminHealthPage() {
     await fetchHealth();
     setTimeout(() => {
       setPinging(false);
-      setDbSize(1.4 + Math.random() * 0.1);
     }, 1000);
   };
 
@@ -94,12 +91,15 @@ export default function AdminHealthPage() {
           <div className="grid gap-3">
             {PROVIDERS_LIST.map((p) => {
               const live = healthData.find((h) => h.provider?.toLowerCase() === p.key);
-              const uptime = live ? live.uptime : p.defaultUptime;
-              const latency = live && live.requests > 0 ? Math.round(live.totalLatency / live.requests) : p.defaultLatency;
+              const uptime = live ? live.uptime : null;
+              const latency = live && live.requests > 0 ? Math.round(live.totalLatency / live.requests) : null;
 
               let status = "🟢 Healthy";
               let badgeColor = "bg-emerald-950/20 text-emerald-400 border-emerald-900/40";
-              if (uptime < 90) {
+              if (uptime === null) {
+                status = "No data";
+                badgeColor = "bg-[#27272a] text-[#a1a1aa] border-transparent";
+              } else if (uptime < 90) {
                 status = "🔴 Offline";
                 badgeColor = "bg-red-950/20 text-red-400 border-red-900/40";
               } else if (uptime < 98) {
@@ -118,11 +118,11 @@ export default function AdminHealthPage() {
                     </div>
                     <div>
                       <span className="text-xs font-semibold text-white block">{p.name}</span>
-                      <span className="text-[9px] text-[#71717a] font-mono">Response time: {latency}ms</span>
+                      <span className="text-[9px] text-[#71717a] font-mono">Response time: {latency !== null ? `${latency}ms` : "N/A"}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
-                    <span className="text-[10px] font-mono text-[#a1a1aa]">Uptime: {uptime}%</span>
+                    <span className="text-[10px] font-mono text-[#a1a1aa]">Uptime: {uptime !== null ? `${uptime}%` : "N/A"}</span>
                     <Badge className={`${badgeColor} text-[9px] font-semibold flex items-center gap-1`}>
                       {status}
                     </Badge>
@@ -139,23 +139,8 @@ export default function AdminHealthPage() {
             Resource Usage
           </span>
           <Card variant="default" padding="md" className="bg-[#18181b] border-[#27272a] space-y-4">
-            <div className="space-y-3 text-xs">
-              <div className="flex justify-between items-center py-2 border-b border-[#27272a]">
-                <span className="text-[#a1a1aa]">Server Latency (Railway)</span>
-                <span className="font-mono text-white font-bold">42ms</span>
-              </div>
-              <div className="flex justify-between items-center py-2 border-b border-[#27272a]">
-                <span className="text-[#a1a1aa]">Firestore Footprint</span>
-                <span className="font-mono text-white font-bold">{dbSize.toFixed(2)} MB</span>
-              </div>
-              <div className="flex justify-between items-center py-2 border-b border-[#27272a]">
-                <span className="text-[#a1a1aa]">Background Job Queue</span>
-                <span className="font-mono text-white font-bold">0 pending</span>
-              </div>
-              <div className="flex justify-between items-center py-2">
-                <span className="text-[#a1a1aa]">Active Threads / Parser Tasks</span>
-                <span className="font-mono text-white font-bold">1 running</span>
-              </div>
+            <div className="text-center py-12 text-[#71717a] text-xs border border-dashed border-[#27272a] rounded-xl">
+              Resource telemetry not available. Requires infrastructure monitoring integration.
             </div>
           </Card>
         </div>

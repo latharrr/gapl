@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Card } from "@/components/ui/Card";
+import { adminFetch } from "@/lib/admin-fetch";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import {
@@ -41,9 +42,7 @@ export default function AdminDashboardPage() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/admin/stats", {
-        headers: { "x-admin-uid": user.uid },
-      });
+      const res = await adminFetch("/api/admin/stats");
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to load admin stats");
       setStats(data);
@@ -57,7 +56,7 @@ export default function AdminDashboardPage() {
   const handleSeed = async () => {
     setSeeding(true);
     try {
-      const res = await fetch("/api/admin/seed", { method: "POST" });
+      const res = await adminFetch("/api/admin/seed", { method: "POST" });
       if (res.ok) {
         await fetchStats();
       }

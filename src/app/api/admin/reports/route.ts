@@ -1,28 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, doc, getDoc, deleteDoc } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc, deleteDoc, query, orderBy, limit } from "firebase/firestore";
 import { logAuditAction } from "@/lib/audit-logger";
+import { requireAdmin, requireSuperAdmin } from "@/lib/firebase-admin";
 
 export const runtime = "nodejs";
 
-async function getAdminUser(req: NextRequest) {
-  const adminUid = req.headers.get("x-admin-uid");
-  if (!adminUid) return null;
-  const userRef = doc(db, "users", adminUid);
-  const snap = await getDoc(userRef);
-  if (!snap.exists()) return null;
-  return { uid: snap.id, ...snap.data() } as any;
-}
-
 export async function GET(req: NextRequest) {
   try {
-    const adminUser = await getAdminUser(req);
-    if (!adminUser || !["super_admin", "admin", "support", "readonly"].includes(adminUser.role)) {
-      return NextResponse.json({ error: "Unauthorized access." }, { status: 403 });
-    }
+    const adminOrError = await requireAdmin(req);
+    if (adminOrError instanceof NextResponse) return adminOrError;
 
     const reportsRef = collection(db, "reports");
-    const snap = await getDocs(reportsRef);
+    const q = query(reportsRef, orderBy("createdAt", "desc"), limit(200));
+    const snap = await getDocs(q);
     const reports = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 
     return NextResponse.json({ reports });
@@ -33,10 +24,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const adminUser = await getAdminUser(req);
-    if (!adminUser || adminUser.role !== "super_admin") {
-      return NextResponse.json({ error: "Only super_admins can delete reports." }, { status: 403 });
-    }
+    const adminOrError = await requireSuperAdmin(req);
+    if (adminOrError instanceof NextResponse) return adminOrError;
+    const adminUser = adminOrError;
 
     const { action, reportId } = await req.json();
     if (action === "delete" && reportId) {

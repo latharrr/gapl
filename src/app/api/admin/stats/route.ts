@@ -1,24 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, doc, getDoc, getCountFromServer, query, where } from "firebase/firestore";
+import { requireAdmin } from "@/lib/firebase-admin";
 
 export const runtime = "nodejs";
 
-async function getAdminUser(req: NextRequest) {
-  const adminUid = req.headers.get("x-admin-uid");
-  if (!adminUid) return null;
-  const userRef = doc(db, "users", adminUid);
-  const snap = await getDoc(userRef);
-  if (!snap.exists()) return null;
-  return { uid: snap.id, ...snap.data() } as any;
-}
-
 export async function GET(req: NextRequest) {
   try {
-    const adminUser = await getAdminUser(req);
-    if (!adminUser || !["super_admin", "admin", "support", "readonly"].includes(adminUser.role)) {
-      return NextResponse.json({ error: "Unauthorized access." }, { status: 403 });
-    }
+    const adminOrError = await requireAdmin(req);
+    if (adminOrError instanceof NextResponse) return adminOrError;
+
 
     // 1. Server-Side Aggregations (Cheap & Scalable!)
     const totalUsersCountSnap = await getCountFromServer(collection(db, "users"));
@@ -108,7 +99,8 @@ export async function GET(req: NextRequest) {
 
     // Error calculations
     const promptFailureRate = totalRecentAICalls > 0 ? (failedAICalls / totalRecentAICalls) * 100 : 0;
-    const processingFailures = reports.filter((r) => r.recruiterVerdict?.verdict === "Reject").length;
+    // Count actual processing errors (crashed/failed reports), NOT recruiter Reject verdicts
+    const processingFailures = reports.filter((r) => r.status === "error" || r.status === "failed").length;
     const refundRate = totalRevenue > 0 ? (refunds / (totalRevenue + refunds)) * 100 : 0;
     const conversionRate = totalUsers > 0 ? ((planCounts.basic + planCounts.pro + planCounts.premium) / totalUsers) * 100 : 0;
 
@@ -191,9 +183,25 @@ export async function GET(req: NextRequest) {
 
     // Overall AI Cost
     const totalAICost = aiCalls.reduce((acc, c) => acc + (c.cost || 0), 0);
-    // Storage + Infra cost estimate
-    const storageCost = totalUsers * 0.02 + reports.length * 0.05;
-    const infrastructureCost = 45.00; // Mocked Monthly VPS/Railway/Database constant
+
+    // Load configurable cost assumptions from Firestore settings (not hardcoded)
+    let infrastructureCost = 0;
+    let pdfCostPerReport = 0;
+    let storageCostPerReport = 0;
+    let hostingCostPerReport = 0;
+    try {
+      const costsRef = doc(db, "settings", "costs");
+      const costsSnap = await getDoc(costsRef);
+      if (costsSnap.exists()) {
+        const costsData = costsSnap.data();
+        infrastructureCost = costsData.infrastructureCost || 0;
+        pdfCostPerReport = costsData.pdfCostPerReport || 0;
+        storageCostPerReport = costsData.storageCostPerReport || 0;
+        hostingCostPerReport = costsData.hostingCostPerReport || 0;
+      }
+    } catch (_) { /* costs settings doc not found — use zero defaults */ }
+
+    const storageCost = totalReports * storageCostPerReport;
     const netProfit = totalRevenue - totalAICost - storageCost - infrastructureCost;
     const netMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
 
@@ -213,10 +221,10 @@ export async function GET(req: NextRequest) {
         unitEconomics: {
           revenuePerReport: parseFloat((totalRevenue / Math.max(1, totalReports)).toFixed(2)),
           aiCostPerReport: parseFloat((totalAICost / Math.max(1, totalReports)).toFixed(3)),
-          pdfCostPerReport: 0.15,
-          storageCostPerReport: 0.05,
-          hostingCostPerReport: 0.10,
-          profitPerReport: parseFloat(((totalRevenue / Math.max(1, totalReports)) - (totalAICost / Math.max(1, totalReports)) - 0.30).toFixed(2)),
+          pdfCostPerReport,
+          storageCostPerReport,
+          hostingCostPerReport,
+          profitPerReport: parseFloat(((totalRevenue / Math.max(1, totalReports)) - (totalAICost / Math.max(1, totalReports)) - pdfCostPerReport - storageCostPerReport - hostingCostPerReport).toFixed(2)),
         }
       }
     };
@@ -243,7 +251,12 @@ export async function GET(req: NextRequest) {
         mrr,
         reportsCount: reports.length,
         aiCostToday: parseFloat(totalAICostToday.toFixed(4)),
-        profitToday: parseFloat((newUsersToday * 49 - totalAICostToday).toFixed(2)),
+        // profitToday: actual revenue captured today minus AI costs today (not fabricated)
+        profitToday: parseFloat((payments.filter((p) => {
+          if (p.status !== "captured" || p.refunded) return false;
+          const d = p.createdAt?.toDate ? p.createdAt.toDate() : new Date(p.createdAt || 0);
+          return d.toDateString() === new Date().toDateString();
+        }).reduce((acc: number, p: any) => acc + (p.amount || 0), 0) - totalAICostToday).toFixed(2)),
         conversionRate: parseFloat(conversionRate.toFixed(1)),
         refundRate: parseFloat(refundRate.toFixed(1)),
         processingFailures,

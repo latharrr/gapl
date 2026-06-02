@@ -3,10 +3,9 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Card } from "@/components/ui/Card";
+import { adminFetch } from "@/lib/admin-fetch";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { db } from "@/lib/firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
 import {
   Settings,
   Shield,
@@ -39,10 +38,11 @@ export default function AdminSettingsPage() {
   useEffect(() => {
     const loadSettings = async () => {
       try {
-        const routeRef = doc(db, "settings", "routing");
-        const snap = await getDoc(routeRef);
-        if (snap.exists()) {
-          const data = snap.data();
+        const res = await adminFetch("/api/admin/settings");
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error);
+        const data = json.settings;
+        if (data) {
           setShortlistCutoff(data.shortlistCutoff || 80);
           setMaintenance(data.maintenance || false);
           setRegistrations(data.registrations !== false);
@@ -67,21 +67,29 @@ export default function AdminSettingsPage() {
     setSaving(true);
     setSuccess("");
     try {
-      const routeRef = doc(db, "settings", "routing");
-      await setDoc(routeRef, {
-        shortlistCutoff,
-        maintenance,
-        registrations,
-        "resume-parsing": { model: modelParsing, provider: modelParsing.includes("claude") ? "Anthropic" : "Groq" },
-        "jd-analysis": { model: modelJd, provider: modelJd.includes("claude") ? "Anthropic" : "Groq" },
-        "resume-optimization": { model: modelOptimization, provider: modelOptimization.includes("claude") ? "Anthropic" : "Groq" },
-        "ats-evaluation": { model: modelAts, provider: modelAts.includes("claude") ? "Anthropic" : "Groq" },
-        "recruiter-simulation": { model: modelRecruiter, provider: modelRecruiter.includes("claude") ? "Anthropic" : "Groq" },
-        "career-gap": { model: modelGap, provider: modelGap.includes("claude") ? "Anthropic" : "Groq" },
+      const res = await adminFetch("/api/admin/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          shortlistCutoff,
+          maintenance,
+          registrations,
+          modelRouting: {
+            "resume-parsing": { model: modelParsing },
+            "jd-analysis": { model: modelJd },
+            "resume-optimization": { model: modelOptimization },
+            "ats-evaluation": { model: modelAts },
+            "recruiter-simulation": { model: modelRecruiter },
+            "career-gap": { model: modelGap },
+          },
+        }),
       });
-      setSuccess("Dynamic model routing and platform flags saved successfully!");
-    } catch (err) {
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error);
+      setSuccess(json.message || "Settings saved successfully!");
+    } catch (err: any) {
       console.error(err);
+      setSuccess(`Error: ${err.message || "Failed to save settings"}`);
     } finally {
       setSaving(false);
     }

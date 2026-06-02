@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, doc, setDoc, addDoc, getDoc } from "firebase/firestore";
+import { requireSuperAdmin } from "@/lib/firebase-admin";
 
 export const runtime = "nodejs";
 
@@ -57,16 +58,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Seed endpoint is disabled in production." }, { status: 403 });
     }
 
-    // SECURITY: Require super_admin authentication
-    const adminUid = req.headers.get("x-admin-uid");
-    if (!adminUid) {
-      return NextResponse.json({ error: "Unauthorized." }, { status: 403 });
-    }
-    const adminRef = doc(db, "users", adminUid);
-    const adminSnap = await getDoc(adminRef);
-    if (!adminSnap.exists() || adminSnap.data().role !== "super_admin") {
-      return NextResponse.json({ error: "Only super_admin can seed data." }, { status: 403 });
-    }
+    // SECURITY: Require super_admin authentication via Firebase Admin SDK
+    const adminOrError = await requireSuperAdmin(req);
+    if (adminOrError instanceof NextResponse) return adminOrError;
 
 
     // 1. Seed Users
