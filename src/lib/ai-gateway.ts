@@ -21,6 +21,45 @@ export interface GatewayOptions {
 }
 
 // Direct fetch callers to avoid heavy SDK dependencies in edge runtimes
+async function callFreeModel(model: string, prompt: string, temperature: number) {
+  const apiKey = process.env.FREEMODEL_API_KEY;
+  if (!apiKey) throw new Error("FREEMODEL_API_KEY is not configured.");
+
+  // Map user-friendly model strings to FreeModel's specific provider strings if needed
+  let targetModel = model;
+  if (model === "gpt-4o-mini") targetModel = "gpt-4o-mini";
+  else if (model === "gpt-4o") targetModel = "gpt-4o";
+  else if (model === "claude-3-5-sonnet") targetModel = "claude-3-5-sonnet";
+  else if (model === "gemini-1.5-flash") targetModel = "gemini-1.5-flash";
+
+  const res = await fetch("https://api.freemodel.dev/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: targetModel,
+      messages: [{ role: "user", content: prompt }],
+      temperature,
+    }),
+  });
+
+  if (!res.ok) {
+    const errorJson = await res.json().catch(() => ({}));
+    throw new Error(`FreeModel Error: ${errorJson?.error?.message || res.statusText}`);
+  }
+
+  const data = await res.json();
+  return {
+    content: data.choices[0]?.message?.content || "",
+    usage: {
+      prompt_tokens: data.usage?.prompt_tokens || 0,
+      completion_tokens: data.usage?.completion_tokens || 0,
+    }
+  };
+}
+
 async function callOpenAI(model: string, prompt: string, temperature: number) {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) throw new Error("OPENAI_API_KEY is not configured.");
@@ -164,7 +203,7 @@ export async function generateAICall(
 
     if (attempt === 2) {
       // Fallback 1: OpenAI
-      if (process.env.OPENAI_API_KEY) {
+      if (process.env.OPENAI_API_KEY || process.env.FREEMODEL_API_KEY) {
         currentProvider = "OpenAI";
         currentModel = "gpt-4o-mini";
       } else {
@@ -173,7 +212,7 @@ export async function generateAICall(
       }
     } else if (attempt === 3) {
       // Fallback 2: Anthropic or Gemini
-      if (process.env.ANTHROPIC_API_KEY) {
+      if (process.env.ANTHROPIC_API_KEY || process.env.FREEMODEL_API_KEY) {
         currentProvider = "Anthropic";
         currentModel = "claude-3-5-sonnet";
       } else if (process.env.GEMINI_API_KEY) {
@@ -190,7 +229,11 @@ export async function generateAICall(
       let usage = { prompt_tokens: 0, completion_tokens: 0 };
 
       // Route execution natively based on chosen provider
-      if (currentProvider === "OpenAI" && process.env.OPENAI_API_KEY) {
+      if (process.env.FREEMODEL_API_KEY) {
+        const result = await callFreeModel(currentModel, prompt, temperature);
+        content = result.content;
+        usage = result.usage;
+      } else if (currentProvider === "OpenAI" && process.env.OPENAI_API_KEY) {
         const result = await callOpenAI(currentModel, prompt, temperature);
         content = result.content;
         usage = result.usage;
