@@ -13,12 +13,12 @@ const nextConfig: NextConfig = {
     const isDev = process.env.NODE_ENV === "development";
     const csp = [
       "default-src 'self'",
-      `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://checkout.razorpay.com`,
+      `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://checkout.razorpay.com https://apis.google.com https://www.gstatic.com`,
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' blob: data: https://lh3.googleusercontent.com https://firebasestorage.googleapis.com https://*.razorpay.com",
       "font-src 'self'",
-      "connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.razorpay.com",
-      "frame-src https://*.razorpay.com https://accounts.google.com",
+      "connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.razorpay.com https://*.firebaseapp.com",
+      "frame-src 'self' https://*.razorpay.com https://accounts.google.com https://*.firebaseapp.com",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",

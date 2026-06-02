@@ -29,7 +29,11 @@ export async function POST(req: NextRequest) {
       timestamp: new Date().toISOString(),
     };
 
-    await getAdminDb().collection("analytics_events").add(eventDoc);
+    try {
+      await getAdminDb().collection("analytics_events").add(eventDoc);
+    } catch (dbErr: any) {
+      console.warn("Firestore Admin: Failed to log event to database. Is FIREBASE_SERVICE_ACCOUNT_KEY configured? Error:", dbErr.message || dbErr);
+    }
 
     return NextResponse.json({ success: true });
   } catch (err: any) {
