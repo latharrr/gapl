@@ -95,6 +95,9 @@ export default function BillingPage() {
 
             if (verifyRes.ok && verifyData.success) {
               setSuccessPlan(planName);
+              setTimeout(() => {
+                window.location.reload();
+              }, 1500);
             } else {
               setError(verifyData.error || "Payment verification failed.");
             }
