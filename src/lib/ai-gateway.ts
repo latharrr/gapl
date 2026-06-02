@@ -11,6 +11,7 @@ const TOKEN_PRICING: Record<string, { input: number; output: number }> = {
   "gemini-1.5-flash": { input: 0.075 / 1000000, output: 0.30 / 1000000 },
   "gemini-1.5-pro": { input: 1.25 / 1000000, output: 5.00 / 1000000 },
   "deepseek-r1": { input: 0.55 / 1000000, output: 2.19 / 1000000 },
+  "gpt-5.4": { input: 6.00 / 1000000, output: 6.00 / 1000000 },
 };
 
 export interface GatewayOptions {
@@ -25,15 +26,8 @@ async function callFreeModel(model: string, prompt: string, temperature: number)
   const apiKey = process.env.FREEMODEL_API_KEY;
   if (!apiKey) throw new Error("FREEMODEL_API_KEY is not configured.");
 
-  // Map requested model names to FreeModel's supported strings (FRE-5.5 for flagship / FRE-5.4 for standard/faster model)
-  let targetModel = "FRE-5.5";
-  if (model === "gpt-4o-mini" || model === "gemini-1.5-flash" || model === "openai/gpt-oss-120b") {
-    targetModel = "FRE-5.4";
-  } else if (model === "claude-3-5-sonnet" || model === "gpt-4o" || model === "gemini-1.5-pro") {
-    targetModel = "FRE-5.5";
-  } else if (model === "FRE-5.4" || model === "FRE-5.5") {
-    targetModel = model;
-  }
+  // Map to FreeModel's specific model string (gpt-5.4)
+  const targetModel = "gpt-5.4";
 
   const res = await fetch("https://api.freemodel.dev/v1/chat/completions", {
     method: "POST",
@@ -233,6 +227,7 @@ export async function generateAICall(
 
       // Route execution natively based on chosen provider
       if (process.env.FREEMODEL_API_KEY) {
+        currentModel = "gpt-5.4";
         const result = await callFreeModel(currentModel, prompt, temperature);
         content = result.content;
         usage = result.usage;
