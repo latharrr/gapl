@@ -77,7 +77,7 @@ export default function AdminEmailsPage() {
     );
   }
 
-  const { overview, funnel, campaigns, messages } = data;
+  const { overview = {}, funnel = [], campaigns = [], messages = [] } = data || {};
 
   const cardStats = [
     { label: "Emails Sent", value: overview.sent, sub: "Total dispatches", icon: Send, color: "text-blue-400" },

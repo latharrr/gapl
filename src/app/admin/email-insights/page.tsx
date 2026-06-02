@@ -73,7 +73,7 @@ export default function AdminEmailInsightsPage() {
     );
   }
 
-  const { qAndA, highlyEngaged, likelyToChurn, aiSummary } = data;
+  const { qAndA = {}, highlyEngaged = [], likelyToChurn = [], aiSummary = "" } = data || {};
 
   return (
     <div className="space-y-8">

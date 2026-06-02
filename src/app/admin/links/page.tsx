@@ -122,7 +122,7 @@ export default function AdminLinksPage() {
     );
   }
 
-  const { links, metrics, campaigns } = data;
+  const { links = [], metrics = {}, campaigns = [] } = data || {};
 
   return (
     <div className="space-y-8">
@@ -308,7 +308,11 @@ export default function AdminLinksPage() {
                       <td className="px-6 py-4 text-center font-bold text-white">{link.clickCount}</td>
                       <td className="px-6 py-4 text-center font-bold text-emerald-400">{link.uniqueClicks}</td>
                       <td className="px-6 py-4 text-right text-[#71717a]">
-                        {new Date(link.createdAt).toLocaleDateString()}
+                        {link.createdAt
+                          ? typeof link.createdAt.toDate === "function"
+                            ? link.createdAt.toDate().toLocaleDateString()
+                            : new Date(link.createdAt).toLocaleDateString()
+                          : "N/A"}
                       </td>
                     </tr>
                   );

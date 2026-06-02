@@ -71,7 +71,7 @@ export default function AdminEmailHealthPage() {
     );
   }
 
-  const { overview, messages } = data;
+  const { overview = {}, messages = [] } = data || {};
 
   // Filter issues (failed, bounced, complained)
   const healthIssues = messages.filter((m: any) =>

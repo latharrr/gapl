@@ -67,7 +67,13 @@ export async function GET(req: NextRequest) {
     // --- ALERT 3: Payment Conversion Drops 50% ---
     // Period A: Last 48h
     const reportsA = reports.filter((r) => {
-      const d = r.createdAtIso ? new Date(r.createdAtIso) : r.createdAt ? r.createdAt.toDate() : null;
+      const d = r.createdAtIso
+        ? new Date(r.createdAtIso)
+        : r.createdAt
+        ? typeof r.createdAt.toDate === "function"
+          ? r.createdAt.toDate()
+          : new Date(r.createdAt)
+        : null;
       return d && d >= twoDaysAgo;
     }).length;
     const paymentsA = payments.filter((p) => {
@@ -78,7 +84,13 @@ export async function GET(req: NextRequest) {
 
     // Period B: Prior 7 days (9 days ago to 2 days ago)
     const reportsB = reports.filter((r) => {
-      const d = r.createdAtIso ? new Date(r.createdAtIso) : r.createdAt ? r.createdAt.toDate() : null;
+      const d = r.createdAtIso
+        ? new Date(r.createdAtIso)
+        : r.createdAt
+        ? typeof r.createdAt.toDate === "function"
+          ? r.createdAt.toDate()
+          : new Date(r.createdAt)
+        : null;
       return d && d >= nineDaysAgo && d < twoDaysAgo;
     }).length;
     const paymentsB = payments.filter((p) => {

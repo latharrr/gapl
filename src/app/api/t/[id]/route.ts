@@ -123,7 +123,12 @@ export async function GET(
     }).catch(console.error);
 
     // 4. Set Cookie and Redirect
-    const redirectResponse = NextResponse.redirect(new URL(targetUrl, req.url));
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.in";
+    const absoluteTargetUrl = targetUrl.startsWith("http")
+      ? targetUrl
+      : `${appUrl}${targetUrl.startsWith("/") ? "" : "/"}${targetUrl}`;
+
+    const redirectResponse = NextResponse.redirect(new URL(absoluteTargetUrl));
     if (isUnique) {
       redirectResponse.cookies.set(cookieKey, "1", {
         maxAge: 60 * 60 * 24 * 365, // 1 year
@@ -136,6 +141,7 @@ export async function GET(
     return redirectResponse;
   } catch (err) {
     console.error("Redirect redirect tracker failed:", err);
-    return NextResponse.redirect(new URL("/", req.url));
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.in";
+    return NextResponse.redirect(new URL(appUrl));
   }
 }

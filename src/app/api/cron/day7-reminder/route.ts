@@ -25,7 +25,13 @@ export async function GET(req: NextRequest) {
     })) as any[];
 
     const candidateReports = reports.filter((r) => {
-      const created = r.createdAtIso ? new Date(r.createdAtIso) : r.createdAt ? r.createdAt.toDate() : null;
+      const created = r.createdAtIso
+        ? new Date(r.createdAtIso)
+        : r.createdAt
+        ? typeof r.createdAt.toDate === "function"
+          ? r.createdAt.toDate()
+          : new Date(r.createdAt)
+        : null;
       return created && created >= eightDaysAgo && created <= sevenDaysAgo;
     });
 
