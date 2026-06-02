@@ -10,7 +10,7 @@ Gapl is a production-grade candidate application readiness platform and founder 
 graph TD
   User[User / Candidate] -->|Creates Account / Pays / Scans Resume| App[Gapl React Web Application]
   App -->|Authenticates| Firebase_Auth[Firebase Authentication]
-  App -->|Triggers Resume Analysis| API_Analyze[/api/analyze]
+  App -->|Triggers Resume Analysis| API_Analyze["/api/analyze"]
   
   API_Analyze -->|Query Routing & Prompts| Firestore[(Firestore DB: settings/routing)]
   API_Analyze -->|Central AI Dispatcher| AI_Gateway[AI Gateway Fallback System]
@@ -22,20 +22,20 @@ graph TD
   API_Analyze -->|Trigger Notification| Email_Service[Email Service Abstraction]
   
   Email_Service -->|Rewrite Links to Shortlinks| Link_Tracker[Shortlink Redirect Generator]
-  Link_Tracker -->|Point to Subdomain| Links_Domain[links.deepanshulathar.dev]
+  Link_Tracker -->|Point to Subdomain| Links_Domain["links.deepanshulathar.dev"]
   Link_Tracker -->|Register Redirect Mapping| Trackable_Links[(Firestore DB: trackable_links)]
   
   Email_Service -->|Dispatch Transactional/Retention Mail| Resend_API[Resend SMTP/API]
   Resend_API -->|Sends Email| User
   
   User -->|Clicks Shortlink| Links_Domain
-  Links_Domain -->|Next.js Edge Middleware| Middleware_Rewrite{src/middleware.ts}
-  Middleware_Rewrite -->|Internal Redirect| Redirect_API[/api/t/id]
+  Links_Domain -->|Next.js Edge Middleware| Middleware_Rewrite{"src/middleware.ts"}
+  Middleware_Rewrite -->|Internal Redirect| Redirect_API["/api/t/id"]
   Redirect_API -->|Increment Click Counts & Log Telemetry| Trackable_Links
   Redirect_API -->|Set Browser Context Tracking Cookie| User
   Redirect_API -->|Redirect Browser to Target Path| App
   
-  Resend_API -->|Webhooks Status: Sent, Opened, Clicked| Webhook_API[/api/webhooks/resend]
+  Resend_API -->|Webhooks Status: Sent, Opened, Clicked| Webhook_API["/api/webhooks/resend"]
   Webhook_API -->|Verify Signature & Check Idempotency| Webhook_Events[(Firestore DB: webhook_events)]
   Webhook_API -->|Log Message Status Update| Email_Messages[(Firestore DB: email_messages)]
   Webhook_API -->|Log Telemetry Event| Email_Events[(Firestore DB: email_events)]
@@ -45,9 +45,9 @@ graph TD
   Conversion_Engine -->|Stamp Marketing Campaign Attribution| Reports_Db
   Conversion_Engine -->|Increment Customer Lifetime Value| Users_Db[(Firestore DB: users)]
   
-  Founder[Founder / Admin] -->|Explore Dashboards / Manage Prompts / Send Mail| Admin_Panel[/admin/*]
-  Admin_Panel -->|Send Custom Email| Admin_Send_API[/api/admin/emails/send]
-  Admin_Send_API -->|AI Rewrite Content| Admin_Rewrite_API[/api/admin/emails/rewrite]
+  Founder[Founder / Admin] -->|Explore Dashboards / Manage Prompts / Send Mail| Admin_Panel["/admin/*"]
+  Admin_Panel -->|Send Custom Email| Admin_Send_API["/api/admin/emails/send"]
+  Admin_Send_API -->|AI Rewrite Content| Admin_Rewrite_API["/api/admin/emails/rewrite"]
   Admin_Rewrite_API -->|AI Gateway| AI_Gateway
 ```
 
