@@ -67,6 +67,7 @@ export default function AnalyzePage() {
   const [loadingStep, setLoadingStep] = useState(0);
   const [loadingError, setLoadingError] = useState("");
   const [showPaywall, setShowPaywall] = useState(false);
+  const [validating, setValidating] = useState(false);
   const router = useRouter();
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -129,19 +130,47 @@ export default function AnalyzePage() {
 
   const hasResume = resumeFile !== null || resumeText.trim().length > 50;
 
-  const handleContinueToJD = () => {
-    // Client-side CV check for pasted text
-    if (!resumeFile && resumeText.trim()) {
-      if (!looksLikeResume(resumeText)) {
-        setPasteError(
-          "This doesn't look like a resume. Make sure your text includes sections like Education, Skills, Experience, or Projects."
-        );
+  const handleContinueToJD = async () => {
+    setFileError("");
+    setPasteError("");
+
+    if (!resumeFile && !resumeText.trim()) {
+      setFileError("Please upload your resume or paste the text.");
+      return;
+    }
+
+    setValidating(true);
+    try {
+      const formData = new FormData();
+      if (resumeFile) {
+        formData.append("resume", resumeFile);
+      } else {
+        formData.append("resumeText", resumeText.trim());
+      }
+
+      const res = await authFetch("/api/analyze/validate", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        if (resumeFile) {
+          setFileError(data.error || "Invalid resume content.");
+        } else {
+          setPasteError(data.error || "Invalid resume content.");
+        }
         return;
       }
-      import("@/lib/analytics").then(({ trackEvent }) => trackEvent("resume_uploaded"));
+
+      setStage("jd");
+    } catch (err) {
+      console.error("Resume validation failed:", err);
+      // Fallback: if network fails or API fails, let them proceed
+      setStage("jd");
+    } finally {
+      setValidating(false);
     }
-    setPasteError("");
-    setStage("jd");
   };
 
   const runAnalysis = async () => {
@@ -563,7 +592,7 @@ export default function AnalyzePage() {
 
                 <div className="flex gap-2 mt-2">
                   <Button variant="outline" size="lg" onClick={() => setStage("tier")} className="flex-1">Back</Button>
-                  <Button size="lg" onClick={handleContinueToJD} className="flex-1" disabled={!hasResume}>
+                  <Button size="lg" onClick={handleContinueToJD} className="flex-1" disabled={!hasResume || validating} loading={validating}>
                     Continue <ChevronRight size={16} />
                   </Button>
                 </div>

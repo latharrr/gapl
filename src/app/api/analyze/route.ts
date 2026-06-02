@@ -7,6 +7,7 @@ import { getAdminDb, requireUser } from "@/lib/firebase-admin";
 import { buildAnalysisPrompt } from "@/lib/prompt";
 import { takeRateLimit } from "@/lib/rate-limit";
 import { type AnalysisResult } from "@/types/analysis";
+import { extractText, validateResumeContent } from "@/lib/resume-parser";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -21,37 +22,6 @@ const ALLOWED_TIERS = new Set(["Mass Recruiter", "Product Startup", "Top Product
 function extension(fileName: string) {
   const index = fileName.lastIndexOf(".");
   return index >= 0 ? fileName.slice(index).toLowerCase() : "";
-}
-
-function validateResumeContent(text: string): { isResume: boolean; reason: string } {
-  const lower = text.toLowerCase();
-  if (text.trim().length < 100) return { isResume: false, reason: "Content is too short to be a resume." };
-
-  const signals = [
-    "experience", "education", "skills", "projects", "internship", "summary",
-    "achievements", "certifications", "curriculum vitae", "resume", "cgpa",
-    "gpa", "b.tech", "b.e.", "b.sc", "bachelor", "master", "degree",
-    "university", "college", "linkedin", "github",
-  ];
-  const negatives = [
-    "chapter ", "table of contents", "doi:", "restaurant", "menu item",
-    "invoice", "receipt", "total amount due", "purchase order", "bibliography",
-  ];
-
-  if (negatives.filter((signal) => lower.includes(signal)).length >= 2) {
-    return { isResume: false, reason: "This looks like a different kind of document. Please upload your resume or paste its text." };
-  }
-  if (signals.filter((signal) => lower.includes(signal)).length < 3) {
-    return { isResume: false, reason: "This does not look like a resume. Include sections such as education, skills, projects, or experience." };
-  }
-  return { isResume: true, reason: "" };
-}
-
-async function extractText(file: File): Promise<string> {
-  if (file.type === "text/plain" || extension(file.name) === ".txt") return file.text();
-  const { extractText } = await import("unpdf");
-  const { text } = await extractText(new Uint8Array(await file.arrayBuffer()), { mergePages: true });
-  return Array.isArray(text) ? text.join("\n") : text;
 }
 
 export async function POST(req: NextRequest) {
