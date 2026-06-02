@@ -1,26 +1,168 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@theme {
+  /* Colors */
+  --color-ink: #111111;
+  --color-ink-secondary: #3f3f46;
+  --color-ink-muted: #71717a;
+  --color-ink-faint: #a1a1aa;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-surface-DEFAULT: #ffffff;
+  --color-surface-muted: #fafafa;
+  --color-surface-subtle: #f4f4f5;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  --color-border-DEFAULT: #e4e4e7;
+  --color-border-strong: #d4d4d8;
+
+  --color-primary-DEFAULT: #4f46e5;
+  --color-primary-foreground: #ffffff;
+  --color-primary-50: #eef2ff;
+  --color-primary-100: #e0e7ff;
+  --color-primary-400: #818cf8;
+  --color-primary-600: #4f46e5;
+  --color-primary-700: #4338ca;
+
+  --color-success: #16a34a;
+  --color-success-bg: #f0fdf4;
+  --color-success-border: #bbf7d0;
+
+  --color-warning: #f59e0b;
+  --color-warning-bg: #fffbeb;
+  --color-warning-border: #fde68a;
+
+  --color-danger: #dc2626;
+  --color-danger-bg: #fef2f2;
+  --color-danger-border: #fecaca;
+
+  /* Font */
+  --font-sans: "Inter", system-ui, sans-serif;
+
+  /* Font sizes */
+  --font-size-2xs: 0.625rem;
+  --line-height-2xs: 0.875rem;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.04);
+  --shadow-DEFAULT: 0 2px 8px 0 rgb(0 0 0 / 0.06), 0 1px 3px -1px rgb(0 0 0 / 0.04);
+  --shadow-md: 0 4px 12px 0 rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --shadow-lg: 0 8px 24px 0 rgb(0 0 0 / 0.08), 0 4px 8px -4px rgb(0 0 0 / 0.05);
+  --shadow-xl: 0 16px 40px 0 rgb(0 0 0 / 0.1), 0 8px 16px -8px rgb(0 0 0 / 0.06);
+  --shadow-card: 0 0 0 1px rgb(0 0 0 / 0.06), 0 1px 3px rgb(0 0 0 / 0.05);
+
+  /* Border radius */
+  --radius-4xl: 2rem;
+
+  /* Animations */
+  --animate-fade-in: fade-in 0.4s ease-out;
+  --animate-slide-in-right: slide-in-right 0.3s ease-out;
+  --animate-scale-in: scale-in 0.2s ease-out;
+  --animate-shimmer: shimmer 1.5s infinite;
+  --animate-pulse-slow: pulse-slow 2s ease-in-out infinite;
+  --animate-spin-slow: spin-slow 3s linear infinite;
+
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slide-in-right {
+    from { opacity: 0; transform: translateX(-16px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes scale-in {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes shimmer {
+    from { background-position: -200% 0; }
+    to { background-position: 200% 0; }
+  }
+
+  @keyframes pulse-slow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  @keyframes spin-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: #fafafa;
+    color: #111111;
+    font-family: "Inter", system-ui, sans-serif;
+    line-height: 1.6;
+  }
+
+  ::selection {
+    background: rgba(79, 70, 229, 0.15);
+    color: #4f46e5;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #d4d4d8;
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #a1a1aa;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .text-2xs {
+    font-size: 0.625rem;
+    line-height: 0.875rem;
+  }
+
+  .shadow-card {
+    box-shadow: 0 0 0 1px rgb(0 0 0 / 0.06), 0 1px 3px rgb(0 0 0 / 0.05);
+  }
+
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      #f4f4f5 0%,
+      #e4e4e7 50%,
+      #f4f4f5 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  .glass {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+  }
 }
