@@ -113,21 +113,18 @@ export async function POST(req: NextRequest) {
         const userSnap = await getDoc(userRef);
         if (userSnap.exists()) {
           const userData = userSnap.data();
-          if (userData.plan !== "pro") {
+          if (userData.plan !== "pro" && userData.plan !== "basic" && userData.plan !== "premium") {
             const now = new Date();
-            const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
             const reportsRef = collection(db, "reports");
-            const q = query(reportsRef, where("userId", "==", userId));
+            const q = query(
+              reportsRef,
+              where("userId", "==", userId),
+              where("createdAt", ">=", monthStart)
+            );
             const snap = await getDocs(q);
-            const currentMonthReports = snap.docs.filter((d) => {
-              const data = d.data();
-              if (!data.createdAt) return false;
-              const created = data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
-              const mStr = `${created.getFullYear()}-${String(created.getMonth() + 1).padStart(2, "0")}`;
-              return mStr === currentMonthStr;
-            });
 
-            if (currentMonthReports.length >= 3) {
+            if (snap.size >= 3) {
               return NextResponse.json(
                 { error: "Monthly free analysis limit reached. Upgrade to Pro for unlimited reports.", code: "LIMIT_REACHED" },
                 { status: 403 }

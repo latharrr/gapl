@@ -112,51 +112,44 @@ export async function GET(req: NextRequest) {
     const refundRate = totalRevenue > 0 ? (refunds / (totalRevenue + refunds)) * 100 : 0;
     const conversionRate = totalUsers > 0 ? ((planCounts.basic + planCounts.pro + planCounts.premium) / totalUsers) * 100 : 0;
 
-    // 3. User Growth Timeline (daily/monthly helper)
-    const usersGrowth = [
-      { date: "May 25", users: 12 },
-      { date: "May 26", users: 18 },
-      { date: "May 27", users: 29 },
-      { date: "May 28", users: 45 },
-      { date: "May 29", users: 58 },
-      { date: "May 30", users: 74 },
-      { date: "May 31", users: 95 },
-      { date: "Jun 01", users: 112 },
-      { date: "Jun 02", users: totalUsers },
-    ];
+    // 3. Build real daily growth charts from the last-30-day query results
+    const dailyUsers: Record<string, number> = {};
+    const dailyRevenue: Record<string, number> = {};
+    const dailyAICost: Record<string, number> = {};
 
-    // Revenue Growth
-    const revenueGrowth = [
-      { date: "May 25", revenue: 149 },
-      { date: "May 26", revenue: 298 },
-      { date: "May 27", revenue: 496 },
-      { date: "May 28", revenue: 745 },
-      { date: "May 29", revenue: 994 },
-      { date: "May 30", revenue: 1292 },
-      { date: "May 31", revenue: 1640 },
-      { date: "Jun 01", revenue: 1939 },
-      { date: "Jun 02", revenue: totalRevenue },
-    ];
+    users.forEach((u) => {
+      if (!u.createdAt) return;
+      const d = u.createdAt.toDate ? u.createdAt.toDate() : new Date(u.createdAt);
+      const key = d.toLocaleDateString("en-US", { month: "short", day: "2-digit" });
+      dailyUsers[key] = (dailyUsers[key] || 0) + 1;
+    });
 
-    // AI Cost Trend
-    const aiCostTrend = [
-      { date: "May 25", cost: 0.12 },
-      { date: "May 26", cost: 0.28 },
-      { date: "May 27", cost: 0.45 },
-      { date: "May 28", cost: 0.62 },
-      { date: "May 29", cost: 0.81 },
-      { date: "May 30", cost: 1.05 },
-      { date: "May 31", cost: 1.34 },
-      { date: "Jun 01", cost: 1.58 },
-      { date: "Jun 02", cost: parseFloat(totalAICostToday.toFixed(3)) },
-    ];
+    payments.forEach((p) => {
+      if (!p.createdAt && !p.timestamp) return;
+      const raw = p.createdAt || p.timestamp;
+      const d = raw?.toDate ? raw.toDate() : new Date(raw);
+      const key = d.toLocaleDateString("en-US", { month: "short", day: "2-digit" });
+      if (p.status === "captured") {
+        dailyRevenue[key] = (dailyRevenue[key] || 0) + (p.amount || 0);
+      }
+    });
 
-    // Funnel Conversions
+    aiCalls.forEach((c) => {
+      const d = new Date(c.timestamp);
+      const key = d.toLocaleDateString("en-US", { month: "short", day: "2-digit" });
+      dailyAICost[key] = (dailyAICost[key] || 0) + (c.cost || 0);
+    });
+
+    const usersGrowth = Object.entries(dailyUsers).map(([date, count]) => ({ date, users: count }));
+    const revenueGrowth = Object.entries(dailyRevenue).map(([date, rev]) => ({ date, revenue: rev }));
+    const aiCostTrend = Object.entries(dailyAICost).map(([date, cost]) => ({ date, cost: parseFloat(cost.toFixed(3)) }));
+
+    // Funnel Conversions (real data)
+    const paidUsers = planCounts.basic + planCounts.pro + planCounts.premium;
     const conversionFunnel = [
-      { name: "Traffic / Landing", value: 100 },
-      { name: "Resume Uploaded", value: 68 },
-      { name: "Free Report Generated", value: 42 },
-      { name: "Purchased Plan", value: parseFloat(conversionRate.toFixed(1)) },
+      { name: "Total Users", value: totalUsers },
+      { name: "Generated Report", value: totalReports },
+      { name: "Purchased Plan", value: paidUsers },
     ];
 
     // --- ADVANCED COST ENGINE & PROFITABILITY ---
@@ -228,14 +221,18 @@ export async function GET(req: NextRequest) {
       }
     };
 
-    // Most common skill gaps
-    const commonSkillGaps = [
-      { skill: "Docker & Containerization", count: 18 },
-      { skill: "System Design & Scaling", count: 15 },
-      { skill: "Redis Caching", count: 12 },
-      { skill: "CI/CD & Github Actions", count: 10 },
-      { skill: "SQL Indexing & Joins", count: 9 },
-    ];
+    // Skill gaps aggregated from real reports (last 30 days)
+    const skillGapMap: Record<string, number> = {};
+    reports.forEach((r) => {
+      const gaps = r.missingSkills || r.careerGaps?.map((g: any) => g.skill) || [];
+      gaps.forEach((s: string) => {
+        skillGapMap[s] = (skillGapMap[s] || 0) + 1;
+      });
+    });
+    const commonSkillGaps = Object.entries(skillGapMap)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([skill, count]) => ({ skill, count }));
 
     return NextResponse.json({
       metrics: {

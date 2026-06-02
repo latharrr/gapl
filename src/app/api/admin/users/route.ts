@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc, updateDoc, deleteDoc, query, orderBy, limit, startAfter } from "firebase/firestore";
 import { logAuditAction } from "@/lib/audit-logger";
 
 export const runtime = "nodejs";
@@ -22,11 +22,24 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized access." }, { status: 403 });
     }
 
+    const PAGE_SIZE = 100;
     const usersRef = collection(db, "users");
-    const snap = await getDocs(usersRef);
-    const users = snap.docs.map((d) => ({ uid: d.id, ...d.data() }));
+    let q = query(usersRef, orderBy("createdAt", "desc"), limit(PAGE_SIZE));
 
-    return NextResponse.json({ users });
+    // Cursor pagination: if a lastDocId is provided, start after that document
+    const lastDocId = req.nextUrl.searchParams.get("after");
+    if (lastDocId) {
+      const lastDocSnap = await getDoc(doc(db, "users", lastDocId));
+      if (lastDocSnap.exists()) {
+        q = query(usersRef, orderBy("createdAt", "desc"), startAfter(lastDocSnap), limit(PAGE_SIZE));
+      }
+    }
+
+    const snap = await getDocs(q);
+    const users = snap.docs.map((d) => ({ uid: d.id, ...d.data() }));
+    const lastDoc = snap.docs.length > 0 ? snap.docs[snap.docs.length - 1].id : null;
+
+    return NextResponse.json({ users, nextCursor: lastDoc, hasMore: snap.docs.length === PAGE_SIZE });
   } catch (err: any) {
     return NextResponse.json({ error: err?.message || "Internal server error" }, { status: 500 });
   }

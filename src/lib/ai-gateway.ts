@@ -225,8 +225,8 @@ export async function generateAICall(
       let content = "";
       let usage = { prompt_tokens: 0, completion_tokens: 0 };
 
-      // Route execution natively based on chosen provider
-      if (process.env.FREEMODEL_API_KEY) {
+      // Route execution — only use FreeModel on attempt 1; real failover on 2 & 3
+      if (attempt === 1 && process.env.FREEMODEL_API_KEY) {
         currentModel = "gpt-5.4";
         const result = await callFreeModel(currentModel, prompt, temperature);
         content = result.content;

@@ -14,10 +14,21 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { amount, plan, userId } = (await req.json()) as { amount: number; plan: string; userId?: string };
+    const { plan, userId } = (await req.json()) as { plan: string; userId?: string };
 
-    if (!amount || !plan) {
-      return NextResponse.json({ error: "amount and plan are required" }, { status: 400 });
+    if (!plan) {
+      return NextResponse.json({ error: "plan is required" }, { status: 400 });
+    }
+
+    // SECURITY: Server-side price enforcement — never trust the client amount
+    const PLAN_PRICES: Record<string, number> = {
+      "Basic": 49,
+      "Pro": 149,
+      "Premium": 299,
+    };
+    const amount = PLAN_PRICES[plan];
+    if (!amount) {
+      return NextResponse.json({ error: `Invalid plan: ${plan}` }, { status: 400 });
     }
 
     // Lazy import so missing keys don't crash at module load time
