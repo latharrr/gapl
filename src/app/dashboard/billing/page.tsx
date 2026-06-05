@@ -28,6 +28,23 @@ export default function BillingPage() {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [successPlan, setSuccessPlan] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const currentPlan = String(userDoc?.plan || "free").toLowerCase();
+  
+  const PLAN_RANK: Record<string, number> = {
+    free: 0,
+    basic: 1,
+    pro: 2,
+    premium: 3,
+  };
+  
+  const currentRank = PLAN_RANK[currentPlan] ?? PLAN_RANK.free;
+
+  const availablePlans = PRICING_PLANS.filter((p) => {
+    const planNameLower = p.name.toLowerCase();
+    if (planNameLower === "free") return false;
+    const planRank = PLAN_RANK[planNameLower] ?? 0;
+    return planRank > currentRank;
+  });
 
   const handleUpgrade = async (planName: string) => {
     setError("");
@@ -167,70 +184,80 @@ export default function BillingPage() {
       </motion.div>
 
       {/* Plans */}
-      <div>
-        <h2 className="text-sm font-semibold text-ink mb-4">Upgrade your plan</h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {PRICING_PLANS.filter((p) => p.name !== "Free").map((plan, i) => {
-            const isLoading = loadingPlan === plan.name;
-            const isSuccess = successPlan === plan.name;
-            return (
-              <motion.div
-                key={plan.name}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.12 + i * 0.08 }}
-                className={cn(
-                  "rounded-2xl p-5 border flex flex-col",
-                  plan.highlighted ? "bg-[#111111] border-[#111111]" : "bg-white border-border-DEFAULT"
-                )}
-              >
-                {plan.highlighted && (
-                  <span className="text-xs font-medium text-primary-400 mb-2">Most Popular</span>
-                )}
-                <h3 className={cn("text-sm font-semibold mb-0.5", plan.highlighted ? "text-white" : "text-ink")}>
-                  {plan.name}
-                </h3>
-                <p className={cn("text-xs mb-3", plan.highlighted ? "text-zinc-400" : "text-ink-muted")}>
-                  {plan.description}
-                </p>
-                <div className="flex items-end gap-1 mb-4">
-                  <span className={cn("text-2xl font-bold", plan.highlighted ? "text-white" : "text-ink")}>
-                    ₹{plan.price}
-                  </span>
-                  <span className={cn("text-xs mb-0.5", plan.highlighted ? "text-zinc-400" : "text-ink-muted")}> one-time</span>
-                </div>
-                <ul className="space-y-2 mb-5 flex-1">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2">
-                      <Check size={12} className={cn("mt-0.5 flex-shrink-0", plan.highlighted ? "text-zinc-400" : "text-success")} />
-                      <span className={cn("text-xs", plan.highlighted ? "text-zinc-300" : "text-ink-secondary")}>{f}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Button
-                  size="sm"
-                  variant={plan.highlighted ? "secondary" : "outline"}
-                  className="w-full gap-2"
-                  disabled={isLoading || isSuccess}
-                  onClick={() => handleUpgrade(plan.name)}
-                >
-                  {isSuccess ? (
-                    <><CheckCircle2 size={13} /> Active</>
-                  ) : isLoading ? (
-                    <><Loader2 size={13} className="animate-spin" /> Opening…</>
-                  ) : (
-                    plan.cta
+      {availablePlans.length > 0 ? (
+        <div>
+          <h2 className="text-sm font-semibold text-ink mb-4">Upgrade your plan</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {availablePlans.map((plan, i) => {
+              const isLoading = loadingPlan === plan.name;
+              const isSuccess = successPlan === plan.name;
+              return (
+                <motion.div
+                  key={plan.name}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.12 + i * 0.08 }}
+                  className={cn(
+                    "rounded-2xl p-5 border flex flex-col",
+                    plan.highlighted ? "bg-[#111111] border-[#111111]" : "bg-white border-border-DEFAULT"
                   )}
-                </Button>
-              </motion.div>
-            );
-          })}
-        </div>
+                >
+                  {plan.highlighted && (
+                    <span className="text-xs font-medium text-primary-400 mb-2">Most Popular</span>
+                  )}
+                  <h3 className={cn("text-sm font-semibold mb-0.5", plan.highlighted ? "text-white" : "text-ink")}>
+                    {plan.name}
+                  </h3>
+                  <p className={cn("text-xs mb-3", plan.highlighted ? "text-zinc-400" : "text-ink-muted")}>
+                    {plan.description}
+                  </p>
+                  <div className="flex items-end gap-1 mb-4">
+                    <span className={cn("text-2xl font-bold", plan.highlighted ? "text-white" : "text-ink")}>
+                      ₹{plan.price}
+                    </span>
+                    <span className={cn("text-xs mb-0.5", plan.highlighted ? "text-zinc-400" : "text-ink-muted")}> one-time</span>
+                  </div>
+                  <ul className="space-y-2 mb-5 flex-1">
+                    {plan.features.map((f) => (
+                      <li key={f} className="flex items-start gap-2">
+                        <Check size={12} className={cn("mt-0.5 flex-shrink-0", plan.highlighted ? "text-zinc-400" : "text-success")} />
+                        <span className={cn("text-xs", plan.highlighted ? "text-zinc-300" : "text-ink-secondary")}>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Button
+                    size="sm"
+                    variant={plan.highlighted ? "secondary" : "outline"}
+                    className="w-full gap-2"
+                    disabled={isLoading || isSuccess}
+                    onClick={() => handleUpgrade(plan.name)}
+                  >
+                    {isSuccess ? (
+                      <><CheckCircle2 size={13} /> Active</>
+                    ) : isLoading ? (
+                      <><Loader2 size={13} className="animate-spin" /> Opening…</>
+                    ) : (
+                      plan.cta
+                    )}
+                  </Button>
+                </motion.div>
+              );
+            })}
+          </div>
 
-        <p className="text-xs text-ink-muted mt-4 text-center">
-          One-time beta access payments processed by Razorpay
-        </p>
-      </div>
+          <p className="text-xs text-ink-muted mt-4 text-center">
+            One-time beta access payments processed by Razorpay
+          </p>
+        </div>
+      ) : (
+        <div className="p-8 text-center bg-white border border-border-DEFAULT rounded-2xl shadow-xs">
+          <CheckCircle2 className="mx-auto text-[#16a34a] mb-3 animate-bounce" size={32} />
+          <h3 className="text-sm font-semibold text-ink">You are on the highest tier plan</h3>
+          <p className="text-xs text-ink-muted mt-1 leading-relaxed max-w-sm mx-auto">
+            Thank you for supporting Gapl! You have full access to all analyses, roadmaps, and optimization features.
+          </p>
+        </div>
+      )}
     </div>
   );
 }
