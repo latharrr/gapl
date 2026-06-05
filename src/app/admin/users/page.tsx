@@ -9,14 +9,14 @@ import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
 import {
   Search,
-  Filter,
-  Shield,
   Trash2,
   Lock,
   Unlock,
-  AlertTriangle,
   Loader2,
-  ChevronDown,
+  Mail,
+  Wand2,
+  SendHorizonal,
+  CheckCircle2,
 } from "lucide-react";
 
 export default function AdminUsersPage() {
@@ -290,6 +290,16 @@ function UserDetailDrawer({
   const [timeline, setTimeline] = useState<any[]>([]);
   const [loadingTimeline, setLoadingTimeline] = useState(true);
 
+  // Send Email state
+  const [emailSubject, setEmailSubject] = useState("");
+  const [emailMessage, setEmailMessage] = useState("");
+  const [sendingEmail, setSendingEmail] = useState(false);
+  const [rewritingEmail, setRewritingEmail] = useState(false);
+  const [emailError, setEmailError] = useState("");
+  const [emailSentCount, setEmailSentCount] = useState<number | null>(null);
+  const [justSent, setJustSent] = useState(false);
+  const EMAIL_LIMIT = 5;
+
   useEffect(() => {
     const fetchTimeline = async () => {
       setLoadingTimeline(true);
@@ -306,7 +316,73 @@ function UserDetailDrawer({
       }
     };
     fetchTimeline();
+
+    // Fetch current admin email count
+    const fetchEmailCount = async () => {
+      try {
+        const res = await adminFetch(`/api/admin/users/send-email?uid=${selectedUser.uid}`);
+        const data = await res.json();
+        if (res.ok) setEmailSentCount(data.adminEmailCount ?? 0);
+      } catch {}
+    };
+    fetchEmailCount();
+
+    // Reset email form when user changes
+    setEmailSubject("");
+    setEmailMessage("");
+    setEmailError("");
+    setJustSent(false);
   }, [selectedUser]);
+
+  const handleRewriteEmail = async () => {
+    if (!emailMessage.trim()) return;
+    setRewritingEmail(true);
+    setEmailError("");
+    try {
+      const res = await adminFetch("/api/admin/users/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "rewrite", targetUid: selectedUser.uid, message: emailMessage }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Rewrite failed");
+      setEmailMessage(data.rewritten);
+    } catch (e: any) {
+      setEmailError(e.message);
+    } finally {
+      setRewritingEmail(false);
+    }
+  };
+
+  const handleSendEmail = async () => {
+    if (!emailSubject.trim() || !emailMessage.trim()) {
+      setEmailError("Subject and message are required.");
+      return;
+    }
+    setSendingEmail(true);
+    setEmailError("");
+    setJustSent(false);
+    try {
+      const res = await adminFetch("/api/admin/users/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "send",
+          targetUid: selectedUser.uid,
+          subject: emailSubject,
+          message: emailMessage,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to send email");
+      setEmailSentCount(data.adminEmailCount ?? (emailSentCount ?? 0) + 1);
+      setJustSent(true);
+    } catch (e: any) {
+      setEmailError(e.message);
+    } finally {
+      setSendingEmail(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -439,6 +515,66 @@ function UserDetailDrawer({
               >
                 <Trash2 size={12} className="mr-1" /> Delete Account
               </Button>
+            </div>
+          </div>
+
+          {/* Send Email section */}
+          <div className="pt-4 border-t border-[#27272a] space-y-3">
+            <div className="flex items-center gap-2 mb-1">
+              <Mail size={13} className="text-[#6366f1]" />
+              <span className="text-xs font-bold text-white">Send Admin Email</span>
+              <span className="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-950/30 text-emerald-400 border border-emerald-900/40">
+                Unlimited
+              </span>
+            </div>
+
+            <input
+              type="text"
+              placeholder="Email subject..."
+              value={emailSubject}
+              onChange={(e) => setEmailSubject(e.target.value)}
+              className="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-xs text-white placeholder-[#52525b] focus:outline-none focus:border-[#6366f1] transition-colors"
+            />
+            <div className="relative">
+              <textarea
+                placeholder="Write your message..."
+                value={emailMessage}
+                onChange={(e) => setEmailMessage(e.target.value)}
+                rows={4}
+                className="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-xs text-white placeholder-[#52525b] focus:outline-none focus:border-[#6366f1] transition-colors resize-none"
+              />
+            </div>
+
+            {emailError && (
+              <div className="bg-red-950/20 border border-red-900/40 text-red-400 p-2 rounded-lg text-[11px]">
+                {emailError}
+              </div>
+            )}
+
+            {justSent && (
+              <div className="bg-emerald-950/20 border border-emerald-900/40 text-emerald-400 p-2.5 rounded-lg text-[11px] flex items-center gap-2">
+                <CheckCircle2 size={13} />
+                <span>Email sent successfully to {selectedUser.email}!</span>
+              </div>
+            )}
+
+            <div className="flex gap-2">
+              <button
+                onClick={handleRewriteEmail}
+                disabled={rewritingEmail || !emailMessage.trim()}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold text-purple-400 border border-purple-900/40 bg-purple-950/20 rounded-lg hover:bg-purple-950/40 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {rewritingEmail ? <Loader2 size={11} className="animate-spin" /> : <Wand2 size={11} />}
+                AI Rewrite
+              </button>
+              <button
+                onClick={handleSendEmail}
+                disabled={sendingEmail || !emailSubject.trim() || !emailMessage.trim()}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold text-white bg-[#6366f1] rounded-lg hover:bg-[#4f46e5] transition-all disabled:opacity-40 disabled:cursor-not-allowed ml-auto"
+              >
+                {sendingEmail ? <Loader2 size={11} className="animate-spin" /> : <SendHorizonal size={11} />}
+                {justSent ? "Send Again" : "Send Email"}
+              </button>
             </div>
           </div>
 

@@ -124,7 +124,7 @@ export async function POST(req: NextRequest) {
 
       return NextResponse.json({ result: parsed });
     } catch (err: unknown) {
-      if (reserved) await releaseAnalysis(user.uid).catch(console.error);
+      if (reserved) await releaseAnalysis(user.uid).catch((error) => console.error("CRITICAL: releaseAnalysis failed for", user.uid, error));
       if (err instanceof UsageLimitError) {
         return NextResponse.json({ error: err.message, code: "LIMIT_REACHED" }, { status: 403 });
       }

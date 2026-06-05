@@ -286,7 +286,28 @@ export async function generateAICall(
       }
 
       // Cost calculations
-      const pricing = TOKEN_PRICING[currentModel] || { input: 0.5 / 1000000, output: 0.8 / 1000000 };
+      let pricing = TOKEN_PRICING[currentModel];
+      
+      const isFreeModelRouting = !!process.env.FREEMODEL_API_KEY && 
+        (currentProvider === "FreeModel" || !process.env[`${currentProvider.toUpperCase()}_API_KEY`]);
+
+      if (isFreeModelRouting) {
+        const envInput = process.env.FREEMODEL_TOKEN_PRICE_INPUT;
+        const envOutput = process.env.FREEMODEL_TOKEN_PRICE_OUTPUT;
+        
+        const fallbackInput = (TOKEN_PRICING[currentModel] || TOKEN_PRICING["gpt-4o-mini"] || { input: 0.5 / 1000000 }).input;
+        const fallbackOutput = (TOKEN_PRICING[currentModel] || TOKEN_PRICING["gpt-4o-mini"] || { output: 0.8 / 1000000 }).output;
+        
+        pricing = {
+          input: envInput ? parseFloat(envInput) / 1000000 : fallbackInput,
+          output: envOutput ? parseFloat(envOutput) / 1000000 : fallbackOutput,
+        };
+      }
+      
+      if (!pricing) {
+        pricing = { input: 0.5 / 1000000, output: 0.8 / 1000000 };
+      }
+      
       const calculatedCost = (usage.prompt_tokens * pricing.input) + (usage.completion_tokens * pricing.output);
 
       // Log success transaction

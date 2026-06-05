@@ -54,13 +54,17 @@ export async function POST(req: NextRequest) {
     const { getLastTouchAttribution } = await import("@/lib/link-tracker");
     const attribution = await getLastTouchAttribution(userId);
 
-    await db.runTransaction(async (transaction) => {
+    const alreadyProcessed = await db.runTransaction(async (transaction) => {
       const orderSnapshot = await transaction.get(orderRef);
       if (!orderSnapshot.exists) throw new Error("Webhook order was not created by Gapl.");
 
       const order = orderSnapshot.data() ?? {};
       if (order.userId !== userId || order.plan !== plan || order.amount !== PLAN_PRICES_INR[plan]) {
         throw new Error("Webhook order does not match its server-side record.");
+      }
+
+      if (order.status === "captured" || order.status === "verified") {
+        return true;
       }
 
       transaction.set(paymentRef, {
@@ -83,7 +87,12 @@ export async function POST(req: NextRequest) {
       }, { merge: true });
       transaction.set(orderRef, { status: "captured", paymentId, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
       transaction.set(userRef, { plan, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
+      return false;
     });
+
+    if (alreadyProcessed) {
+      return NextResponse.json({ received: true });
+    }
 
     // Send Payment Success Email
     try {

@@ -1,0 +1,7 @@
+{
+  "crons": [
+    { "path": "/api/cron/daily-alerts", "schedule": "0 6 * * *" },
+    { "path": "/api/cron/day1-reminder", "schedule": "0 9 * * *" },
+    { "path": "/api/cron/day7-reminder", "schedule": "0 9 * * 1" }
+  ]
+}

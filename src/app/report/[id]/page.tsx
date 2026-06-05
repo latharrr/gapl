@@ -48,12 +48,18 @@ export default function ReportPage() {
       const res = await authFetch(`/api/reports/${params.id}/email`, {
         method: "POST",
       });
+      const json = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const json = await res.json().catch(() => ({}));
         throw new Error(json.error || "Failed to send email");
       }
+      const remaining: number = json.remaining ?? 0;
+      const total: number = json.total ?? 3;
       import("react-hot-toast").then(({ default: toast }) => {
-        toast.success("Report summary emailed successfully!");
+        toast.success(
+          remaining > 0
+            ? `Report emailed! ${remaining} of ${total} sends remaining (resets in 8 h)`
+            : `Report emailed! You've used all ${total} sends — resets in 8 hours`
+        );
       });
     } catch (err: any) {
       import("react-hot-toast").then(({ default: toast }) => {

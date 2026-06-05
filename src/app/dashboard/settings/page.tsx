@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { useAuth } from "@/context/AuthContext";
-import { Bell, Shield, Trash2, User } from "lucide-react";
-import { updateUserProfile } from "@/lib/firebase";
+import { Bell, Shield, Trash2, User, AlertTriangle } from "lucide-react";
+import { updateUserProfile, logOut } from "@/lib/firebase";
+import { authFetch } from "@/lib/auth-fetch";
 
 export default function SettingsPage() {
   const { user } = useAuth();
@@ -28,6 +29,57 @@ export default function SettingsPage() {
       setError(e?.message || "Failed to update profile changes.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const [showDeleteReportsConfirm, setShowDeleteReportsConfirm] = useState(false);
+  const [deletingReports, setDeletingReports] = useState(false);
+  const [reportsSuccess, setReportsSuccess] = useState(false);
+
+  const [showDeleteAccountConfirm, setShowDeleteAccountConfirm] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [deletingAccount, setDeletingAccount] = useState(false);
+
+  const handleDeleteReports = async () => {
+    setDeletingReports(true);
+    setError("");
+    setReportsSuccess(false);
+    try {
+      const res = await authFetch("/api/user/delete-reports", {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to delete reports.");
+      }
+      setReportsSuccess(true);
+      setShowDeleteReportsConfirm(false);
+      setTimeout(() => setReportsSuccess(false), 4000);
+    } catch (e: any) {
+      setError(e?.message || "Failed to delete reports.");
+    } finally {
+      setDeletingReports(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText !== "DELETE") return;
+    setDeletingAccount(true);
+    setError("");
+    try {
+      const res = await authFetch("/api/user/delete", {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to delete account.");
+      }
+      await logOut();
+      window.location.href = "/";
+    } catch (e: any) {
+      setError(e?.message || "Failed to delete account.");
+    } finally {
+      setDeletingAccount(false);
     }
   };
 
@@ -121,20 +173,114 @@ export default function SettingsPage() {
             <Trash2 size={14} className="text-danger" />
             <h2 className="text-sm font-semibold text-danger">Danger Zone</h2>
           </div>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-ink">Delete all reports</p>
-                <p className="text-xs text-ink-muted">Permanently remove all analysis data</p>
+          <div className="space-y-4">
+            {reportsSuccess && (
+              <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-xl text-xs text-green-500 font-medium">
+                All reports and associated analysis data have been deleted.
               </div>
-              <Button size="sm" variant="danger">Delete</Button>
+            )}
+            {error && (
+              <div className="p-3 bg-danger/10 border border-danger/20 rounded-xl text-xs text-danger font-medium">
+                {error}
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-ink">Delete all reports</p>
+                  <p className="text-xs text-ink-muted">Permanently remove all analysis data</p>
+                </div>
+                {!showDeleteReportsConfirm && (
+                  <Button
+                    size="sm"
+                    variant="danger"
+                    onClick={() => {
+                      setShowDeleteReportsConfirm(true);
+                      setShowDeleteAccountConfirm(false);
+                      setError("");
+                    }}
+                  >
+                    Delete
+                  </Button>
+                )}
+              </div>
+              {showDeleteReportsConfirm && (
+                <div className="p-4 bg-surface-subtle border border-border rounded-xl space-y-3">
+                  <div className="flex gap-2 items-start text-xs text-ink-muted">
+                    <AlertTriangle size={14} className="text-amber-500 shrink-0 mt-0.5" />
+                    <p>Are you sure you want to delete all reports? This action cannot be undone and will permanently purge all report documents and AI trace calls.</p>
+                  </div>
+                  <div className="flex gap-2 justify-end">
+                    <Button size="sm" variant="outline" onClick={() => setShowDeleteReportsConfirm(false)}>
+                      Cancel
+                    </Button>
+                    <Button size="sm" variant="danger" onClick={handleDeleteReports} disabled={deletingReports}>
+                      {deletingReports ? "Deleting..." : "Yes, delete all reports"}
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-ink">Delete account</p>
-                <p className="text-xs text-ink-muted">Permanently remove your account and all data</p>
+
+            <hr className="border-border/50" />
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-ink">Delete account</p>
+                  <p className="text-xs text-ink-muted">Permanently remove your account and all data</p>
+                </div>
+                {!showDeleteAccountConfirm && (
+                  <Button
+                    size="sm"
+                    variant="danger"
+                    onClick={() => {
+                      setShowDeleteAccountConfirm(true);
+                      setShowDeleteReportsConfirm(false);
+                      setDeleteConfirmText("");
+                      setError("");
+                    }}
+                  >
+                    Delete Account
+                  </Button>
+                )}
               </div>
-              <Button size="sm" variant="danger">Delete Account</Button>
+              {showDeleteAccountConfirm && (
+                <div className="p-4 bg-surface-subtle border border-danger/20 rounded-xl space-y-3">
+                  <div className="flex gap-2 items-start text-xs text-ink-muted">
+                    <AlertTriangle size={14} className="text-danger shrink-0 mt-0.5" />
+                    <p>
+                      <strong>WARNING:</strong> This is a permanent, non-reversible action. Deleting your account will completely purge all reports, roadmaps, optimization history, billing records, and your platform login account.
+                    </p>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider">
+                      Type <span className="text-danger">DELETE</span> to confirm
+                    </label>
+                    <Input
+                      placeholder="DELETE"
+                      value={deleteConfirmText}
+                      onChange={(e) => setDeleteConfirmText(e.target.value)}
+                      id="delete-account-confirm"
+                      className="border-danger/30 focus-visible:ring-danger/30 text-xs py-1 h-8"
+                    />
+                  </div>
+                  <div className="flex gap-2 justify-end">
+                    <Button size="sm" variant="outline" onClick={() => setShowDeleteAccountConfirm(false)}>
+                      Cancel
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="danger"
+                      onClick={handleDeleteAccount}
+                      disabled={deleteConfirmText !== "DELETE" || deletingAccount}
+                    >
+                      {deletingAccount ? "Deleting..." : "Permanently Delete Account"}
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </Card>

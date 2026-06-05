@@ -47,17 +47,31 @@ export async function releaseAnalysis(uid: string) {
   const userRef = db.collection("users").doc(uid);
   const month = currentMonth();
 
-  await db.runTransaction(async (transaction) => {
-    const snapshot = await transaction.get(userRef);
-    if (!snapshot.exists) return;
+  const maxAttempts = 3;
+  let attempt = 0;
+  while (attempt < maxAttempts) {
+    try {
+      await db.runTransaction(async (transaction) => {
+        const snapshot = await transaction.get(userRef);
+        if (!snapshot.exists) return;
 
-    const data = snapshot.data() ?? {};
-    if (data.analysisUsageMonth !== month) return;
+        const data = snapshot.data() ?? {};
+        if (data.analysisUsageMonth !== month) return;
 
-    transaction.update(userRef, {
-      analysisUsageCount: Math.max(0, Number(data.analysisUsageCount || 0) - 1),
-      analysisCount: FieldValue.increment(-1),
-      updatedAt: FieldValue.serverTimestamp(),
-    });
-  });
+        transaction.update(userRef, {
+          analysisUsageCount: Math.max(0, Number(data.analysisUsageCount || 0) - 1),
+          analysisCount: FieldValue.increment(-1),
+          updatedAt: FieldValue.serverTimestamp(),
+        });
+      });
+      return; // Success
+    } catch (err) {
+      attempt++;
+      if (attempt >= maxAttempts) {
+        throw err;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+  }
 }
+

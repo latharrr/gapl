@@ -36,12 +36,7 @@ export default function LoginPage() {
     setGoogleLoading(true);
     try {
       const result = await signInWithGoogle();
-      // Non-blocking — Firestore may not be set up yet
-      try {
-        await createUserDocument(result.user);
-      } catch {
-        console.warn("Firestore not configured yet — skipping user document creation");
-      }
+      await createUserDocument(result.user);
       router.push("/dashboard");
     } catch (err: unknown) {
       const error = err as { message?: string };

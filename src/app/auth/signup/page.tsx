@@ -29,12 +29,7 @@ export default function SignupPage() {
     setLoading(true);
     try {
       const result = await signUpWithEmail(email, password);
-      // Save profile to Firestore — non-blocking, Firestore may not be set up yet
-      try {
-        await createUserDocument(result.user, { displayName: name });
-      } catch {
-        console.warn("Firestore not configured yet — skipping user document creation");
-      }
+      await createUserDocument(result.user, { displayName: name });
       trackEvent("signup", {
         userId: result.user.uid,
         email: result.user.email || email,
@@ -53,11 +48,7 @@ export default function SignupPage() {
     setGoogleLoading(true);
     try {
       const result = await signInWithGoogle();
-      try {
-        await createUserDocument(result.user);
-      } catch {
-        console.warn("Firestore not configured yet — skipping user document creation");
-      }
+      await createUserDocument(result.user);
       trackEvent("signup", {
         userId: result.user.uid,
         email: result.user.email || "",

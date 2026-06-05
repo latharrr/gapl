@@ -128,16 +128,31 @@ export async function POST(req: NextRequest) {
       </div>
     `;
 
+    // ── Rolling 8-hour window rate limit (3 sends per window) ──────────────────
+    const WINDOW_MS = 8 * 60 * 60 * 1000;
+    const MAX_SENDS = 3;
+
     const { getAdminDb } = await import("@/lib/firebase-admin");
     const db = getAdminDb();
     const userRef = db.collection("users").doc(user.uid);
     const userSnap = await userRef.get();
     const userData = userSnap.exists ? userSnap.data() : {};
-    const cvEmailCount = userData?.cvEmailCount || 0;
 
-    if (cvEmailCount >= 5) {
+    const now = Date.now();
+    const windowStart: number = userData?.cvEmailWindowStart ?? 0;
+    const windowCount: number = userData?.cvEmailWindowCount ?? 0;
+
+    const windowActive = now - windowStart < WINDOW_MS;
+    const currentCount = windowActive ? windowCount : 0;
+
+    if (currentCount >= MAX_SENDS) {
+      const resetAt = new Date(windowStart + WINDOW_MS);
       return NextResponse.json(
-        { error: "Rate limit exceeded. You can only email your CV up to 5 times." },
+        {
+          error: `You've emailed your CV ${MAX_SENDS} times. Try again after ${resetAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}.`,
+          remaining: 0,
+          resetAt: resetAt.toISOString(),
+        },
         { status: 429 }
       );
     }
@@ -149,9 +164,19 @@ export async function POST(req: NextRequest) {
     });
 
     const { FieldValue } = await import("firebase-admin/firestore");
-    await userRef.set({ cvEmailCount: FieldValue.increment(1) }, { merge: true });
+    if (windowActive) {
+      await userRef.set({ cvEmailWindowCount: FieldValue.increment(1) }, { merge: true });
+    } else {
+      await userRef.set(
+        { cvEmailWindowStart: now, cvEmailWindowCount: 1 },
+        { merge: true }
+      );
+    }
 
-    return NextResponse.json({ success: true });
+    const newCount = currentCount + 1;
+    const remaining = MAX_SENDS - newCount;
+
+    return NextResponse.json({ success: true, remaining, total: MAX_SENDS, sent: newCount });
   } catch (err: any) {
     console.error("Failed to email CV:", err);
     return NextResponse.json({ error: err.message || "Failed to send email." }, { status: 500 });

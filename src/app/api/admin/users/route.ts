@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, collection, getDocs, doc, getDoc, updateDoc, deleteDoc, query, orderBy, limit, startAfter } from "@/lib/server-firestore";
 import { logAuditAction } from "@/lib/audit-logger";
-import { requireAdmin } from "@/lib/firebase-admin";
+import { requireAdmin, deleteAuthUser } from "@/lib/firebase-admin";
+import { cascadeDeleteUserData } from "@/lib/user-deletion";
 
 export const runtime = "nodejs";
 
@@ -117,7 +118,11 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Only super_admin can delete users." }, { status: 403 });
       }
 
-      await deleteDoc(targetRef);
+      // 1. Cascade Firestore deletes (9 collections)
+      await cascadeDeleteUserData(targetUid);
+
+      // 2. Delete Auth account last
+      await deleteAuthUser(targetUid);
 
       await logAuditAction({
         adminId: adminUser.uid,

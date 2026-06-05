@@ -111,3 +111,7 @@ export async function requireSuperAdmin(req: NextRequest): Promise<VerifiedAdmin
   }
   return user;
 }
+
+export async function deleteAuthUser(uid: string) {
+  await getAuth(getAdminApp()).deleteUser(uid);
+}

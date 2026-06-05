@@ -20,6 +20,7 @@ import {
   ClipboardPaste,
   Zap,
   Lock,
+  Shield,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -118,7 +119,7 @@ export default function AnalyzePage() {
     }
   }, []);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop: onResumeDrop,
     accept: {
       "application/pdf": [".pdf"],
@@ -166,8 +167,12 @@ export default function AnalyzePage() {
       setStage("jd");
     } catch (err) {
       console.error("Resume validation failed:", err);
-      // Fallback: if network fails or API fails, let them proceed
-      setStage("jd");
+      const errMsg = "Validation failed. Please check your internet connection and try again.";
+      if (resumeFile) {
+        setFileError(errMsg);
+      } else {
+        setPasteError(errMsg);
+      }
     } finally {
       setValidating(false);
     }
@@ -186,6 +191,9 @@ export default function AnalyzePage() {
 
     import("@/lib/analytics").then(({ trackEvent }) => {
       trackEvent("analysis_started");
+      if (!jdText.trim()) {
+        trackEvent("jd_skipped");
+      }
     });
 
     // Animate loading steps while API call runs
@@ -229,6 +237,7 @@ export default function AnalyzePage() {
       }
 
       if (!response.ok) {
+        import("@/lib/analytics").then(({ trackEvent }) => trackEvent("analysis_failed"));
         setLoadingError(data.error || "Analysis failed. Please try again.");
         setStage("resume");
         return;
@@ -247,6 +256,7 @@ export default function AnalyzePage() {
       router.push(`/report/${reportId}`);
     } catch {
       if (intervalRef.current) clearInterval(intervalRef.current);
+      import("@/lib/analytics").then(({ trackEvent }) => trackEvent("analysis_failed"));
       setLoadingError("Network error. Please check your connection and try again.");
       setStage("resume");
     }
@@ -554,7 +564,17 @@ export default function AnalyzePage() {
                         <p className="text-sm font-semibold text-[#111111]">
                           {isDragActive ? "Drop it here" : "Drag & drop your resume"}
                         </p>
-                        <p className="text-xs text-[#71717a] mt-1">or click to browse · PDF or TXT</p>
+                        <p className="text-xs text-[#71717a] mt-1 mb-3">or click to browse · PDF or TXT</p>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            open();
+                          }}
+                          className="inline-flex items-center justify-center px-4 py-2 bg-[#111111] hover:bg-black text-white text-xs font-semibold rounded-xl transition-all shadow-sm active:scale-95"
+                        >
+                          Choose File
+                        </button>
                       </div>
                     )}
                   </div>
@@ -589,6 +609,11 @@ export default function AnalyzePage() {
                     )}
                   </div>
                 )}
+
+                <div className="flex items-center gap-1.5 justify-center text-xs text-[#71717a] mt-4 mb-2">
+                  <Shield size={12} className="text-[#a1a1aa] shrink-0" />
+                  <span>Your resume is processed for analysis and is not stored. Only the generated report is saved.</span>
+                </div>
 
                 <div className="flex gap-2 mt-2">
                   <Button variant="outline" size="lg" onClick={() => setStage("tier")} className="flex-1">Back</Button>

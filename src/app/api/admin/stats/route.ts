@@ -142,7 +142,9 @@ export async function GET(req: NextRequest) {
     const landingSessions = new Set(events.filter((e: any) => e.event === "landing_view").map((e: any) => e.sessionId || e.userId));
     const signupUsers = new Set(events.filter((e: any) => e.event === "signup").map((e: any) => e.userId || e.sessionId));
     const uploadUsers = new Set(events.filter((e: any) => e.event === "resume_uploaded").map((e: any) => e.userId || e.sessionId));
+    const jdSkippedUsers = new Set(events.filter((e: any) => e.event === "jd_skipped").map((e: any) => e.userId || e.sessionId));
     const reportUsers = new Set(events.filter((e: any) => e.event === "analysis_completed").map((e: any) => e.userId || e.sessionId));
+    const failedUsers = new Set(events.filter((e: any) => e.event === "analysis_failed").map((e: any) => e.userId || e.sessionId));
     const paymentUsers = new Set(events.filter((e: any) => e.event === "payment_success").map((e: any) => e.userId || e.sessionId));
 
     // Return users: active on more than 1 distinct calendar day
@@ -157,11 +159,13 @@ export async function GET(req: NextRequest) {
     const returnUsers = Object.entries(userActivityDays).filter(([_, days]) => days.size >= 2).map(([id]) => id);
 
     const conversionFunnel = [
-      { name: "Landing View", value: Math.max(landingSessions.size, totalUsers > 0 ? Math.round(totalUsers * 1.5) : 10) },
-      { name: "Sign Up", value: Math.max(signupUsers.size, totalUsers) },
-      { name: "Resume Upload", value: Math.max(uploadUsers.size, totalReports) },
-      { name: "Report Created", value: Math.max(reportUsers.size, totalReports) },
-      { name: "Plan Purchased", value: Math.max(paymentUsers.size, planCounts.basic + planCounts.pro + planCounts.premium) },
+      { name: "Landing View", value: landingSessions.size },
+      { name: "Sign Up", value: signupUsers.size },
+      { name: "Resume Upload", value: uploadUsers.size },
+      { name: "JD Skipped", value: jdSkippedUsers.size },
+      { name: "Report Created", value: reportUsers.size },
+      { name: "Analysis Failed", value: failedUsers.size },
+      { name: "Plan Purchased", value: paymentUsers.size },
       { name: "Returning User", value: returnUsers.length },
     ];
 

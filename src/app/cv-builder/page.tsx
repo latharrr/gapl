@@ -73,12 +73,18 @@ export default function CVBuilderPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ cv: result }),
       });
+      const json = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const json = await res.json().catch(() => ({}));
         throw new Error(json.error || "Failed to send email");
       }
+      const remaining: number = json.remaining ?? 0;
+      const total: number = json.total ?? 3;
       import("react-hot-toast").then(({ default: toast }) => {
-        toast.success("CV sent to your email successfully!");
+        toast.success(
+          remaining > 0
+            ? `CV emailed! ${remaining} of ${total} sends remaining (resets in 8 h)`
+            : `CV emailed! You've used all ${total} sends — resets in 8 hours`
+        );
       });
     } catch (err: any) {
       import("react-hot-toast").then(({ default: toast }) => {
