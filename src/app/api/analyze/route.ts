@@ -106,8 +106,8 @@ export async function POST(req: NextRequest) {
         user.uid,
         user.email,
         reportRef.id,
-        safePayload.atsScore || 70,
-        safePayload.readiness || 65
+        safePayload.atsScore ?? 70,
+        safePayload.readiness ?? 65
       ).catch((err) => console.error("Failed to send Report Ready email:", err));
     }
 
