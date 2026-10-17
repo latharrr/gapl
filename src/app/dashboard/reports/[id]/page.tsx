@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { LoadingChart } from "@/components/ui/Sheet";
 
 // The new report page is at /report/[id]
 // Redirect dashboard/reports/[id] → /report/[id]
@@ -14,9 +15,5 @@ export default function LegacyReportRedirect() {
     router.replace(`/report/${id}`);
   }, [params.id, router]);
 
-  return (
-    <div className="flex items-center justify-center h-screen">
-      <div className="w-6 h-6 border-2 border-primary-600/20 border-t-primary-600 rounded-full animate-spin" />
-    </div>
-  );
+  return <LoadingChart text="OPENING CHART" className="min-h-screen items-center" />;
 }

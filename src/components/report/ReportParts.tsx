@@ -2,30 +2,7 @@ import { Plus, Minus, ArrowRight, type LucideIcon } from "lucide-react";
 import { VerdictBadge, type Verdict } from "@/components/ui/Badge";
 import { cn } from "@/lib/utils";
 
-/* A section of the report, printed as one ruled sheet. */
-export function Sheet({
-  title,
-  aside,
-  children,
-  className,
-  id,
-}: {
-  title: string;
-  aside?: React.ReactNode;
-  children: React.ReactNode;
-  className?: string;
-  id?: string;
-}) {
-  return (
-    <section id={id} className={cn("chart-sheet rounded-[6px] overflow-hidden scroll-mt-32", className)}>
-      <header className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-4 sm:px-6 py-3 border-b-[1.5px] border-ink">
-        <h2 className="text-sm font-[800] uppercase tracking-[0.06em]">{title}</h2>
-        {aside && <div className="chart-data text-[0.6875rem] text-ink-muted">{aside}</div>}
-      </header>
-      {children}
-    </section>
-  );
-}
+export { Sheet } from "@/components/ui/Sheet";
 
 const ROW = "md:grid-cols-[1.3fr_1.1fr_4.5rem_6rem_6.5rem_minmax(0,1.6fr)]";
 

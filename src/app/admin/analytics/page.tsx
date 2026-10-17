@@ -1,5 +1,7 @@
 "use client";
 
+import { LoadingChart } from "@/components/ui/Sheet";
+
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Card } from "@/components/ui/Card";
@@ -45,14 +47,14 @@ export default function AdminAnalyticsPage() {
   if (loading) {
     return (
       <div className="h-[60vh] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-[#6366f1]" />
+        <LoadingChart />
       </div>
     );
   }
 
   if (error || !stats) {
     return (
-      <div className="text-center py-20 text-[#71717a]">
+      <div className="text-center py-20 text-ink-muted">
         Failed to compile analytics logs.
       </div>
     );
@@ -73,74 +75,74 @@ export default function AdminAnalyticsPage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-bold text-white tracking-tight">Analytics & Costs</h1>
-        <p className="text-xs text-[#a1a1aa] mt-0.5">Explore landing conversions, candidate deficits, and platform profitability metrics</p>
+        <h1 className="display text-[clamp(1.9rem,4vw,2.6rem)]">Analytics and costs</h1>
+        <p className="mt-1.5 text-[0.9375rem] text-ink-secondary">Explore landing conversions, candidate deficits, and platform profitability metrics</p>
       </div>
 
       {/* Profitability aggregates */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <Card variant="default" padding="sm" className="bg-[#18181b] border-[#27272a]">
-          <span className="text-[10px] text-[#a1a1aa] font-semibold uppercase block">Gross Income</span>
-          <p className="text-md font-bold text-white mt-1">${profitability.revenue}</p>
+        <Card variant="default" padding="sm" className="bg-surface-DEFAULT border-border-DEFAULT">
+          <span className="text-[0.6875rem] text-ink-muted font-semibold uppercase block">Gross Income</span>
+          <p className="text-md font-bold text-ink mt-1">₹{profitability.revenue}</p>
         </Card>
-        <Card variant="default" padding="sm" className="bg-[#18181b] border-[#27272a]">
-          <span className="text-[10px] text-[#a1a1aa] font-semibold uppercase block">AI Gateway Spend</span>
-          <p className="text-md font-bold text-red-400 mt-1">${profitability.aiCost}</p>
+        <Card variant="default" padding="sm" className="bg-surface-DEFAULT border-border-DEFAULT">
+          <span className="text-[0.6875rem] text-ink-muted font-semibold uppercase block">AI Gateway Spend</span>
+          <p className="text-md font-bold text-danger mt-1">${profitability.aiCost}</p>
         </Card>
-        <Card variant="default" padding="sm" className="bg-[#18181b] border-[#27272a]">
-          <span className="text-[10px] text-[#a1a1aa] font-semibold uppercase block">Est. DB Storage</span>
-          <p className="text-md font-bold text-red-400 mt-1">${profitability.storageCost}</p>
+        <Card variant="default" padding="sm" className="bg-surface-DEFAULT border-border-DEFAULT">
+          <span className="text-[0.6875rem] text-ink-muted font-semibold uppercase block">Est. DB Storage</span>
+          <p className="text-md font-bold text-danger mt-1">${profitability.storageCost}</p>
         </Card>
-        <Card variant="default" padding="sm" className="bg-[#18181b] border-[#27272a]">
-          <span className="text-[10px] text-[#a1a1aa] font-semibold uppercase block">Net Margin Profit</span>
-          <p className="text-md font-bold text-emerald-400 mt-1">${profitability.profit}</p>
+        <Card variant="default" padding="sm" className="bg-surface-DEFAULT border-border-DEFAULT">
+          <span className="text-[0.6875rem] text-ink-muted font-semibold uppercase block">Net Margin Profit</span>
+          <p className="text-md font-bold text-success mt-1">₹{profitability.profit}</p>
         </Card>
-        <Card variant="default" padding="sm" className="bg-[#18181b] border-[#27272a] col-span-2 md:col-span-1">
-          <span className="text-[10px] text-[#a1a1aa] font-semibold uppercase block">Operating Margin</span>
-          <p className="text-md font-bold text-emerald-400 mt-1">{profitability.margin}%</p>
+        <Card variant="default" padding="sm" className="bg-surface-DEFAULT border-border-DEFAULT col-span-2 md:col-span-1">
+          <span className="text-[0.6875rem] text-ink-muted font-semibold uppercase block">Operating Margin</span>
+          <p className="text-md font-bold text-success mt-1">{profitability.margin}%</p>
         </Card>
       </div>
 
       {/* Unit Economics Section */}
-      <Card variant="default" padding="md" className="bg-[#18181b] border-[#27272a] space-y-6">
+      <Card variant="default" padding="md" className="bg-surface-DEFAULT border-border-DEFAULT space-y-6">
         <div>
-          <h2 className="text-sm font-bold text-white">Unit Economics (Average Cost Per Report)</h2>
-          <p className="text-[10px] text-[#71717a]">Detailed revenue, infrastructure, and margin profile breakdown per analysis cycle</p>
+          <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">Unit Economics (Average Cost Per Report)</h2>
+          <p className="text-[0.6875rem] text-ink-muted">Detailed revenue, infrastructure, and margin profile breakdown per analysis cycle</p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-          <div className="p-3 bg-[#09090b] border border-[#27272a] rounded-xl text-center">
-            <span className="text-[9px] text-[#a1a1aa] block uppercase font-medium">Revenue</span>
-            <span className="text-sm font-bold text-white font-mono mt-1 block">
+          <div className="p-3 bg-surface-muted border border-border-DEFAULT rounded-[6px] text-center">
+            <span className="text-[0.6875rem] text-ink-muted block uppercase font-medium">Revenue</span>
+            <span className="text-sm font-bold text-ink font-mono mt-1 block">
               ${profitability.unitEconomics?.revenuePerReport || "0.00"}
             </span>
           </div>
-          <div className="p-3 bg-[#09090b] border border-[#27272a] rounded-xl text-center">
-            <span className="text-[9px] text-[#a1a1aa] block uppercase font-medium">AI Cost</span>
-            <span className="text-sm font-bold text-red-400 font-mono mt-1 block">
+          <div className="p-3 bg-surface-muted border border-border-DEFAULT rounded-[6px] text-center">
+            <span className="text-[0.6875rem] text-ink-muted block uppercase font-medium">AI Cost</span>
+            <span className="text-sm font-bold text-danger font-mono mt-1 block">
               -${profitability.unitEconomics?.aiCostPerReport || "0.000"}
             </span>
           </div>
-          <div className="p-3 bg-[#09090b] border border-[#27272a] rounded-xl text-center">
-            <span className="text-[9px] text-[#a1a1aa] block uppercase font-medium">PDF Engine</span>
-            <span className="text-sm font-bold text-red-400 font-mono mt-1 block">
+          <div className="p-3 bg-surface-muted border border-border-DEFAULT rounded-[6px] text-center">
+            <span className="text-[0.6875rem] text-ink-muted block uppercase font-medium">PDF Engine</span>
+            <span className="text-sm font-bold text-danger font-mono mt-1 block">
               -${profitability.unitEconomics?.pdfCostPerReport || "0.15"}
             </span>
           </div>
-          <div className="p-3 bg-[#09090b] border border-[#27272a] rounded-xl text-center">
-            <span className="text-[9px] text-[#a1a1aa] block uppercase font-medium">Storage</span>
-            <span className="text-sm font-bold text-red-400 font-mono mt-1 block">
+          <div className="p-3 bg-surface-muted border border-border-DEFAULT rounded-[6px] text-center">
+            <span className="text-[0.6875rem] text-ink-muted block uppercase font-medium">Storage</span>
+            <span className="text-sm font-bold text-danger font-mono mt-1 block">
               -${profitability.unitEconomics?.storageCostPerReport || "0.05"}
             </span>
           </div>
-          <div className="p-3 bg-[#09090b] border border-[#27272a] rounded-xl text-center">
-            <span className="text-[9px] text-[#a1a1aa] block uppercase font-medium">Hosting</span>
-            <span className="text-sm font-bold text-red-400 font-mono mt-1 block">
+          <div className="p-3 bg-surface-muted border border-border-DEFAULT rounded-[6px] text-center">
+            <span className="text-[0.6875rem] text-ink-muted block uppercase font-medium">Hosting</span>
+            <span className="text-sm font-bold text-danger font-mono mt-1 block">
               -${profitability.unitEconomics?.hostingCostPerReport || "0.10"}
             </span>
           </div>
-          <div className="p-3 bg-[#09090b] border border-[#27272a] rounded-xl text-center col-span-2 md:col-span-1">
-            <span className="text-[9px] text-[#a1a1aa] block uppercase font-medium">Profit</span>
-            <span className="text-sm font-bold text-emerald-400 font-mono mt-1 block">
+          <div className="p-3 bg-surface-muted border border-border-DEFAULT rounded-[6px] text-center col-span-2 md:col-span-1">
+            <span className="text-[0.6875rem] text-ink-muted block uppercase font-medium">Profit</span>
+            <span className="text-sm font-bold text-success font-mono mt-1 block">
               ${profitability.unitEconomics?.profitPerReport || "0.00"}
             </span>
           </div>
@@ -149,10 +151,10 @@ export default function AdminAnalyticsPage() {
 
       <div className="grid md:grid-cols-2 gap-6">
         {/* Onboarding Funnel Progress */}
-        <Card variant="default" padding="md" className="bg-[#18181b] border-[#27272a] space-y-6">
+        <Card variant="default" padding="md" className="bg-surface-DEFAULT border-border-DEFAULT space-y-6">
           <div>
-            <h2 className="text-sm font-bold text-white">Conversion Funnel Dropoffs</h2>
-            <p className="text-[10px] text-[#71717a]">Weekly aggregate onboarding milestones</p>
+            <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">Conversion Funnel Dropoffs</h2>
+            <p className="text-[0.6875rem] text-ink-muted">Weekly aggregate onboarding milestones</p>
           </div>
           <div className="space-y-4">
             {charts?.conversionFunnel?.map((f: any, idx: number, arr: any[]) => {
@@ -160,11 +162,11 @@ export default function AdminAnalyticsPage() {
               const pct = baseValue > 0 ? Math.round((f.value / baseValue) * 100) : 0;
               return (
                 <div key={f.name} className="space-y-1.5">
-                  <div className="flex justify-between items-center text-xs text-white">
+                  <div className="flex justify-between items-center text-xs text-ink">
                     <span className="font-medium">{f.name}</span>
-                    <span className="font-mono text-[#a1a1aa]">{f.value} ({pct}%)</span>
+                    <span className="font-mono text-ink-muted">{f.value} ({pct}%)</span>
                   </div>
-                  <Progress value={pct} className="h-1.5 bg-[#09090b] indicator-bg-[#6366f1]" />
+                  <Progress value={pct} className="h-1.5 bg-surface-muted" />
                 </div>
               );
             })}
@@ -172,79 +174,79 @@ export default function AdminAnalyticsPage() {
         </Card>
 
         {/* User Retention curve */}
-        <Card variant="default" padding="md" className="bg-[#18181b] border-[#27272a] space-y-6">
+        <Card variant="default" padding="md" className="bg-surface-DEFAULT border-border-DEFAULT space-y-6">
           <div>
-            <h2 className="text-sm font-bold text-white">Weekly User Retention Cohort</h2>
-            <p className="text-[10px] text-[#71717a]">Proportion of active users returning weekly</p>
+            <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">Weekly User Retention Cohort</h2>
+            <p className="text-[0.6875rem] text-ink-muted">Proportion of active users returning weekly</p>
           </div>
-          <div className="text-center py-12 text-[#71717a] text-xs border border-dashed border-[#27272a] rounded-xl">
+          <div className="text-center py-12 text-ink-muted text-xs border border-dashed border-border-DEFAULT rounded-[6px]">
             Retention cohort tracking not yet implemented. Requires session-level analytics integration.
           </div>
         </Card>
 
         {/* AI Cost by Task */}
-        <Card variant="default" padding="md" className="bg-[#18181b] border-[#27272a] space-y-4">
+        <Card variant="default" padding="md" className="bg-surface-DEFAULT border-border-DEFAULT space-y-4">
           <div>
-            <h2 className="text-sm font-bold text-white">AI Gateway Cost By Feature</h2>
-            <p className="text-[10px] text-[#71717a]">Spend categorized by gateway task mappings</p>
+            <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">AI Gateway Cost By Feature</h2>
+            <p className="text-[0.6875rem] text-ink-muted">Spend categorized by gateway task mappings</p>
           </div>
           <div className="h-60 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={costStats?.costByTask || []} layout="vertical">
-                <XAxis type="number" stroke="#52525b" fontSize={10} tickLine={false} />
-                <YAxis dataKey="name" type="category" stroke="#52525b" fontSize={9} tickLine={false} width={130} />
-                <Tooltip contentStyle={{ background: "#18181b", border: "1px solid #27272a", fontSize: "10px" }} labelClassName="text-[#a1a1aa]" />
-                <Bar dataKey="cost" fill="#818cf8" radius={[0, 4, 4, 0]} />
+                <XAxis type="number" stroke="#595c69" fontSize={10} tickLine={false} />
+                <YAxis dataKey="name" type="category" stroke="#595c69" fontSize={9} tickLine={false} width={130} />
+                <Tooltip contentStyle={{ background: "#fcfcf7", border: "1px solid #d2d1c4", fontSize: "10px" }} labelClassName="text-ink-muted" />
+                <Bar dataKey="cost" fill="#1d2b6b" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </Card>
 
         {/* Common Skill Gaps Chart */}
-        <Card variant="default" padding="md" className="bg-[#18181b] border-[#27272a] space-y-4">
+        <Card variant="default" padding="md" className="bg-surface-DEFAULT border-border-DEFAULT space-y-4">
           <div>
-            <h2 className="text-sm font-bold text-white">Most Common Skill Deficits</h2>
-            <p className="text-[10px] text-[#71717a]">Top missing topics parsed from evaluated resumes</p>
+            <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">Most Common Skill Deficits</h2>
+            <p className="text-[0.6875rem] text-ink-muted">Top missing topics parsed from evaluated resumes</p>
           </div>
           <div className="h-60 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={charts.commonSkillGaps} layout="vertical">
-                <XAxis type="number" stroke="#52525b" fontSize={10} tickLine={false} />
-                <YAxis dataKey="skill" type="category" stroke="#52525b" fontSize={9} tickLine={false} width={130} />
-                <Tooltip contentStyle={{ background: "#18181b", border: "1px solid #27272a", fontSize: "10px" }} labelClassName="text-[#a1a1aa]" />
-                <Bar dataKey="count" fill="#6366f1" radius={[0, 4, 4, 0]} />
+                <XAxis type="number" stroke="#595c69" fontSize={10} tickLine={false} />
+                <YAxis dataKey="skill" type="category" stroke="#595c69" fontSize={9} tickLine={false} width={130} />
+                <Tooltip contentStyle={{ background: "#fcfcf7", border: "1px solid #d2d1c4", fontSize: "10px" }} labelClassName="text-ink-muted" />
+                <Bar dataKey="count" fill="#1d2b6b" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </Card>
 
         {/* Top 10 Expensive Users */}
-        <Card variant="default" padding="md" className="bg-[#18181b] border-[#27272a] space-y-4">
+        <Card variant="default" padding="md" className="bg-surface-DEFAULT border-border-DEFAULT space-y-4">
           <div>
-            <h2 className="text-sm font-bold text-white">Top 10 Most Expensive Users</h2>
-            <p className="text-[10px] text-[#71717a]">Total gateway API costs incurred by user profiles</p>
+            <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">Top 10 Most Expensive Users</h2>
+            <p className="text-[0.6875rem] text-ink-muted">Total gateway API costs incurred by user profiles</p>
           </div>
           <div className="space-y-2.5 max-h-72 overflow-y-auto">
             {costStats?.topExpensiveUsers?.map((u: any, idx: number) => (
-              <div key={idx} className="flex justify-between items-center text-xs p-2.5 bg-[#09090b] border border-[#27272a] rounded-xl">
-                <span className="text-[#a1a1aa] font-mono truncate max-w-[200px]">{u.email}</span>
-                <span className="font-mono text-red-400 font-bold">${u.cost}</span>
+              <div key={idx} className="flex justify-between items-center text-xs p-2.5 bg-surface-muted border border-border-DEFAULT rounded-[6px]">
+                <span className="text-ink-muted font-mono truncate max-w-[200px]">{u.email}</span>
+                <span className="font-mono text-danger font-bold">${u.cost}</span>
               </div>
             ))}
           </div>
         </Card>
 
         {/* Top 10 Expensive Prompts/Tasks */}
-        <Card variant="default" padding="md" className="bg-[#18181b] border-[#27272a] space-y-4">
+        <Card variant="default" padding="md" className="bg-surface-DEFAULT border-border-DEFAULT space-y-4">
           <div>
-            <h2 className="text-sm font-bold text-white">Top Expensive Prompts & Tasks</h2>
-            <p className="text-[10px] text-[#71717a]">Ranking tasks consuming the largest token budgets</p>
+            <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">Top Expensive Prompts & Tasks</h2>
+            <p className="text-[0.6875rem] text-ink-muted">Ranking tasks consuming the largest token budgets</p>
           </div>
           <div className="space-y-2.5 max-h-72 overflow-y-auto">
             {costStats?.topExpensivePrompts?.map((p: any, idx: number) => (
-              <div key={idx} className="flex justify-between items-center text-xs p-2.5 bg-[#09090b] border border-[#27272a] rounded-xl">
-                <span className="text-white font-semibold capitalize">{p.task.replace("-", " ")}</span>
-                <span className="font-mono text-red-400 font-bold">${p.cost}</span>
+              <div key={idx} className="flex justify-between items-center text-xs p-2.5 bg-surface-muted border border-border-DEFAULT rounded-[6px]">
+                <span className="text-ink font-semibold capitalize">{p.task.replace("-", " ")}</span>
+                <span className="font-mono text-danger font-bold">${p.cost}</span>
               </div>
             ))}
           </div>

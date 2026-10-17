@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 
@@ -29,37 +30,36 @@ export default function BlogPage() {
   return (
     <>
       <Navbar />
-      <main className="pt-24 pb-16 bg-surface-muted min-h-screen text-ink">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <h1 className="text-4xl font-extrabold tracking-tight mb-8">
-            Gapl Blog
-          </h1>
-          <p className="text-lg text-ink-muted mb-12">
-            No fluff. Just tactical advice on building strong engineering signals and getting shortlisted.
-          </p>
-
-          <div className="space-y-12">
-            {POSTS.map((post) => (
-              <article key={post.slug} className="border-b border-border-DEFAULT pb-8 last:border-b-0">
-                <div className="flex items-center gap-3 text-xs text-ink-faint mb-3">
-                  <span>{post.date}</span>
-                  <span>•</span>
-                  <span>{post.readTime}</span>
-                </div>
-                <h2 className="text-2xl font-bold text-ink hover:text-ink transition-colors mb-3">
-                  <Link href={`/blog/${post.slug}`}>
-                    {post.title}
-                  </Link>
-                </h2>
-                <p className="text-ink-muted text-sm leading-relaxed mb-4">
-                  {post.excerpt}
-                </p>
-                <Link href={`/blog/${post.slug}`} className="text-xs font-semibold text-ink hover:text-ink-secondary underline underline-offset-4">
-                  Read article
-                </Link>
-              </article>
-            ))}
+      <main className="pt-[59px] bg-surface-muted min-h-screen">
+        <header className="border-b-[1.5px] border-ink bg-surface-DEFAULT">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-10 sm:pt-14 pb-8 sm:pb-10">
+            <h1 className="display text-[clamp(2.2rem,5.5vw,3.75rem)]">Gapl blog</h1>
+            <p className="mt-4 text-lg sm:text-xl leading-relaxed text-ink-secondary max-w-[60ch]">
+              No fluff. Tactical advice on building strong engineering signals and getting shortlisted.
+            </p>
           </div>
+        </header>
+
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
+          <ol className="border-t-[1.5px] border-ink">
+            {POSTS.map((post) => (
+              <li key={post.slug} className="border-b border-border-strong">
+                <Link href={`/blog/${post.slug}`} className="group grid gap-x-8 gap-y-2 py-7 sm:grid-cols-[9rem_minmax(0,1fr)]">
+                  <p className="chart-data text-xs text-ink-muted pt-1.5">
+                    {post.date}
+                    <span className="block">{post.readTime}</span>
+                  </p>
+                  <div>
+                    <h2 className="text-2xl font-[800] tracking-[-0.02em] leading-tight group-hover:text-primary-600">{post.title}</h2>
+                    <p className="mt-2 text-[1.0625rem] leading-relaxed text-ink-secondary max-w-[62ch]">{post.excerpt}</p>
+                    <span className="mt-3 inline-flex items-center gap-1.5 text-sm font-bold text-primary-600">
+                      Read the article <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
+                    </span>
+                  </div>
+                </Link>
+              </li>
+            ))}
+          </ol>
         </div>
       </main>
       <Footer />

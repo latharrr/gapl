@@ -1,5 +1,7 @@
 "use client";
 
+import { LoadingChart } from "@/components/ui/Sheet";
+
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Card } from "@/components/ui/Card";
@@ -163,7 +165,7 @@ export default function AdminPromptsPage() {
   if (loading) {
     return (
       <div className="h-[60vh] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-[#6366f1]" />
+        <LoadingChart />
       </div>
     );
   }
@@ -172,18 +174,18 @@ export default function AdminPromptsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-bold text-white tracking-tight">Prompt Library & Versioning</h1>
-        <p className="text-xs text-[#a1a1aa] mt-0.5">Optimize LLM instructions, inspect changes, rollback deployments, and run sandboxed tests</p>
+        <h1 className="display text-[clamp(1.9rem,4vw,2.6rem)]">Prompts</h1>
+        <p className="mt-1.5 text-[0.9375rem] text-ink-secondary">Optimize LLM instructions, inspect changes, rollback deployments, and run sandboxed tests</p>
       </div>
 
       {error && (
-        <div className="bg-red-950/20 border border-red-900/40 text-red-400 p-4 rounded-xl text-xs">
+        <div className="bg-danger-bg border border-danger-border text-danger p-4 rounded-[6px] text-xs">
           {error}
         </div>
       )}
 
       {successMsg && (
-        <div className="bg-emerald-950/20 border border-emerald-900/40 text-emerald-400 p-4 rounded-xl text-xs flex items-center gap-2">
+        <div className="bg-success-bg border border-success-border text-success p-4 rounded-[6px] text-xs flex items-center gap-2">
           <CheckCircle size={14} /> {successMsg}
         </div>
       )}
@@ -191,7 +193,7 @@ export default function AdminPromptsPage() {
       <div className="grid lg:grid-cols-4 gap-6 items-start">
         {/* Left Side: Prompts Selection */}
         <div className="space-y-2">
-          <span className="text-[10px] text-[#71717a] font-bold uppercase tracking-wider block mb-1">
+          <span className="text-[0.6875rem] text-ink-muted font-bold uppercase tracking-wider block mb-1">
             Prompt Templates
           </span>
           {prompts.map((p) => {
@@ -200,14 +202,14 @@ export default function AdminPromptsPage() {
               <button
                 key={p.id}
                 onClick={() => handleSelectPrompt(p.id)}
-                className={`w-full text-left px-4 py-3 rounded-xl border text-xs font-semibold flex items-center justify-between transition-all ${
+                className={`w-full text-left px-4 py-3 rounded-[6px] border text-xs font-semibold flex items-center justify-between transition-all ${
                   isSelected
-                    ? "bg-[#18181b] border-[#6366f1] text-white"
-                    : "bg-transparent border-[#27272a] text-[#a1a1aa] hover:text-white hover:bg-[#18181b]/50"
+                    ? "bg-surface-DEFAULT border-primary-600 text-ink"
+                    : "bg-transparent border-border-DEFAULT text-ink-muted hover:text-ink hover:bg-surface-muted"
                 }`}
               >
                 <span>{p.name}</span>
-                <Badge className="bg-[#27272a] text-[#a1a1aa] text-[9px]">v{p.version}</Badge>
+                <Badge className="bg-surface-subtle text-ink-muted text-[0.6875rem]">v{p.version}</Badge>
               </button>
             );
           })}
@@ -216,11 +218,11 @@ export default function AdminPromptsPage() {
         {/* Center: Active Prompt Editor */}
         <div className="lg:col-span-2 space-y-4">
           {selectedPrompt ? (
-            <Card variant="default" padding="md" className="bg-[#18181b] border-[#27272a] space-y-4">
+            <Card variant="default" padding="md" className="bg-surface-DEFAULT border-border-DEFAULT space-y-4">
               <div className="flex justify-between items-start gap-4 flex-wrap">
                 <div>
-                  <h2 className="text-sm font-bold text-white">{selectedPrompt.name}</h2>
-                  <span className="text-[10px] text-[#71717a]">
+                  <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">{selectedPrompt.name}</h2>
+                  <span className="text-[0.6875rem] text-ink-muted">
                     Active Version: v{selectedPrompt.version} · Last updated: {new Date(selectedPrompt.lastUpdated).toLocaleString()}
                   </span>
                 </div>
@@ -229,7 +231,7 @@ export default function AdminPromptsPage() {
                   size="sm"
                   onClick={handleUpdatePrompt}
                   loading={updating}
-                  className="bg-[#6366f1] text-white gap-1.5 py-1.5"
+                  className="gap-1.5"
                 >
                   <Save size={13} /> Save & Release v{selectedPrompt.version + 1}
                 </Button>
@@ -240,61 +242,61 @@ export default function AdminPromptsPage() {
                   value={promptContent}
                   onChange={(e) => setPromptContent(e.target.value)}
                   rows={14}
-                  className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-4 py-3 text-xs text-white font-mono placeholder-[#71717a] focus:outline-none resize-none leading-relaxed"
+                  className="w-full bg-surface-muted border border-border-DEFAULT rounded-[6px] px-4 py-3 text-xs text-ink font-mono focus:outline-none resize-none leading-relaxed"
                 />
               </div>
             </Card>
           ) : (
-            <div className="border border-dashed border-[#27272a] rounded-xl text-center py-20 text-[#71717a] text-xs">
+            <div className="border border-dashed border-border-DEFAULT rounded-[6px] text-center py-20 text-ink-muted text-xs">
               Select a prompt template to edit instructions.
             </div>
           )}
 
           {/* Test Sandbox */}
-          <Card variant="default" padding="md" className="bg-[#18181b] border-[#27272a] space-y-4">
+          <Card variant="default" padding="md" className="bg-surface-DEFAULT border-border-DEFAULT space-y-4">
             <div>
-              <h2 className="text-sm font-bold text-white flex items-center gap-1.5">
-                <Play size={14} className="text-[#6366f1]" /> Prompt Sandbox
+              <h2 className="text-sm font-bold text-ink flex items-center gap-1.5">
+                <Play size={14} className="text-primary-600" /> Prompt Sandbox
               </h2>
-              <p className="text-[10px] text-[#71717a] mt-0.5">Test output evaluations locally against the active Groq model</p>
+              <p className="text-[0.6875rem] text-ink-muted mt-0.5">Test output evaluations locally against the active Groq model</p>
             </div>
 
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[9px] font-bold text-[#a1a1aa] uppercase block mb-1">Target Role</label>
+                  <label className="text-[0.6875rem] font-bold text-ink-muted uppercase block mb-1">Target Role</label>
                   <input
                     type="text"
                     value={sandboxRole}
                     onChange={(e) => setSandboxRole(e.target.value)}
-                    className="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none"
+                    className="w-full bg-surface-muted border border-border-DEFAULT rounded-[5px] px-3 py-1.5 text-xs text-ink focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="text-[9px] font-bold text-[#a1a1aa] uppercase block mb-1">Company Tier</label>
+                  <label className="text-[0.6875rem] font-bold text-ink-muted uppercase block mb-1">Company Tier</label>
                   <input
                     type="text"
                     value={sandboxTier}
                     onChange={(e) => setSandboxTier(e.target.value)}
-                    className="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none"
+                    className="w-full bg-surface-muted border border-border-DEFAULT rounded-[5px] px-3 py-1.5 text-xs text-ink focus:outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-[9px] font-bold text-[#a1a1aa] uppercase block mb-1">Mock Resume Text</label>
+                <label className="text-[0.6875rem] font-bold text-ink-muted uppercase block mb-1">Mock Resume Text</label>
                 <textarea
                   value={sandboxResume}
                   onChange={(e) => setSandboxResume(e.target.value)}
                   rows={4}
-                  className="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-xs text-white font-mono focus:outline-none resize-none"
+                  className="w-full bg-surface-muted border border-border-DEFAULT rounded-[5px] px-3 py-2 text-xs text-ink font-mono focus:outline-none resize-none"
                 />
               </div>
 
               <Button
                 variant="primary"
                 size="sm"
-                className="w-full bg-[#18181b] border-[#27272a] hover:bg-[#202024] text-xs py-2"
+                className="w-full bg-surface-DEFAULT border-border-DEFAULT hover:bg-surface-subtle text-xs py-2"
                 onClick={handleTestSandbox}
                 loading={testing}
               >
@@ -303,8 +305,8 @@ export default function AdminPromptsPage() {
 
               {sandboxOutput && (
                 <div className="space-y-1.5">
-                  <span className="text-[9px] font-bold text-[#a1a1aa] uppercase block">Analysis Output Payload</span>
-                  <pre className="bg-[#09090b] border border-[#27272a] p-3 rounded-lg max-h-56 overflow-y-auto text-[9px] text-emerald-400 font-mono whitespace-pre-wrap leading-relaxed">
+                  <span className="text-[0.6875rem] font-bold text-ink-muted uppercase block">Analysis Output Payload</span>
+                  <pre className="bg-surface-muted border border-border-DEFAULT p-3 rounded-[5px] max-h-56 overflow-y-auto text-[0.6875rem] text-success font-mono whitespace-pre-wrap leading-relaxed">
                     {sandboxOutput}
                   </pre>
                 </div>
@@ -315,38 +317,38 @@ export default function AdminPromptsPage() {
 
         {/* Right Side: Version History & Rollback */}
         <div className="space-y-3">
-          <span className="text-[10px] text-[#71717a] font-bold uppercase tracking-wider block mb-1">
+          <span className="text-[0.6875rem] text-ink-muted font-bold uppercase tracking-wider block mb-1">
             Version History
           </span>
           <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
             {promptVersions.map((v) => (
-              <div key={v.id} className="bg-[#18181b] border border-[#27272a] rounded-xl p-3.5 space-y-3">
+              <div key={v.id} className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] p-3.5 space-y-3">
                 <div className="flex justify-between items-start">
                   <div>
-                    <Badge className="bg-[#27272a] text-[#a1a1aa] text-[9px]">v{v.version}</Badge>
-                    <span className="text-[9px] text-[#71717a] block mt-1">
+                    <Badge className="bg-surface-subtle text-ink-muted text-[0.6875rem]">v{v.version}</Badge>
+                    <span className="text-[0.6875rem] text-ink-muted block mt-1">
                       {new Date(v.savedAt).toLocaleString()}
                     </span>
                   </div>
                   <Button
                     variant="outline"
                     size="sm"
-                    className="px-2 py-0.5 h-auto text-[9px] border-[#27272a] text-[#a1a1aa] hover:text-white"
+                    className="px-2 py-0.5 h-auto text-[0.6875rem] border-border-DEFAULT text-ink-muted hover:text-ink"
                     onClick={() => handleRollback(v.version)}
                     loading={updating}
                   >
                     <RotateCcw size={10} className="mr-1" /> Rollback
                   </Button>
                 </div>
-                <div className="bg-[#09090b] p-2 rounded text-[9px] text-[#71717a] font-mono line-clamp-3 leading-relaxed">
+                <div className="bg-surface-muted p-2 rounded text-[0.6875rem] text-ink-muted font-mono line-clamp-3 leading-relaxed">
                   {v.content}
                 </div>
-                <span className="text-[8px] text-[#71717a] block">Released by {v.savedBy || "System"}</span>
+                <span className="text-[8px] text-ink-muted block">Released by {v.savedBy || "System"}</span>
               </div>
             ))}
 
             {promptVersions.length === 0 && (
-              <div className="text-center py-10 border border-dashed border-[#27272a] rounded-xl text-[#71717a] text-[10px]">
+              <div className="text-center py-10 border border-dashed border-border-DEFAULT rounded-[6px] text-ink-muted text-[0.6875rem]">
                 No historical revisions exist for this template.
               </div>
             )}

@@ -1,12 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { PRICING_PLANS } from "@/lib/mock-data";
-import { Card } from "@/components/ui/Card";
+import { PLAN_LIMITS } from "@/lib/plans";
 import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
-import { Check, Zap, Loader2, CheckCircle2 } from "lucide-react";
+import { Sheet, PageHeader, FigureStrip, APP_PAGE } from "@/components/ui/Sheet";
+import { Check, CheckCircle2, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import { authFetch } from "@/lib/auth-fetch";
@@ -88,7 +87,7 @@ export default function BillingPage() {
           name: user?.displayName || "",
           email: user?.email || "",
         },
-        theme: { color: "#4F46E5" },
+        theme: { color: "#1D2B6B" },
         modal: {
           ondismiss: () => setLoadingPlan(null),
         },
@@ -131,132 +130,93 @@ export default function BillingPage() {
     }
   };
 
+  const shownPlan = successPlan ?? String(userDoc?.plan || "free");
+  const limit = PLAN_LIMITS[shownPlan.toLowerCase()] ?? PLAN_LIMITS.free;
+
   return (
-    <div className="p-6 md:p-8 max-w-4xl mx-auto space-y-8">
-      {/* Header */}
-      <div>
-        <motion.h1 initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="text-xl font-bold text-ink">
-          Billing
-        </motion.h1>
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.05 }} className="text-sm text-ink-muted mt-0.5">
-          Manage your plan and payments
-        </motion.p>
-      </div>
+    <div className={APP_PAGE}>
+      <PageHeader title="Billing" description="Your plan and what it includes. Paid plans are one-time payments." />
 
-      {/* Success banner */}
       {successPlan && (
-        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-3 p-4 bg-success-bg border border-success-border rounded-[6px]">
-          <CheckCircle2 size={16} className="text-success flex-shrink-0" />
+        <div role="status" className="flex items-start gap-3 p-4 bg-success-bg border border-success-border rounded-[6px]">
+          <CheckCircle2 size={18} className="text-success shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-semibold text-success">Payment successful!</p>
-            <p className="text-xs text-success mt-0.5">You&apos;re now on the <strong>{successPlan}</strong> plan.</p>
+            <p className="font-bold text-success">Payment successful</p>
+            <p className="text-sm text-success">You&apos;re now on the <strong>{successPlan}</strong> plan. Refreshing…</p>
           </div>
-        </motion.div>
-      )}
-
-      {/* Error */}
-      {error && (
-        <div className="p-3 bg-danger-bg border border-danger-border rounded-[6px]">
-          <p className="text-xs text-danger">{error}</p>
         </div>
       )}
 
-      {/* Current plan */}
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-        <Card variant="default" padding="md">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-ink-muted mb-1">Current plan</p>
-              <div className="flex items-center gap-2">
-                <p className="text-lg font-bold text-ink capitalize">{successPlan ?? String(userDoc?.plan || "free")}</p>
-                <Badge variant="default">Active</Badge>
-              </div>
-              <p className="text-xs text-ink-muted mt-1">
-                Usage resets monthly. Your plan controls the available analysis credits.
-              </p>
-            </div>
-            <div className="p-3 bg-surface-subtle rounded-[6px] border border-border-DEFAULT">
-              <Zap size={20} className="text-ink-muted" />
-            </div>
-          </div>
-        </Card>
-      </motion.div>
+      {error && (
+        <div role="alert" className="flex items-start gap-2 p-3 bg-danger-bg border border-danger-border rounded-[5px]">
+          <AlertCircle size={16} className="text-danger shrink-0 mt-0.5" />
+          <p className="text-sm text-danger">{error}</p>
+        </div>
+      )}
 
-      {/* Plans */}
+      <Sheet title="Current plan" aside={<span className="stamp text-[0.625rem] text-success bg-success-bg">Active</span>}>
+        <FigureStrip
+          items={[
+            { label: "Plan", value: <span className="capitalize">{shownPlan}</span> },
+            { label: "Analyses a month", value: limit },
+            { label: "Usage", value: "Resets monthly", note: "Your plan sets your analysis credits" },
+          ]}
+        />
+      </Sheet>
+
       {availablePlans.length > 0 ? (
-        <div>
-          <h2 className="text-sm font-semibold text-ink mb-4">Upgrade your plan</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {availablePlans.map((plan, i) => {
+        <Sheet title="Upgrade" aside="One-time · Razorpay">
+          <ul className="chart-rows">
+            {availablePlans.map((plan) => {
               const isLoading = loadingPlan === plan.name;
               const isSuccess = successPlan === plan.name;
               return (
-                <motion.div
+                <li
                   key={plan.name}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.12 + i * 0.08 }}
-                  className={cn(
-                    "rounded-[6px] p-5 border flex flex-col",
-                    plan.highlighted ? "bg-ink border-ink" : "bg-surface-DEFAULT border-border-DEFAULT"
-                  )}
+                  className="grid gap-x-6 gap-y-4 px-4 sm:px-6 py-5 lg:grid-cols-[11rem_minmax(0,1fr)_7rem_10rem] lg:items-center"
                 >
-                  {plan.highlighted && (
-                    <span className="text-xs font-medium text-primary-400 mb-2">Most Popular</span>
-                  )}
-                  <h3 className={cn("text-sm font-semibold mb-0.5", plan.highlighted ? "text-white" : "text-ink")}>
-                    {plan.name}
-                  </h3>
-                  <p className={cn("text-xs mb-3", plan.highlighted ? "text-ink-faint" : "text-ink-muted")}>
-                    {plan.description}
-                  </p>
-                  <div className="flex items-end gap-1 mb-4">
-                    <span className={cn("text-2xl font-bold", plan.highlighted ? "text-white" : "text-ink")}>
-                      ₹{plan.price}
-                    </span>
-                    <span className={cn("text-xs mb-0.5", plan.highlighted ? "text-ink-faint" : "text-ink-muted")}> one-time</span>
+                  <div>
+                    <h3 className="text-lg font-[800] tracking-[-0.015em]">{plan.name}</h3>
+                    <p className="text-sm text-ink-muted">{plan.description}</p>
+                    {plan.highlighted && <span className="stamp mt-2 text-[0.625rem] text-ink bg-board">Recommended</span>}
                   </div>
-                  <ul className="space-y-2 mb-5 flex-1">
+                  <ul className="grid gap-x-6 gap-y-1.5 sm:grid-cols-2">
                     {plan.features.map((f) => (
-                      <li key={f} className="flex items-start gap-2">
-                        <Check size={12} className={cn("mt-0.5 flex-shrink-0", plan.highlighted ? "text-ink-faint" : "text-success")} />
-                        <span className={cn("text-xs", plan.highlighted ? "text-border-strong" : "text-ink-secondary")}>{f}</span>
+                      <li key={f} className="flex items-start gap-2 text-sm text-ink-secondary">
+                        <Check size={15} strokeWidth={2.5} className="mt-0.5 shrink-0 text-success" />
+                        {f}
                       </li>
                     ))}
                   </ul>
+                  <p className="lg:text-right">
+                    <span className="chart-data text-2xl font-bold">₹{plan.price}</span>
+                    <span className="block text-xs text-ink-muted">one-time</span>
+                  </p>
                   <Button
-                    size="sm"
-                    variant={plan.highlighted ? "secondary" : "outline"}
-                    className="w-full gap-2"
+                    size="md"
+                    variant={plan.highlighted ? "primary" : "outline"}
+                    className="w-full"
                     disabled={isLoading || isSuccess}
+                    loading={isLoading}
                     onClick={() => handleUpgrade(plan.name)}
                   >
-                    {isSuccess ? (
-                      <><CheckCircle2 size={13} /> Active</>
-                    ) : isLoading ? (
-                      <><Loader2 size={13} className="animate-spin" /> Opening…</>
-                    ) : (
-                      plan.cta
-                    )}
+                    {isSuccess ? "Active" : isLoading ? "Opening…" : plan.cta}
                   </Button>
-                </motion.div>
+                </li>
               );
             })}
-          </div>
-
-          <p className="text-xs text-ink-muted mt-4 text-center">
-            One-time beta access payments processed by Razorpay
-          </p>
-        </div>
+          </ul>
+        </Sheet>
       ) : (
-        <div className="p-8 text-center bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] shadow-xs">
-          <CheckCircle2 className="mx-auto text-success mb-3 animate-bounce" size={32} />
-          <h3 className="text-sm font-semibold text-ink">You are on the highest tier plan</h3>
-          <p className="text-xs text-ink-muted mt-1 leading-relaxed max-w-sm mx-auto">
-            Thank you for supporting Gapl! You have full access to all analyses, roadmaps, and optimization features.
-          </p>
-        </div>
+        <Sheet>
+          <div className="px-5 sm:px-8 py-10">
+            <span className="stamp text-xs text-success bg-success-bg">Highest plan</span>
+            <h2 className="mt-3 text-xl font-[800] tracking-[-0.015em]">You&apos;re on the highest plan</h2>
+            <p className="mt-2 max-w-lg text-[0.9375rem] text-ink-secondary">
+              Thank you for supporting Gapl. You have access to every analysis, roadmap and CV feature.
+            </p>
+          </div>
+        </Sheet>
       )}
     </div>
   );

@@ -1,13 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import { type AnalysisResult } from "@/types/analysis";
-import { Card } from "@/components/ui/Card";
 import { cn } from "@/lib/utils";
-import { CheckCircle2, Circle, ChevronDown, Plus, Loader2, Check } from "lucide-react";
-import { Badge } from "@/components/ui/Badge";
+import { ChevronDown, Plus, Check } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { Sheet, PageHeader, EmptyChart, LoadingChart, APP_PAGE } from "@/components/ui/Sheet";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { getUserReports } from "@/lib/firebase";
@@ -48,125 +46,123 @@ export default function RoadmapsPage() {
     });
   };
 
-  if (loading) {
-    return (
-      <div className="flex h-full w-full items-center justify-center py-20">
-        <Loader2 className="h-6 w-6 animate-spin text-primary-600" />
-      </div>
-    );
-  }
+  if (loading) return <LoadingChart text="LOADING ROUTE" />;
 
   if (!result) {
     return (
-      <div className="p-6 md:p-8 max-w-3xl mx-auto text-center py-20">
-        <h1 className="text-xl font-bold text-ink mb-2">No Roadmap Yet</h1>
-        <p className="text-sm text-ink-muted mb-6">Run an analysis to get your personalized week-by-week roadmap.</p>
-        <Link href="/analyze"><Button size="lg" variant="primary" className="gap-2"><Plus size={16} /> Run Analysis</Button></Link>
+      <div className={APP_PAGE}>
+        <PageHeader title="Roadmap" />
+        <Sheet>
+          <EmptyChart
+            led="NO ROUTE YET"
+            title="No roadmap yet"
+            action={
+              <Link href="/analyze">
+                <Button size="lg"><Plus size={17} strokeWidth={2.5} /> Run an analysis</Button>
+              </Link>
+            }
+          >
+            Run an analysis to get your week-by-week route to close your gaps.
+          </EmptyChart>
+        </Sheet>
       </div>
     );
   }
 
   const totalTasks = result.roadmap.reduce((acc, w) => acc + w.tasks.length, 0);
   const doneTasks = completedTasks.size;
-  const progress = Math.round((doneTasks / totalTasks) * 100);
+  const progress = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+  const expected = result.careerGaps[0]?.expectedReadinessAfter ?? result.readiness + 15;
 
   return (
-    <div className="p-6 md:p-8 max-w-3xl mx-auto space-y-8">
-      <div>
-        <motion.h1 initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="text-xl font-bold text-ink">
-          Roadmap
-        </motion.h1>
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.05 }} className="text-sm text-ink-muted mt-0.5">
-          {result.role} · {result.companyTier} · AI-generated 4-week plan
-        </motion.p>
+    <div className={APP_PAGE}>
+      <PageHeader
+        title="Roadmap"
+        description="Your route, week by week. Tick tasks as you finish them."
+        meta={`${result.role} · ${result.companyTier} · ${result.roadmap.length} weeks`}
+      />
+
+      <div className="led-board rounded-[6px] px-4 sm:px-5 py-3.5 grid grid-cols-3 gap-4 text-sm">
+        <span>
+          TASKS<span className="block text-2xl leading-none mt-1">{doneTasks}/{totalTasks}</span>
+        </span>
+        <span>
+          DONE<span className="block text-2xl leading-none mt-1">{progress}%</span>
+        </span>
+        <span className="text-right">
+          READINESS<span className="block text-2xl leading-none mt-1">{result.readiness}→{expected}</span>
+        </span>
       </div>
 
-      {/* Progress */}
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-        <Card variant="default" padding="md">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <p className="text-sm font-semibold text-ink">{doneTasks}/{totalTasks} tasks completed</p>
-              <p className="text-xs text-ink-muted mt-0.5">Expected readiness after: {result.careerGaps[0]?.expectedReadinessAfter ?? result.readiness + 15}%</p>
-            </div>
-            <span className="text-2xl font-bold text-primary-600">{progress}%</span>
-          </div>
-          <div className="w-full h-2 bg-border-DEFAULT rounded-full overflow-hidden">
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-              className="h-full bg-primary-600 rounded-full"
-            />
-          </div>
-        </Card>
-      </motion.div>
-
-      {/* Weeks */}
-      <div className="space-y-3">
-        {result.roadmap.map((week, i) => {
-          const weekTasks = week.tasks.map((t) => `${week.week}-${t}`);
-          const weekDone = weekTasks.filter((id) => completedTasks.has(id)).length;
-          const weekProgress = Math.round((weekDone / week.tasks.length) * 100);
-          const isExpanded = expandedWeek === week.week;
-
-          return (
-            <motion.div key={week.week} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 + i * 0.08 }}>
-              <Card variant="default" padding="none">
-                <button className="w-full text-left p-5 flex items-center gap-4" onClick={() => setExpandedWeek(isExpanded ? null : week.week)}>
-                  <div className={cn(
-                    "w-10 h-10 rounded-[6px] flex items-center justify-center text-sm font-bold flex-shrink-0 transition-colors",
-                    weekDone === week.tasks.length ? "bg-success text-white" : "bg-surface-subtle text-ink-muted border border-border-DEFAULT"
-                  )}>
-                    {weekDone === week.tasks.length ? <Check size={18} strokeWidth={3} /> : `W${week.week}`}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="text-sm font-semibold text-ink">{week.title}</p>
-                      <Badge variant={weekDone === week.tasks.length ? "success" : "default"}>{weekDone}/{week.tasks.length}</Badge>
-                    </div>
-                    <p className="text-xs text-ink-muted truncate">{week.description}</p>
-                  </div>
-                  <ChevronDown size={16} className={cn("text-ink-faint flex-shrink-0 transition-transform duration-200", isExpanded && "rotate-180")} />
+      <Sheet title="Route">
+        <ol className="divide-y divide-border-DEFAULT">
+          {result.roadmap.map((week) => {
+            const weekDone = week.tasks.filter((t) => completedTasks.has(`${week.week}-${t}`)).length;
+            const complete = weekDone === week.tasks.length;
+            const isExpanded = expandedWeek === week.week;
+            return (
+              <li key={week.week}>
+                <button
+                  className="w-full text-left px-4 sm:px-6 py-4 flex items-center gap-4 hover:bg-surface-muted"
+                  onClick={() => setExpandedWeek(isExpanded ? null : week.week)}
+                  aria-expanded={isExpanded}
+                >
+                  <span
+                    className={cn(
+                      "h-10 w-10 shrink-0 rounded-full border-[3px] grid place-items-center chart-data text-xs font-bold",
+                      complete ? "border-success bg-success text-white" : "border-ink bg-surface-DEFAULT"
+                    )}
+                  >
+                    {complete ? <Check size={17} strokeWidth={3} /> : `W${week.week}`}
+                  </span>
+                  <span className="flex-1 min-w-0">
+                    <span className="block font-bold">{week.title}</span>
+                    <span className="block text-sm text-ink-muted truncate">{week.description}</span>
+                  </span>
+                  <span className="chart-data text-xs text-ink-muted shrink-0">
+                    {weekDone}/{week.tasks.length}
+                  </span>
+                  <ChevronDown size={18} className={cn("shrink-0 text-ink-muted transition-transform duration-300", isExpanded && "rotate-180")} />
                 </button>
 
-                <div className="px-5 pb-3">
-                  <div className="w-full h-1 bg-border-DEFAULT rounded-full overflow-hidden">
-                    <div className="h-full bg-primary-600 rounded-full transition-all duration-300" style={{ width: `${weekProgress}%` }} />
-                  </div>
-                </div>
-
                 {isExpanded && (
-                  <div className="px-5 pb-5 space-y-2 border-t border-border-DEFAULT pt-4">
-                    <p className="text-[0.625rem] text-ink-faint uppercase tracking-wider font-medium mb-3">Tasks</p>
-                    {week.tasks.map((task) => {
-                      const taskId = `${week.week}-${task}`;
-                      const done = completedTasks.has(taskId);
-                      return (
-                        <button
-                          key={taskId}
-                          onClick={() => toggleTask(taskId)}
-                          className={cn(
-                            "w-full text-left flex items-center gap-3 p-3 rounded-[6px] transition-all duration-150",
-                            done ? "bg-success-bg" : "hover:bg-surface-subtle"
-                          )}
-                        >
-                          {done ? <CheckCircle2 size={16} className="text-success flex-shrink-0" /> : <Circle size={16} className="text-border-strong flex-shrink-0" />}
-                          <span className={cn("text-sm", done ? "text-ink-muted line-through" : "text-ink-secondary")}>{task}</span>
-                        </button>
-                      );
-                    })}
-                    <div className="mt-3 p-3 bg-primary-50 rounded-[6px] border border-primary-100">
-                      <p className="text-[0.625rem] text-primary-600/60 uppercase tracking-wider font-medium mb-1">Milestone</p>
-                      <p className="text-xs font-semibold text-primary-700">{week.milestone}</p>
-                    </div>
+                  <div className="px-4 sm:px-6 pb-5 sm:pl-[5.5rem]">
+                    <ul className="border-y border-border-DEFAULT divide-y divide-border-DEFAULT">
+                      {week.tasks.map((task) => {
+                        const taskId = `${week.week}-${task}`;
+                        const done = completedTasks.has(taskId);
+                        return (
+                          <li key={taskId}>
+                            <button
+                              onClick={() => toggleTask(taskId)}
+                              aria-pressed={done}
+                              className="group w-full text-left flex items-start gap-3 py-2.5 hover:bg-surface-muted"
+                            >
+                              <span
+                                className={cn(
+                                  "mt-0.5 h-5 w-5 shrink-0 rounded-[3px] border-[1.5px] grid place-items-center",
+                                  done ? "border-success bg-success text-white" : "border-ink-muted group-hover:border-ink"
+                                )}
+                              >
+                                {done && <Check size={13} strokeWidth={3.5} />}
+                              </span>
+                              <span className={cn("text-[0.9375rem]", done ? "text-ink-muted line-through" : "text-ink")}>{task}</span>
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                    <p className="mt-2.5 text-sm">
+                      <span className="chart-data text-xs font-bold text-success">MILESTONE › </span>
+                      <span className="text-ink-secondary">{week.milestone}</span>
+                    </p>
                   </div>
                 )}
-              </Card>
-            </motion.div>
-          );
-        })}
-      </div>
+              </li>
+            );
+          })}
+        </ol>
+      </Sheet>
     </div>
   );
 }

@@ -1,22 +1,12 @@
 "use client";
 
+
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { Card } from "@/components/ui/Card";
 import { adminFetch } from "@/lib/admin-fetch";
 import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
-import {
-  TrendingUp,
-  Users,
-  Coins,
-  Cpu,
-  CheckCircle,
-  AlertTriangle,
-  RotateCcw,
-  Sparkles,
-  Loader2,
-} from "lucide-react";
+import { Sheet, PageHeader, FigureStrip, EmptyChart, LoadingChart } from "@/components/ui/Sheet";
+import { RotateCcw } from "lucide-react";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -28,6 +18,7 @@ import {
   XAxis,
   YAxis,
   Tooltip,
+  CartesianGrid,
 } from "recharts";
 
 export default function AdminDashboardPage() {
@@ -59,155 +50,133 @@ export default function AdminDashboardPage() {
   if (loading) {
     return (
       <div className="h-[60vh] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-[#6366f1]" />
+        <LoadingChart />
       </div>
     );
   }
 
   if (error || !stats) {
     return (
-      <div className="text-center py-20 max-w-sm mx-auto space-y-4">
-        <AlertTriangle size={32} className="text-yellow-500 mx-auto" />
-        <h2 className="text-md font-bold text-white">Failed to Compile Stats</h2>
-        <p className="text-xs text-[#a1a1aa] leading-relaxed">
-          {error || "The platform database is currently empty or database credentials failed."}
-        </p>
-        <div className="flex gap-2 justify-center">
-          <Button variant="primary" size="sm" onClick={fetchStats}>
-            Retry Fetch
-          </Button>
-        </div>
+      <div className="space-y-5">
+        <PageHeader title="Control room" description="Live operations overview." />
+        <Sheet>
+          <EmptyChart
+            led="STATS UNAVAILABLE"
+            title="Couldn't load the stats"
+            action={<Button onClick={fetchStats}><RotateCcw size={16} /> Try again</Button>}
+          >
+            {error || "The database is empty or the admin credentials failed."}
+          </EmptyChart>
+        </Sheet>
       </div>
     );
   }
 
   const { metrics, charts } = stats;
-
-  const topMetrics = [
-    { label: "Total Users", value: metrics.totalUsers, description: "All registrations", icon: Users, color: "text-[#818cf8]" },
-    { label: "Active Users", value: metrics.activeUsers, description: "Non-suspended accounts", icon: CheckCircle, color: "text-emerald-400" },
-    { label: "New Users Today", value: metrics.newUsersToday, description: "Joined last 24h", icon: TrendingUp, color: "text-[#818cf8]" },
-    { label: "Total Revenue", value: `$${metrics.totalRevenue}`, description: "Gross earnings", icon: Coins, color: "text-amber-400" },
-    { label: "MRR Estimate", value: `$${metrics.mrr}`, description: "Monthly recurring", icon: Coins, color: "text-purple-400" },
-    { label: "Reports Generated", value: metrics.reportsCount, description: "Total ATS optimization", icon: Sparkles, color: "text-cyan-400" },
-    { label: "AI Cost Today", value: `$${metrics.aiCostToday.toFixed(3)}`, description: "LLM token billing", icon: Cpu, color: "text-rose-400" },
-    { label: "Profit Today", value: `$${metrics.profitToday}`, description: "Revenue minus token costs", icon: Coins, color: "text-emerald-400" },
-    { label: "Conversion Rate", value: `${metrics.conversionRate}%`, description: "Paid plan conversions", icon: TrendingUp, color: "text-[#818cf8]" },
-    { label: "Refund Rate", value: `${metrics.refundRate}%`, description: "Total refunds ratio", icon: AlertTriangle, color: "text-yellow-400" },
-    { label: "Processing Failures", value: metrics.processingFailures, description: "Crashed reports", icon: AlertTriangle, color: "text-red-400" },
-  ];
+  const inr = (n: number) => `₹${Number(n || 0).toLocaleString("en-IN")}`;
+  const axis = { stroke: "#a9a89a", fontSize: 11, tickLine: false, tick: { fill: "#595c69", fontFamily: "var(--font-martian)" } };
+  const tip = { contentStyle: { background: "#1d2b6b", border: "none", borderRadius: 4, color: "#fcfcf7", fontSize: 12 }, labelStyle: { color: "#f5c518" }, itemStyle: { color: "#fcfcf7" } };
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex justify-between items-center gap-4 flex-wrap">
-        <div>
-          <h1 className="text-xl font-bold text-white tracking-tight">Admin Dashboard</h1>
-          <p className="text-xs text-[#a1a1aa] mt-0.5">Real-time SaaS operations overview</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button onClick={fetchStats} className="p-2 border border-[#27272a] rounded-lg hover:bg-[#18181b] transition-colors text-[#a1a1aa] hover:text-white">
-            <RotateCcw size={14} />
-          </button>
-        </div>
-      </div>
+    <div className="space-y-5">
+      <PageHeader
+        title="Control room"
+        description="Live operations overview."
+        actions={
+          <Button variant="outline" onClick={fetchStats}>
+            <RotateCcw size={16} /> Refresh
+          </Button>
+        }
+      />
 
-      {/* Grid of metrics */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-        {topMetrics.map((m) => {
-          const Icon = m.icon;
-          return (
-            <Card key={m.label} variant="default" padding="sm" className="bg-[#18181b] border-[#27272a]">
-              <div className="flex justify-between items-start gap-2">
-                <span className="text-[10px] text-[#a1a1aa] font-medium tracking-wide uppercase">{m.label}</span>
-                <Icon size={12} className={m.color} />
-              </div>
-              <p className="text-lg font-bold text-white mt-2 tracking-tight">{m.value}</p>
-              <span className="text-[9px] text-[#71717a] mt-0.5 block">{m.description}</span>
-            </Card>
-          );
-        })}
-      </div>
+      <Sheet title="Users">
+        <FigureStrip
+          items={[
+            { label: "Total users", value: metrics.totalUsers, note: "All registrations" },
+            { label: "Active", value: metrics.activeUsers, note: "Not suspended" },
+            { label: "New today", value: metrics.newUsersToday, note: "Last 24 hours" },
+            { label: "Conversion", value: `${metrics.conversionRate}%`, note: "Paid plan conversions" },
+          ]}
+        />
+      </Sheet>
 
-      {/* Charts Grid */}
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* User Growth */}
-        <Card variant="default" padding="md" className="bg-[#18181b] border-[#27272a]">
-          <div className="mb-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[#a1a1aa]">User Registrations Growth</h3>
-            <p className="text-[10px] text-[#71717a]">Total user accumulation timeline</p>
-          </div>
-          <div className="h-60 w-full">
+      <Sheet title="Money" aside="Revenue in INR · AI cost in USD">
+        <FigureStrip
+          items={[
+            { label: "Total revenue", value: inr(metrics.totalRevenue), note: "Gross collections" },
+            { label: "MRR estimate", value: inr(metrics.mrr), note: "From active paid plans" },
+            { label: "AI cost today", value: `$${Number(metrics.aiCostToday || 0).toFixed(3)}`, note: "LLM token billing" },
+            { label: "Refund rate", value: `${metrics.refundRate}%`, note: "Refunds over gross", tone: Number(metrics.refundRate) > 5 ? "text-danger" : undefined },
+          ]}
+        />
+      </Sheet>
+
+      <Sheet title="Operations">
+        <FigureStrip
+          items={[
+            { label: "Reports", value: metrics.reportsCount, note: "Analyses generated" },
+            { label: "Profit today", value: metrics.profitToday, note: "Revenue minus token cost" },
+            { label: "Failures", value: metrics.processingFailures, note: "Crashed reports", tone: Number(metrics.processingFailures) > 0 ? "text-danger" : "text-success" },
+          ]}
+        />
+      </Sheet>
+
+      <div className="grid gap-5 lg:grid-cols-2">
+        <Sheet title="User growth" aside="Cumulative">
+          <div className="h-64 px-2 py-4">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={charts.usersGrowth}>
-                <XAxis dataKey="date" stroke="#52525b" fontSize={10} tickLine={false} />
-                <YAxis stroke="#52525b" fontSize={10} tickLine={false} />
-                <Tooltip contentStyle={{ background: "#18181b", border: "1px solid #27272a", fontSize: "11px" }} labelClassName="text-[#a1a1aa]" />
-                <Line type="monotone" dataKey="users" stroke="#6366f1" strokeWidth={2} dot={{ r: 3 }} />
+              <LineChart data={charts.usersGrowth} margin={{ top: 8, right: 16, bottom: 0, left: -12 }}>
+                <CartesianGrid stroke="#e6e6dc" vertical={false} />
+                <XAxis dataKey="date" {...axis} />
+                <YAxis {...axis} />
+                <Tooltip {...tip} />
+                <Line type="linear" dataKey="users" stroke="#1d2b6b" strokeWidth={2.5} dot={{ r: 3, fill: "#f5c518", stroke: "#14140f" }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
-        </Card>
+        </Sheet>
 
-        {/* Revenue Growth */}
-        <Card variant="default" padding="md" className="bg-[#18181b] border-[#27272a]">
-          <div className="mb-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[#a1a1aa]">Gross Revenue Performance</h3>
-            <p className="text-[10px] text-[#71717a]">Accumulated payment collections (USD)</p>
-          </div>
-          <div className="h-60 w-full">
+        <Sheet title="Revenue" aside="INR, cumulative">
+          <div className="h-64 px-2 py-4">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={charts.revenueGrowth}>
-                <defs>
-                  <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="date" stroke="#52525b" fontSize={10} tickLine={false} />
-                <YAxis stroke="#52525b" fontSize={10} tickLine={false} />
-                <Tooltip contentStyle={{ background: "#18181b", border: "1px solid #27272a", fontSize: "11px" }} labelClassName="text-[#a1a1aa]" />
-                <Area type="monotone" dataKey="revenue" stroke="#10b981" fillOpacity={1} fill="url(#revenueGrad)" strokeWidth={2} />
+              <AreaChart data={charts.revenueGrowth} margin={{ top: 8, right: 16, bottom: 0, left: -12 }}>
+                <CartesianGrid stroke="#e6e6dc" vertical={false} />
+                <XAxis dataKey="date" {...axis} />
+                <YAxis {...axis} />
+                <Tooltip {...tip} />
+                <Area type="linear" dataKey="revenue" stroke="#1d7337" fill="#e3efe3" fillOpacity={1} strokeWidth={2.5} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
-        </Card>
+        </Sheet>
 
-        {/* AI Costs Trend */}
-        <Card variant="default" padding="md" className="bg-[#18181b] border-[#27272a]">
-          <div className="mb-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[#a1a1aa]">Daily LLM Token Cost</h3>
-            <p className="text-[10px] text-[#71717a]">API cost breakdown in USD</p>
-          </div>
-          <div className="h-60 w-full">
+        <Sheet title="Daily LLM cost" aside="USD">
+          <div className="h-64 px-2 py-4">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={charts.aiCostTrend}>
-                <XAxis dataKey="date" stroke="#52525b" fontSize={10} tickLine={false} />
-                <YAxis stroke="#52525b" fontSize={10} tickLine={false} />
-                <Tooltip contentStyle={{ background: "#18181b", border: "1px solid #27272a", fontSize: "11px" }} labelClassName="text-[#a1a1aa]" />
-                <Bar dataKey="cost" fill="#f43f5e" radius={[4, 4, 0, 0]} />
+              <BarChart data={charts.aiCostTrend} margin={{ top: 8, right: 16, bottom: 0, left: -12 }}>
+                <CartesianGrid stroke="#e6e6dc" vertical={false} />
+                <XAxis dataKey="date" {...axis} />
+                <YAxis {...axis} />
+                <Tooltip {...tip} cursor={{ fill: "#e6e6dc" }} />
+                <Bar dataKey="cost" fill="#b0241c" radius={[2, 2, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
-        </Card>
+        </Sheet>
 
-        {/* Conversion Funnel */}
-        <Card variant="default" padding="md" className="bg-[#18181b] border-[#27272a]">
-          <div className="mb-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[#a1a1aa]">Conversion Funnel Dropoffs</h3>
-            <p className="text-[10px] text-[#71717a]">Onboarding & subscription completion rate %</p>
-          </div>
-          <div className="h-60 w-full">
+        <Sheet title="Conversion funnel" aside="% completing each step">
+          <div className="h-64 px-2 py-4">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={charts.conversionFunnel} layout="vertical">
-                <XAxis type="number" stroke="#52525b" fontSize={10} tickLine={false} />
-                <YAxis dataKey="name" type="category" stroke="#52525b" fontSize={10} tickLine={false} width={120} />
-                <Tooltip contentStyle={{ background: "#18181b", border: "1px solid #27272a", fontSize: "11px" }} labelClassName="text-[#a1a1aa]" />
-                <Bar dataKey="value" fill="#a855f7" radius={[0, 4, 4, 0]} />
+              <BarChart data={charts.conversionFunnel} layout="vertical" margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
+                <CartesianGrid stroke="#e6e6dc" horizontal={false} />
+                <XAxis type="number" {...axis} />
+                <YAxis dataKey="name" type="category" {...axis} width={120} />
+                <Tooltip {...tip} cursor={{ fill: "#e6e6dc" }} />
+                <Bar dataKey="value" fill="#1d2b6b" radius={[0, 2, 2, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
-        </Card>
+        </Sheet>
       </div>
     </div>
   );

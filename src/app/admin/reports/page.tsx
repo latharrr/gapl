@@ -1,5 +1,7 @@
 "use client";
 
+import { LoadingChart } from "@/components/ui/Sheet";
+
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Card } from "@/components/ui/Card";
@@ -96,7 +98,7 @@ export default function AdminReportsPage() {
   if (loading) {
     return (
       <div className="h-[60vh] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-[#6366f1]" />
+        <LoadingChart />
       </div>
     );
   }
@@ -105,36 +107,36 @@ export default function AdminReportsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-bold text-white tracking-tight">Reports Analytics</h1>
-        <p className="text-xs text-[#a1a1aa] mt-0.5">Audit every resume evaluation, parsed text structure, and recruiter simulation</p>
+        <h1 className="display text-[clamp(1.9rem,4vw,2.6rem)]">Reports</h1>
+        <p className="mt-1.5 text-[0.9375rem] text-ink-secondary">Audit every resume evaluation, parsed text structure, and recruiter simulation</p>
       </div>
 
       {error && (
-        <div className="bg-red-950/20 border border-red-900/40 text-red-400 p-4 rounded-xl text-xs">
+        <div className="bg-danger-bg border border-danger-border text-danger p-4 rounded-[6px] text-xs">
           {error}
         </div>
       )}
 
       {/* Toolbar */}
       <div className="flex flex-wrap gap-3 items-center justify-between">
-        <div className="flex flex-1 min-w-[240px] max-w-md items-center gap-2 bg-[#18181b] border border-[#27272a] rounded-lg px-3 py-1.5">
-          <Search size={14} className="text-[#71717a]" />
+        <div className="flex flex-1 min-w-[240px] max-w-md items-center gap-2 bg-surface-DEFAULT border border-border-DEFAULT rounded-[5px] px-3 py-1.5">
+          <Search size={14} className="text-ink-muted" />
           <input
             type="text"
             placeholder="Search by role or report ID..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="bg-transparent border-none text-xs text-white placeholder-[#71717a] focus:outline-none w-full"
+            className="bg-transparent border-none text-xs text-ink focus:outline-none w-full"
           />
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 bg-[#18181b] border border-[#27272a] rounded-lg px-3 py-1.5 text-xs text-white">
-            <span className="text-[#71717a]">Verdict:</span>
+          <div className="flex items-center gap-1.5 bg-surface-DEFAULT border border-border-DEFAULT rounded-[5px] px-3 py-1.5 text-xs text-ink">
+            <span className="text-ink-muted">Verdict:</span>
             <select
               value={verdictFilter}
               onChange={(e) => setVerdictFilter(e.target.value)}
-              className="bg-transparent border-none focus:outline-none text-xs font-medium text-white cursor-pointer"
+              className="bg-transparent border-none focus:outline-none text-xs font-medium text-ink cursor-pointer"
             >
               <option value="all">All Verdicts</option>
               <option value="Shortlist">Shortlist</option>
@@ -143,12 +145,12 @@ export default function AdminReportsPage() {
             </select>
           </div>
 
-          <div className="flex items-center gap-1.5 bg-[#18181b] border border-[#27272a] rounded-lg px-3 py-1.5 text-xs text-white">
-            <span className="text-[#71717a]">Tier:</span>
+          <div className="flex items-center gap-1.5 bg-surface-DEFAULT border border-border-DEFAULT rounded-[5px] px-3 py-1.5 text-xs text-ink">
+            <span className="text-ink-muted">Tier:</span>
             <select
               value={tierFilter}
               onChange={(e) => setTierFilter(e.target.value)}
-              className="bg-transparent border-none focus:outline-none text-xs font-medium text-white cursor-pointer"
+              className="bg-transparent border-none focus:outline-none text-xs font-medium text-ink cursor-pointer"
             >
               <option value="all">All Tiers</option>
               <option value="Top Product">Top Product</option>
@@ -168,22 +170,22 @@ export default function AdminReportsPage() {
               <div
                 key={r.id}
                 onClick={() => setSelectedReport(r)}
-                className={`bg-[#18181b] border rounded-xl p-4 flex items-center justify-between gap-4 cursor-pointer hover:bg-[#202024] transition-all ${
-                  selectedReport?.id === r.id ? "border-[#6366f1] bg-[#18181b]/80" : "border-[#27272a]"
+                className={`bg-surface-DEFAULT border rounded-[6px] p-4 flex items-center justify-between gap-4 cursor-pointer hover:bg-surface-subtle transition-all ${
+                  selectedReport?.id === r.id ? "border-primary-600 bg-surface-DEFAULT" : "border-border-DEFAULT"
                 }`}
               >
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-white">{r.role}</span>
-                    <Badge className={`text-[9px] border font-semibold ${
-                      verdict === "Shortlist" ? "bg-emerald-950/20 text-emerald-400 border-emerald-900/40" :
-                      verdict === "Reject" ? "bg-red-950/20 text-red-400 border-red-900/40" :
-                      "bg-amber-950/20 text-amber-400 border-amber-900/40"
+                    <span className="text-xs font-bold text-ink">{r.role}</span>
+                    <Badge className={`text-[0.6875rem] border font-semibold ${
+                      verdict === "Shortlist" ? "bg-success-bg text-success border-success-border" :
+                      verdict === "Reject" ? "bg-danger-bg text-danger border-danger-border" :
+                      "bg-warning-bg text-warning border-warning-border"
                     }`}>
                       {verdict}
                     </Badge>
                   </div>
-                  <div className="flex items-center gap-3 text-[10px] text-[#71717a]">
+                  <div className="flex items-center gap-3 text-[0.6875rem] text-ink-muted">
                     <span>ID: {r.id}</span>
                     <span>·</span>
                     <span>Tier: {r.companyTier}</span>
@@ -199,21 +201,21 @@ export default function AdminReportsPage() {
                       e.stopPropagation();
                       handleDeleteReport(r.id);
                     }}
-                    className={`p-2 rounded-lg hover:bg-red-950/20 border border-transparent hover:border-red-900/40 text-red-500 hover:text-red-400 transition-colors ${
+                    className={`p-2 rounded-[5px] hover:bg-danger-bg border border-transparent hover:border-danger-border text-danger hover:text-danger transition-colors ${
                       deletingId === r.id ? "animate-pulse" : ""
                     }`}
                     title={isSuperAdmin ? "Delete report" : "Super Admin privileges required"}
                   >
                     <Trash2 size={13} />
                   </button>
-                  <ChevronRight size={14} className="text-[#71717a]" />
+                  <ChevronRight size={14} className="text-ink-muted" />
                 </div>
               </div>
             );
           })}
 
           {filteredReports.length === 0 && (
-            <div className="text-center py-12 text-[#71717a] border border-dashed border-[#27272a] rounded-xl text-xs">
+            <div className="text-center py-12 text-ink-muted border border-dashed border-border-DEFAULT rounded-[6px] text-xs">
               No reports found matching selection filters.
             </div>
           )}
@@ -222,75 +224,75 @@ export default function AdminReportsPage() {
         {/* Right 1/3: Report inspector panel */}
         <div>
           {selectedReport ? (
-            <Card variant="default" padding="md" className="bg-[#18181b] border-[#27272a] space-y-6">
+            <Card variant="default" padding="md" className="bg-surface-DEFAULT border-border-DEFAULT space-y-6">
               <div>
-                <span className="text-[10px] text-[#71717a] font-semibold uppercase tracking-wider block mb-1">
+                <span className="text-[0.6875rem] text-ink-muted font-semibold uppercase tracking-wider block mb-1">
                   Report Inspector
                 </span>
-                <h2 className="text-sm font-bold text-white">{selectedReport.role}</h2>
-                <span className="text-[10px] text-[#71717a]">ID: {selectedReport.id}</span>
+                <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">{selectedReport.role}</h2>
+                <span className="text-[0.6875rem] text-ink-muted">ID: {selectedReport.id}</span>
               </div>
 
               {/* Recruiter Verdict block */}
-              <div className="p-3.5 bg-[#09090b] border border-[#27272a] rounded-xl space-y-1.5">
+              <div className="p-3.5 bg-surface-muted border border-border-DEFAULT rounded-[6px] space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-[#a1a1aa] font-medium">Recruiter Verdict</span>
-                  <span className="text-[10px] font-mono text-[#6366f1]">
+                  <span className="text-[0.6875rem] text-ink-muted font-medium">Recruiter Verdict</span>
+                  <span className="text-[0.6875rem] font-mono text-primary-600">
                     Conf: {selectedReport.recruiterVerdict?.confidence || 80}%
                   </span>
                 </div>
-                <p className="text-xs text-white leading-relaxed">
+                <p className="text-xs text-ink leading-relaxed">
                   {selectedReport.recruiterVerdict?.reason || "No verdict description was compiled."}
                 </p>
               </div>
 
               {/* Core Skill scores */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-[#09090b] border border-[#27272a] p-3 rounded-lg text-center">
-                  <span className="text-[10px] text-[#71717a] block mb-0.5">ATS SCORE</span>
-                  <span className="text-lg font-bold text-[#6366f1]">{selectedReport.atsScore}%</span>
+                <div className="bg-surface-muted border border-border-DEFAULT p-3 rounded-[5px] text-center">
+                  <span className="text-[0.6875rem] text-ink-muted block mb-0.5">ATS SCORE</span>
+                  <span className="text-lg font-bold text-primary-600">{selectedReport.atsScore}%</span>
                 </div>
-                <div className="bg-[#09090b] border border-[#27272a] p-3 rounded-lg text-center">
-                  <span className="text-[10px] text-[#71717a] block mb-0.5">READINESS</span>
-                  <span className="text-lg font-bold text-emerald-400">{selectedReport.readiness}%</span>
+                <div className="bg-surface-muted border border-border-DEFAULT p-3 rounded-[5px] text-center">
+                  <span className="text-[0.6875rem] text-ink-muted block mb-0.5">READINESS</span>
+                  <span className="text-lg font-bold text-success">{selectedReport.readiness}%</span>
                 </div>
               </div>
 
               {/* Skills checklist */}
               <div className="space-y-3">
                 <div>
-                  <span className="text-[10px] text-[#a1a1aa] font-bold uppercase tracking-wider block mb-1">
+                  <span className="text-[0.6875rem] text-ink-muted font-bold uppercase tracking-wider block mb-1">
                     Missing Skills Identified
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {selectedReport.missingSkills?.map((s: string) => (
-                      <Badge key={s} className="bg-red-950/20 text-red-400 border-red-900/40 text-[9px]">
+                      <Badge key={s} className="bg-danger-bg text-danger border-danger-border text-[0.6875rem]">
                         {s}
                       </Badge>
-                    )) || <span className="text-[10px] text-[#71717a]">None</span>}
+                    )) || <span className="text-[0.6875rem] text-ink-muted">None</span>}
                   </div>
                 </div>
 
                 <div>
-                  <span className="text-[10px] text-[#a1a1aa] font-bold uppercase tracking-wider block mb-1">
+                  <span className="text-[0.6875rem] text-ink-muted font-bold uppercase tracking-wider block mb-1">
                     Validated Strengths
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {selectedReport.strongSkills?.map((s: string) => (
-                      <Badge key={s} className="bg-emerald-950/20 text-emerald-400 border-emerald-900/40 text-[9px]">
+                      <Badge key={s} className="bg-success-bg text-success border-success-border text-[0.6875rem]">
                         {s}
                       </Badge>
-                    )) || <span className="text-[10px] text-[#71717a]">None</span>}
+                    )) || <span className="text-[0.6875rem] text-ink-muted">None</span>}
                   </div>
                 </div>
               </div>
 
               {/* PDF Actions / Impersonation */}
-              <div className="pt-2 border-t border-[#27272a]">
+              <div className="pt-2 border-t border-border-DEFAULT">
                 <Button
                   variant="primary"
                   size="sm"
-                  className="w-full bg-[#18181b] border-[#27272a] hover:bg-[#202024] text-xs py-2 rounded-lg"
+                  className="w-full bg-surface-DEFAULT border-border-DEFAULT hover:bg-surface-subtle text-xs py-2 rounded-[5px]"
                   onClick={() => window.open(`/report/${selectedReport.id}`, "_blank")}
                 >
                   Open Report Details Card
@@ -298,7 +300,7 @@ export default function AdminReportsPage() {
               </div>
             </Card>
           ) : (
-            <div className="border border-dashed border-[#27272a] rounded-xl text-center py-20 text-[#71717a] text-xs">
+            <div className="border border-dashed border-border-DEFAULT rounded-[6px] text-center py-20 text-ink-muted text-xs">
               Select an analysis report to inspect detailed resume metadata.
             </div>
           )}

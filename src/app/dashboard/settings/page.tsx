@@ -1,12 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import { Sheet, PageHeader, APP_PAGE } from "@/components/ui/Sheet";
 import { Input } from "@/components/ui/Input";
 import { useAuth } from "@/context/AuthContext";
-import { Bell, Shield, Trash2, User, AlertTriangle } from "lucide-react";
+import { AlertTriangle, CheckCircle2 } from "lucide-react";
 import { updateUserProfile, logOut } from "@/lib/firebase";
 import { authFetch } from "@/lib/auth-fetch";
 
@@ -83,208 +82,179 @@ export default function SettingsPage() {
     }
   };
 
+  const soon = <span className="stamp text-[0.625rem] text-ink-muted border-dashed">Coming soon</span>;
+
   return (
-    <div className="p-6 md:p-8 max-w-2xl mx-auto space-y-8">
-      {/* Header */}
-      <div>
-        <motion.h1 initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="text-xl font-bold text-ink">
-          Settings
-        </motion.h1>
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.05 }} className="text-sm text-ink-muted mt-0.5">
-          Manage your account preferences
-        </motion.p>
-      </div>
+    <div className={APP_PAGE}>
+      <PageHeader title="Settings" description="Your profile, notifications and account." />
 
-      {/* Profile */}
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-        <Card variant="default" padding="md">
-          <div className="flex items-center gap-2 mb-5">
-            <User size={14} className="text-ink-muted" />
-            <h2 className="text-sm font-semibold text-ink">Profile</h2>
-          </div>
-          <div className="space-y-4">
-            <Input label="Display Name" value={name} onChange={(e) => setName(e.target.value)} id="settings-name" />
-            <Input label="Email" value={user?.email || ""} disabled hint="Email cannot be changed" id="settings-email" />
-            {error && <p className="text-xs text-danger font-medium">{error}</p>}
-            <Button size="sm" onClick={handleSave} variant={saved ? "outline" : "primary"} disabled={saving}>
-              {saving ? "Saving..." : saved ? "Saved" : "Save changes"}
+      <Sheet title="Profile">
+        <div className="px-4 sm:px-6 py-5 grid gap-4 max-w-xl">
+          <Input label="Display name" value={name} onChange={(e) => setName(e.target.value)} id="settings-name" />
+          <Input label="Email" value={user?.email || ""} disabled hint="Email can't be changed" id="settings-email" />
+          <div className="flex items-center gap-3">
+            <Button onClick={handleSave} variant={saved ? "outline" : "primary"} disabled={saving} loading={saving}>
+              {saving ? "Saving" : saved ? "Saved" : "Save changes"}
             </Button>
+            {saved && (
+              <span role="status" className="inline-flex items-center gap-1.5 text-sm text-success">
+                <CheckCircle2 size={15} /> Profile updated
+              </span>
+            )}
           </div>
-        </Card>
-      </motion.div>
+        </div>
+      </Sheet>
 
-      {/* Notifications */}
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-        <Card variant="default" padding="md">
-          <div className="flex items-center gap-2 mb-5">
-            <Bell size={14} className="text-ink-muted" />
-            <h2 className="text-sm font-semibold text-ink">Notifications</h2>
-          </div>
-          <div className="space-y-4">
-            {[
-              { label: "Weekly readiness digest", desc: "Get a weekly summary of your progress" },
-              { label: "New role opportunities", desc: "Notifications when new role templates are added" },
-              { label: "Roadmap reminders", desc: "Remind me to complete my weekly tasks" },
-            ].map((item) => (
-              <div key={item.label} className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-ink">{item.label}</p>
-                  <p className="text-xs text-ink-muted">{item.desc}</p>
+      <Sheet title="Notifications" aside="Email">
+        <ul className="divide-y divide-border-DEFAULT">
+          {[
+            { label: "Weekly readiness digest", desc: "A weekly summary of your progress" },
+            { label: "New role templates", desc: "When new roles are added to Gapl" },
+            { label: "Roadmap reminders", desc: "A nudge to finish your weekly tasks" },
+          ].map((item) => (
+            <li key={item.label} className="flex items-center justify-between gap-4 px-4 sm:px-6 py-4">
+              <div>
+                <p className="font-semibold">{item.label}</p>
+                <p className="text-sm text-ink-muted">{item.desc}</p>
+              </div>
+              {soon}
+            </li>
+          ))}
+        </ul>
+      </Sheet>
+
+      <Sheet title="Security">
+        <ul className="divide-y divide-border-DEFAULT">
+          <li className="flex items-center justify-between gap-4 px-4 sm:px-6 py-4">
+            <div>
+              <p className="font-semibold">Password</p>
+              <p className="text-sm text-ink-muted">Change the password for email sign-in</p>
+            </div>
+            {soon}
+          </li>
+          <li className="flex items-center justify-between gap-4 px-4 sm:px-6 py-4">
+            <div>
+              <p className="font-semibold">Active sessions</p>
+              <p className="text-sm text-ink-muted">See where you&apos;re signed in</p>
+            </div>
+            {soon}
+          </li>
+        </ul>
+      </Sheet>
+
+      <section className="rounded-[6px] border-[1.5px] border-danger overflow-hidden bg-surface-DEFAULT">
+        <header className="px-4 sm:px-6 py-3 bg-danger-bg border-b border-danger-border">
+          <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-danger">Danger zone</h2>
+        </header>
+        <div className="divide-y divide-border-DEFAULT">
+          {(reportsSuccess || error) && (
+            <div className="px-4 sm:px-6 py-3">
+              {reportsSuccess && (
+                <p role="status" className="text-sm font-medium text-success">
+                  All reports and their analysis data have been deleted.
+                </p>
+              )}
+              {error && (
+                <p role="alert" className="text-sm font-medium text-danger">
+                  {error}
+                </p>
+              )}
+            </div>
+          )}
+
+          <div className="px-4 sm:px-6 py-4 space-y-3">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="font-semibold">Delete all reports</p>
+                <p className="text-sm text-ink-muted">Permanently remove every analysis and its data</p>
+              </div>
+              {!showDeleteReportsConfirm && (
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => {
+                    setShowDeleteReportsConfirm(true);
+                    setShowDeleteAccountConfirm(false);
+                    setError("");
+                  }}
+                >
+                  Delete reports
+                </Button>
+              )}
+            </div>
+            {showDeleteReportsConfirm && (
+              <div className="p-4 bg-danger-bg/60 border border-danger-border rounded-[5px] space-y-3">
+                <p className="flex gap-2 items-start text-sm text-ink-secondary">
+                  <AlertTriangle size={16} className="text-danger shrink-0 mt-0.5" />
+                  This permanently deletes every report and its AI trace. It can&apos;t be undone.
+                </p>
+                <div className="flex gap-2 justify-end">
+                  <Button size="sm" variant="outline" onClick={() => setShowDeleteReportsConfirm(false)}>
+                    Keep my reports
+                  </Button>
+                  <Button size="sm" variant="danger" onClick={handleDeleteReports} disabled={deletingReports} loading={deletingReports}>
+                    {deletingReports ? "Deleting" : "Delete all reports"}
+                  </Button>
                 </div>
-                <button className="w-9 h-5 rounded-full bg-primary-600 relative transition-colors">
-                  <span className="absolute right-0.5 top-0.5 w-4 h-4 bg-surface-DEFAULT rounded-full shadow-sm" />
-                </button>
-              </div>
-            ))}
-          </div>
-        </Card>
-      </motion.div>
-
-      {/* Security */}
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-        <Card variant="default" padding="md">
-          <div className="flex items-center gap-2 mb-5">
-            <Shield size={14} className="text-ink-muted" />
-            <h2 className="text-sm font-semibold text-ink">Security</h2>
-          </div>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 bg-surface-subtle rounded-[6px]">
-              <div>
-                <p className="text-sm font-medium text-ink">Password</p>
-                <p className="text-xs text-ink-muted">Last changed: never</p>
-              </div>
-              <Button size="sm" variant="outline">Change</Button>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-surface-subtle rounded-[6px]">
-              <div>
-                <p className="text-sm font-medium text-ink">Active sessions</p>
-                <p className="text-xs text-ink-muted">1 session active</p>
-              </div>
-              <Button size="sm" variant="outline">View</Button>
-            </div>
-          </div>
-        </Card>
-      </motion.div>
-
-      {/* Danger zone */}
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-        <Card variant="bordered" padding="md" className="border-danger/30">
-          <div className="flex items-center gap-2 mb-4">
-            <Trash2 size={14} className="text-danger" />
-            <h2 className="text-sm font-semibold text-danger">Danger Zone</h2>
-          </div>
-          <div className="space-y-4">
-            {reportsSuccess && (
-              <div className="p-3 bg-success/10 border border-success/20 rounded-[6px] text-xs text-success font-medium">
-                All reports and associated analysis data have been deleted.
               </div>
             )}
-            {error && (
-              <div className="p-3 bg-danger/10 border border-danger/20 rounded-[6px] text-xs text-danger font-medium">
-                {error}
-              </div>
-            )}
+          </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-ink">Delete all reports</p>
-                  <p className="text-xs text-ink-muted">Permanently remove all analysis data</p>
-                </div>
-                {!showDeleteReportsConfirm && (
+          <div className="px-4 sm:px-6 py-4 space-y-3">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="font-semibold">Delete account</p>
+                <p className="text-sm text-ink-muted">Permanently remove your account and all its data</p>
+              </div>
+              {!showDeleteAccountConfirm && (
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => {
+                    setShowDeleteAccountConfirm(true);
+                    setShowDeleteReportsConfirm(false);
+                    setDeleteConfirmText("");
+                    setError("");
+                  }}
+                >
+                  Delete account
+                </Button>
+              )}
+            </div>
+            {showDeleteAccountConfirm && (
+              <div className="p-4 bg-danger-bg/60 border border-danger-border rounded-[5px] space-y-3">
+                <p className="flex gap-2 items-start text-sm text-ink-secondary">
+                  <AlertTriangle size={16} className="text-danger shrink-0 mt-0.5" />
+                  This permanently deletes your reports, roadmaps, CV history, billing records and your login. It
+                  can&apos;t be undone.
+                </p>
+                <Input
+                  label="Type DELETE to confirm"
+                  placeholder="DELETE"
+                  value={deleteConfirmText}
+                  onChange={(e) => setDeleteConfirmText(e.target.value)}
+                  id="delete-account-confirm"
+                  autoComplete="off"
+                />
+                <div className="flex gap-2 justify-end">
+                  <Button size="sm" variant="outline" onClick={() => setShowDeleteAccountConfirm(false)}>
+                    Keep my account
+                  </Button>
                   <Button
                     size="sm"
                     variant="danger"
-                    onClick={() => {
-                      setShowDeleteReportsConfirm(true);
-                      setShowDeleteAccountConfirm(false);
-                      setError("");
-                    }}
+                    onClick={handleDeleteAccount}
+                    disabled={deleteConfirmText !== "DELETE" || deletingAccount}
+                    loading={deletingAccount}
                   >
-                    Delete
+                    {deletingAccount ? "Deleting" : "Delete my account"}
                   </Button>
-                )}
+                </div>
               </div>
-              {showDeleteReportsConfirm && (
-                <div className="p-4 bg-surface-subtle border border-border rounded-[6px] space-y-3">
-                  <div className="flex gap-2 items-start text-xs text-ink-muted">
-                    <AlertTriangle size={14} className="text-warning shrink-0 mt-0.5" />
-                    <p>Are you sure you want to delete all reports? This action cannot be undone and will permanently purge all report documents and AI trace calls.</p>
-                  </div>
-                  <div className="flex gap-2 justify-end">
-                    <Button size="sm" variant="outline" onClick={() => setShowDeleteReportsConfirm(false)}>
-                      Cancel
-                    </Button>
-                    <Button size="sm" variant="danger" onClick={handleDeleteReports} disabled={deletingReports}>
-                      {deletingReports ? "Deleting..." : "Yes, delete all reports"}
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <hr className="border-border/50" />
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-ink">Delete account</p>
-                  <p className="text-xs text-ink-muted">Permanently remove your account and all data</p>
-                </div>
-                {!showDeleteAccountConfirm && (
-                  <Button
-                    size="sm"
-                    variant="danger"
-                    onClick={() => {
-                      setShowDeleteAccountConfirm(true);
-                      setShowDeleteReportsConfirm(false);
-                      setDeleteConfirmText("");
-                      setError("");
-                    }}
-                  >
-                    Delete Account
-                  </Button>
-                )}
-              </div>
-              {showDeleteAccountConfirm && (
-                <div className="p-4 bg-surface-subtle border border-danger/20 rounded-[6px] space-y-3">
-                  <div className="flex gap-2 items-start text-xs text-ink-muted">
-                    <AlertTriangle size={14} className="text-danger shrink-0 mt-0.5" />
-                    <p>
-                      <strong>WARNING:</strong> This is a permanent, non-reversible action. Deleting your account will completely purge all reports, roadmaps, optimization history, billing records, and your platform login account.
-                    </p>
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider">
-                      Type <span className="text-danger">DELETE</span> to confirm
-                    </label>
-                    <Input
-                      placeholder="DELETE"
-                      value={deleteConfirmText}
-                      onChange={(e) => setDeleteConfirmText(e.target.value)}
-                      id="delete-account-confirm"
-                      className="border-danger/30 focus-visible:ring-danger/30 text-xs py-1 h-8"
-                    />
-                  </div>
-                  <div className="flex gap-2 justify-end">
-                    <Button size="sm" variant="outline" onClick={() => setShowDeleteAccountConfirm(false)}>
-                      Cancel
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="danger"
-                      onClick={handleDeleteAccount}
-                      disabled={deleteConfirmText !== "DELETE" || deletingAccount}
-                    >
-                      {deletingAccount ? "Deleting..." : "Permanently Delete Account"}
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
+            )}
           </div>
-        </Card>
-      </motion.div>
+        </div>
+      </section>
     </div>
   );
 }

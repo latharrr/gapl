@@ -1,5 +1,7 @@
 "use client";
 
+import { LoadingChart } from "@/components/ui/Sheet";
+
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Card } from "@/components/ui/Card";
@@ -100,7 +102,7 @@ export default function AdminUsersPage() {
   if (loading) {
     return (
       <div className="h-[60vh] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-[#6366f1]" />
+        <LoadingChart />
       </div>
     );
   }
@@ -109,36 +111,36 @@ export default function AdminUsersPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-bold text-white tracking-tight">Users Management</h1>
-        <p className="text-xs text-[#a1a1aa] mt-0.5">Manage user permissions, bans, plans, and impersonation profiles</p>
+        <h1 className="display text-[clamp(1.9rem,4vw,2.6rem)]">Users</h1>
+        <p className="mt-1.5 text-[0.9375rem] text-ink-secondary">Manage user permissions, bans, plans, and impersonation profiles</p>
       </div>
 
       {error && (
-        <div className="bg-red-950/20 border border-red-900/40 text-red-400 p-4 rounded-xl text-xs">
+        <div className="bg-danger-bg border border-danger-border text-danger p-4 rounded-[6px] text-xs">
           {error}
         </div>
       )}
 
       {/* Filters toolbar */}
       <div className="flex flex-wrap gap-3 items-center justify-between">
-        <div className="flex flex-1 min-w-[240px] max-w-md items-center gap-2 bg-[#18181b] border border-[#27272a] rounded-lg px-3 py-1.5">
-          <Search size={14} className="text-[#71717a]" />
+        <div className="flex flex-1 min-w-[240px] max-w-md items-center gap-2 bg-surface-DEFAULT border border-border-DEFAULT rounded-[5px] px-3 py-1.5">
+          <Search size={14} className="text-ink-muted" />
           <input
             type="text"
             placeholder="Search by name or email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="bg-transparent border-none text-xs text-white placeholder-[#71717a] focus:outline-none w-full"
+            className="bg-transparent border-none text-xs text-ink focus:outline-none w-full"
           />
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 bg-[#18181b] border border-[#27272a] rounded-lg px-3 py-1.5 text-xs text-white">
-            <span className="text-[#71717a]">Role:</span>
+          <div className="flex items-center gap-1.5 bg-surface-DEFAULT border border-border-DEFAULT rounded-[5px] px-3 py-1.5 text-xs text-ink">
+            <span className="text-ink-muted">Role:</span>
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
-              className="bg-transparent border-none focus:outline-none text-xs font-medium text-white cursor-pointer"
+              className="bg-transparent border-none focus:outline-none text-xs font-medium text-ink cursor-pointer"
             >
               <option value="all">All Roles</option>
               <option value="super_admin">Super Admin</option>
@@ -149,12 +151,12 @@ export default function AdminUsersPage() {
             </select>
           </div>
 
-          <div className="flex items-center gap-1.5 bg-[#18181b] border border-[#27272a] rounded-lg px-3 py-1.5 text-xs text-white">
-            <span className="text-[#71717a]">Plan:</span>
+          <div className="flex items-center gap-1.5 bg-surface-DEFAULT border border-border-DEFAULT rounded-[5px] px-3 py-1.5 text-xs text-ink">
+            <span className="text-ink-muted">Plan:</span>
             <select
               value={planFilter}
               onChange={(e) => setPlanFilter(e.target.value)}
-              className="bg-transparent border-none focus:outline-none text-xs font-medium text-white cursor-pointer"
+              className="bg-transparent border-none focus:outline-none text-xs font-medium text-ink cursor-pointer"
             >
               <option value="all">All Plans</option>
               <option value="free">Free</option>
@@ -167,11 +169,11 @@ export default function AdminUsersPage() {
       </div>
 
       {/* Users table */}
-      <div className="bg-[#18181b] border border-[#27272a] rounded-xl overflow-hidden">
+      <div className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="border-b border-[#27272a] bg-[#1c1c1f] text-[#71717a] font-semibold uppercase tracking-wider">
+              <tr className="border-b border-border-DEFAULT bg-surface-subtle text-ink-muted font-semibold uppercase tracking-wider">
                 <th className="px-5 py-3.5">User</th>
                 <th className="px-5 py-3.5">Role</th>
                 <th className="px-5 py-3.5">Plan</th>
@@ -180,52 +182,52 @@ export default function AdminUsersPage() {
                 <th className="px-5 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#27272a]">
+            <tbody className="divide-y divide-border-DEFAULT">
               {filteredUsers.map((u) => {
                 const uRole = u.role || "user";
                 const uPlan = u.plan || "free";
                 const isSuspended = u.suspended === true;
 
                 return (
-                  <tr key={u.uid} className="hover:bg-[#202024] transition-colors text-white">
+                  <tr key={u.uid} className="hover:bg-surface-subtle transition-colors text-ink">
                     <td className="px-5 py-4">
                       <div>
-                        <span className="font-semibold text-white block">{u.displayName || "No Name"}</span>
-                        <span className="text-[10px] text-[#71717a]">{u.email}</span>
+                        <span className="font-semibold text-ink block">{u.displayName || "No Name"}</span>
+                        <span className="text-[0.6875rem] text-ink-muted">{u.email}</span>
                       </div>
                     </td>
                     <td className="px-5 py-4">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase ${
-                        uRole === "super_admin" ? "bg-purple-950/40 border border-purple-900/60 text-purple-400" :
-                        uRole === "admin" ? "bg-blue-950/40 border border-blue-900/60 text-blue-400" :
-                        uRole === "support" ? "bg-amber-950/40 border border-amber-900/60 text-amber-400" :
-                        "bg-[#27272a] text-[#a1a1aa]"
+                      <span className={`px-2 py-0.5 rounded text-[0.6875rem] font-semibold uppercase ${
+                        uRole === "super_admin" ? "bg-primary-50 border border-primary-100 text-primary-600" :
+                        uRole === "admin" ? "bg-primary-50 border border-primary-100 text-primary-600" :
+                        uRole === "support" ? "bg-warning-bg border border-warning-border text-warning" :
+                        "bg-surface-subtle text-ink-muted"
                       }`}>
                         {uRole.replace("_", " ")}
                       </span>
                     </td>
                     <td className="px-5 py-4">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase ${
-                        uPlan === "premium" ? "bg-emerald-950/40 border border-emerald-900/60 text-emerald-400" :
-                        uPlan === "pro" ? "bg-indigo-950/40 border border-indigo-900/60 text-indigo-400" :
-                        uPlan === "basic" ? "bg-cyan-950/40 border border-cyan-900/60 text-cyan-400" :
-                        "bg-[#27272a] text-[#71717a]"
+                      <span className={`px-2 py-0.5 rounded text-[0.6875rem] font-semibold uppercase ${
+                        uPlan === "premium" ? "bg-success-bg border border-success-border text-success" :
+                        uPlan === "pro" ? "bg-primary-50 border border-primary-100 text-primary-600" :
+                        uPlan === "basic" ? "bg-primary-50 border border-primary-100 text-primary-600" :
+                        "bg-surface-subtle text-ink-muted"
                       }`}>
                         {uPlan}
                       </span>
                     </td>
-                    <td className="px-5 py-4 font-mono text-[#a1a1aa]">
+                    <td className="px-5 py-4 font-mono text-ink-muted">
                       {u.analysisCount || 0}
                     </td>
                     <td className="px-5 py-4">
                       {isSuspended ? (
-                        <span className="inline-flex items-center gap-1.5 text-xs text-red-500 font-medium">
-                          <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                        <span className="inline-flex items-center gap-1.5 text-xs text-danger font-medium">
+                          <span className="w-1.5 h-1.5 rounded-full bg-danger animate-pulse" />
                           Suspended
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                        <span className="inline-flex items-center gap-1.5 text-xs text-success font-medium">
+                          <span className="w-1.5 h-1.5 rounded-full bg-success" />
                           Active
                         </span>
                       )}
@@ -236,7 +238,7 @@ export default function AdminUsersPage() {
                           variant="outline"
                           size="sm"
                           onClick={() => setSelectedUser(u)}
-                          className="px-2 py-1 h-auto text-[10px] bg-transparent text-white border-[#27272a] hover:bg-[#27272a]"
+                          className="px-2 py-1 h-auto text-[0.6875rem] bg-transparent text-ink border-border-DEFAULT hover:bg-surface-subtle"
                         >
                           Manage User
                         </Button>
@@ -247,7 +249,7 @@ export default function AdminUsersPage() {
               })}
               {filteredUsers.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="text-center py-10 text-[#71717a]">
+                  <td colSpan={6} className="text-center py-10 text-ink-muted">
                     No users matched the criteria.
                   </td>
                 </tr>
@@ -386,17 +388,17 @@ function UserDetailDrawer({
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-[#18181b] border border-[#27272a] rounded-2xl w-full max-w-4xl max-h-[85vh] overflow-y-auto p-6 grid md:grid-cols-2 gap-6">
+      <div className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] w-full max-w-4xl max-h-[85vh] overflow-y-auto p-6 grid md:grid-cols-2 gap-6">
         
         {/* Left column: Admin modifications controls */}
         <div className="space-y-6">
           <div>
-            <h2 className="text-md font-bold text-white tracking-tight">Manage User Profile</h2>
-            <p className="text-xs text-[#a1a1aa] mt-0.5">{selectedUser.email}</p>
+            <h2 className="text-lg font-[800] tracking-[-0.015em] text-ink">Manage User Profile</h2>
+            <p className="text-xs text-ink-muted mt-0.5">{selectedUser.email}</p>
           </div>
 
           {actionError && (
-            <div className="bg-red-950/20 border border-red-900/40 text-red-400 p-3 rounded-lg text-xs">
+            <div className="bg-danger-bg border border-danger-border text-danger p-3 rounded-[5px] text-xs">
               {actionError}
             </div>
           )}
@@ -404,7 +406,7 @@ function UserDetailDrawer({
           <div className="space-y-4">
             {/* Role setting */}
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-wider text-[#a1a1aa] block mb-1.5">
+              <label className="text-[0.6875rem] font-bold uppercase tracking-wider text-ink-muted block mb-1.5">
                 Update Platform Role
               </label>
               <div className="flex gap-2">
@@ -412,7 +414,7 @@ function UserDetailDrawer({
                   defaultValue={selectedUser.role || "user"}
                   disabled={!isSuperAdmin}
                   id="update-role-select"
-                  className="bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-1.5 text-xs text-white flex-1 focus:outline-none"
+                  className="bg-surface-muted border border-border-DEFAULT rounded-[5px] px-3 py-1.5 text-xs text-ink flex-1 focus:outline-none"
                 >
                   <option value="user">User</option>
                   <option value="readonly">Read-only</option>
@@ -434,7 +436,7 @@ function UserDetailDrawer({
                 </Button>
               </div>
               {!isSuperAdmin && (
-                <span className="text-[10px] text-[#71717a] mt-1 block">
+                <span className="text-[0.6875rem] text-ink-muted mt-1 block">
                   🔒 Super Admin permission required to modify user roles.
                 </span>
               )}
@@ -442,7 +444,7 @@ function UserDetailDrawer({
 
             {/* Sub setting */}
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-wider text-[#a1a1aa] block mb-1.5">
+              <label className="text-[0.6875rem] font-bold uppercase tracking-wider text-ink-muted block mb-1.5">
                 Modify Plan Tier
               </label>
               <div className="flex gap-2">
@@ -450,7 +452,7 @@ function UserDetailDrawer({
                   defaultValue={selectedUser.plan || "free"}
                   disabled={!isSuperAdmin}
                   id="update-plan-select"
-                  className="bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-1.5 text-xs text-white flex-1 focus:outline-none"
+                  className="bg-surface-muted border border-border-DEFAULT rounded-[5px] px-3 py-1.5 text-xs text-ink flex-1 focus:outline-none"
                 >
                   <option value="free">Free</option>
                   <option value="basic">Basic</option>
@@ -471,24 +473,24 @@ function UserDetailDrawer({
                 </Button>
               </div>
               {!isSuperAdmin && (
-                <span className="text-[10px] text-[#71717a] mt-1 block">
+                <span className="text-[0.6875rem] text-ink-muted mt-1 block">
                   🔒 Super Admin permission required to modify subscription plans.
                 </span>
               )}
             </div>
 
             {/* Ban / Suspend actions */}
-            <div className="pt-4 border-t border-[#27272a] flex items-center justify-between">
+            <div className="pt-4 border-t border-border-DEFAULT flex items-center justify-between">
               <div>
-                <span className="text-xs font-semibold text-white block">Account Suspension</span>
-                <span className="text-[10px] text-[#71717a]">Temporarily block app access</span>
+                <span className="text-xs font-semibold text-ink block">Account Suspension</span>
+                <span className="text-[0.6875rem] text-ink-muted">Temporarily block app access</span>
               </div>
               <Button
                 variant="outline"
                 size="sm"
                 loading={updatingUser}
                 onClick={() => handleAction("suspend", selectedUser.uid, { suspended: !selectedUser.suspended })}
-                className={selectedUser.suspended ? "border-[#10b981] text-[#10b981]" : "border-red-900/60 text-red-400"}
+                className={selectedUser.suspended ? "border-success text-success" : "border-danger-border text-danger"}
               >
                 {selectedUser.suspended ? <Unlock size={12} className="mr-1" /> : <Lock size={12} className="mr-1" />}
                 {selectedUser.suspended ? "Reinstatement" : "Suspend Access"}
@@ -496,10 +498,10 @@ function UserDetailDrawer({
             </div>
 
             {/* Delete user account */}
-            <div className="pt-4 border-t border-[#27272a] flex items-center justify-between">
+            <div className="pt-4 border-t border-border-DEFAULT flex items-center justify-between">
               <div>
-                <span className="text-xs font-semibold text-red-400 block">Dangerous Actions</span>
-                <span className="text-[10px] text-[#71717a]">Irreversibly wipe user credentials</span>
+                <span className="text-xs font-semibold text-danger block">Dangerous Actions</span>
+                <span className="text-[0.6875rem] text-ink-muted">Irreversibly wipe user credentials</span>
               </div>
               <Button
                 variant="outline"
@@ -511,7 +513,7 @@ function UserDetailDrawer({
                     handleAction("delete", selectedUser.uid);
                   }
                 }}
-                className="border-red-950/60 text-red-500 hover:bg-red-950/30"
+                className="border-danger-border text-danger hover:bg-danger-bg"
               >
                 <Trash2 size={12} className="mr-1" /> Delete Account
               </Button>
@@ -519,11 +521,11 @@ function UserDetailDrawer({
           </div>
 
           {/* Send Email section */}
-          <div className="pt-4 border-t border-[#27272a] space-y-3">
+          <div className="pt-4 border-t border-border-DEFAULT space-y-3">
             <div className="flex items-center gap-2 mb-1">
-              <Mail size={13} className="text-[#6366f1]" />
-              <span className="text-xs font-bold text-white">Send Admin Email</span>
-              <span className="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-950/30 text-emerald-400 border border-emerald-900/40">
+              <Mail size={13} className="text-primary-600" />
+              <span className="text-xs font-bold text-ink">Send Admin Email</span>
+              <span className="ml-auto text-[0.6875rem] font-semibold px-2 py-0.5 rounded bg-success-bg text-success border border-success-border">
                 Unlimited
               </span>
             </div>
@@ -533,7 +535,7 @@ function UserDetailDrawer({
               placeholder="Email subject..."
               value={emailSubject}
               onChange={(e) => setEmailSubject(e.target.value)}
-              className="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-xs text-white placeholder-[#52525b] focus:outline-none focus:border-[#6366f1] transition-colors"
+              className="w-full bg-surface-muted border border-border-DEFAULT rounded-[5px] px-3 py-2 text-xs text-ink focus:outline-none focus:border-primary-600 transition-colors"
             />
             <div className="relative">
               <textarea
@@ -541,18 +543,18 @@ function UserDetailDrawer({
                 value={emailMessage}
                 onChange={(e) => setEmailMessage(e.target.value)}
                 rows={4}
-                className="w-full bg-[#09090b] border border-[#27272a] rounded-lg px-3 py-2 text-xs text-white placeholder-[#52525b] focus:outline-none focus:border-[#6366f1] transition-colors resize-none"
+                className="w-full bg-surface-muted border border-border-DEFAULT rounded-[5px] px-3 py-2 text-xs text-ink focus:outline-none focus:border-primary-600 transition-colors resize-none"
               />
             </div>
 
             {emailError && (
-              <div className="bg-red-950/20 border border-red-900/40 text-red-400 p-2 rounded-lg text-[11px]">
+              <div className="bg-danger-bg border border-danger-border text-danger p-2 rounded-[5px] text-xs">
                 {emailError}
               </div>
             )}
 
             {justSent && (
-              <div className="bg-emerald-950/20 border border-emerald-900/40 text-emerald-400 p-2.5 rounded-lg text-[11px] flex items-center gap-2">
+              <div className="bg-success-bg border border-success-border text-success p-2.5 rounded-[5px] text-xs flex items-center gap-2">
                 <CheckCircle2 size={13} />
                 <span>Email sent successfully to {selectedUser.email}!</span>
               </div>
@@ -562,7 +564,7 @@ function UserDetailDrawer({
               <button
                 onClick={handleRewriteEmail}
                 disabled={rewritingEmail || !emailMessage.trim()}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold text-purple-400 border border-purple-900/40 bg-purple-950/20 rounded-lg hover:bg-purple-950/40 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-primary-600 border border-primary-100 bg-primary-50 rounded-[5px] hover:bg-primary-50 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {rewritingEmail ? <Loader2 size={11} className="animate-spin" /> : <Wand2 size={11} />}
                 AI Rewrite
@@ -570,7 +572,7 @@ function UserDetailDrawer({
               <button
                 onClick={handleSendEmail}
                 disabled={sendingEmail || !emailSubject.trim() || !emailMessage.trim()}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold text-white bg-[#6366f1] rounded-lg hover:bg-[#4f46e5] transition-all disabled:opacity-40 disabled:cursor-not-allowed ml-auto"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-primary-600 rounded-[5px] hover:bg-primary-700 transition-all disabled:opacity-40 disabled:cursor-not-allowed ml-auto"
               >
                 {sendingEmail ? <Loader2 size={11} className="animate-spin" /> : <SendHorizonal size={11} />}
                 {justSent ? "Send Again" : "Send Email"}
@@ -578,57 +580,57 @@ function UserDetailDrawer({
             </div>
           </div>
 
-          <div className="pt-4 border-t border-[#27272a] flex justify-end">
-            <Button variant="outline" size="sm" onClick={onClose} className="text-white border-[#27272a] hover:bg-[#27272a] hover:text-white">
+          <div className="pt-4 border-t border-border-DEFAULT flex justify-end">
+            <Button variant="outline" size="sm" onClick={onClose} className="text-ink border-border-DEFAULT hover:bg-surface-subtle hover:text-ink">
               Cancel
             </Button>
           </div>
         </div>
 
         {/* Right column: Observability User Journey Timeline */}
-        <div className="border-l border-[#27272a] pl-6 space-y-4">
+        <div className="border-l border-border-DEFAULT pl-6 space-y-4">
           <div>
-            <h3 className="text-sm font-bold text-white">Observability Journey Timeline</h3>
-            <p className="text-[10px] text-[#71717a] mt-0.5">Chronological trace timeline of candidate steps</p>
+            <h3 className="text-sm font-bold text-ink">Observability Journey Timeline</h3>
+            <p className="text-[0.6875rem] text-ink-muted mt-0.5">Chronological trace timeline of candidate steps</p>
           </div>
 
           {loadingTimeline ? (
             <div className="py-20 flex justify-center">
-              <Loader2 className="w-6 h-6 animate-spin text-[#6366f1]" />
+              <Loader2 className="w-6 h-6 animate-spin text-primary-600" />
             </div>
           ) : (
             <div className="space-y-4 max-h-[55vh] overflow-y-auto pr-2">
               {timeline.map((item, idx) => {
-                let badgeColor = "bg-[#27272a] text-[#a1a1aa]";
-                if (item.type === "report") badgeColor = "bg-indigo-950/30 text-indigo-400 border border-indigo-900/40";
-                if (item.type === "ai_call") badgeColor = "bg-purple-950/30 text-purple-400 border border-purple-900/40";
-                if (item.type === "payment") badgeColor = "bg-emerald-950/30 text-emerald-400 border border-emerald-900/40";
-                if (item.type === "audit") badgeColor = "bg-amber-950/30 text-amber-400 border border-amber-900/40";
+                let badgeColor = "bg-surface-subtle text-ink-muted";
+                if (item.type === "report") badgeColor = "bg-primary-50 text-primary-600 border border-primary-100";
+                if (item.type === "ai_call") badgeColor = "bg-primary-50 text-primary-600 border border-primary-100";
+                if (item.type === "payment") badgeColor = "bg-success-bg text-success border border-success-border";
+                if (item.type === "audit") badgeColor = "bg-warning-bg text-warning border border-warning-border";
 
                 return (
-                  <div key={idx} className="relative pl-6 pb-2 border-l border-[#27272a] last:border-none">
+                  <div key={idx} className="relative pl-6 pb-2 border-l border-border-DEFAULT last:border-none">
                     {/* Circle dot */}
-                    <div className="absolute -left-[5px] top-1.5 w-2.5 h-2.5 rounded-full bg-[#27272a] border border-[#18181b]" />
+                    <div className="absolute -left-[5px] top-1.5 w-2.5 h-2.5 rounded-full bg-surface-subtle border border-border-DEFAULT" />
 
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-xs font-bold text-white">{item.title}</span>
+                        <span className="text-xs font-bold text-ink">{item.title}</span>
                         <Badge className={`${badgeColor} text-[8px] font-semibold py-0 px-1.5 h-4`}>
                           {item.type.toUpperCase()}
                         </Badge>
-                        <span className="text-[9px] text-[#71717a] font-mono ml-auto">
+                        <span className="text-[0.6875rem] text-ink-muted font-mono ml-auto">
                           {new Date(item.timestamp).toLocaleString()}
                         </span>
                       </div>
-                      <p className="text-[11px] text-[#a1a1aa] leading-relaxed">{item.description}</p>
-                      <span className="text-[9px] text-[#71717a] font-mono block">{item.meta}</span>
+                      <p className="text-xs text-ink-muted leading-relaxed">{item.description}</p>
+                      <span className="text-[0.6875rem] text-ink-muted font-mono block">{item.meta}</span>
                     </div>
                   </div>
                 );
               })}
 
               {timeline.length === 0 && (
-                <div className="text-center py-20 text-[#71717a] text-xs">
+                <div className="text-center py-20 text-ink-muted text-xs">
                   No trace logs recorded for this user yet.
                 </div>
               )}

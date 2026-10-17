@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import { type AnalysisResult } from "@/types/analysis";
-import { Card } from "@/components/ui/Card";
-import { Progress } from "@/components/ui/Progress";
-import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { Plus, TrendingUp, Award, Target, Loader2 } from "lucide-react";
+import { VerdictBadge } from "@/components/ui/Badge";
+import { Sheet, PageHeader, EmptyChart, LoadingChart, FigureStrip, APP_PAGE } from "@/components/ui/Sheet";
+import { Breakdown, SkillsLedger } from "@/components/report/ReportParts";
+import { waitlistCount } from "@/lib/sample-report";
+import { Plus } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { getUserReports } from "@/lib/firebase";
@@ -38,106 +38,72 @@ export default function ProgressPage() {
       .finally(() => setLoading(false));
   }, [user]);
 
-  if (loading) {
-    return (
-      <div className="flex h-full w-full items-center justify-center py-20">
-        <Loader2 className="h-6 w-6 animate-spin text-primary-600" />
-      </div>
-    );
-  }
+  if (loading) return <LoadingChart text="LOADING PROGRESS" />;
 
   if (!result) {
     return (
-      <div className="p-6 md:p-8 max-w-4xl mx-auto text-center py-20">
-        <h1 className="text-xl font-bold text-ink mb-2">No Progress Data Yet</h1>
-        <p className="text-sm text-ink-muted mb-6">Run your first analysis to start tracking your readiness growth.</p>
-        <Link href="/analyze"><Button size="lg" variant="primary" className="gap-2"><Plus size={16} /> Run Analysis</Button></Link>
+      <div className={APP_PAGE}>
+        <PageHeader title="Progress" />
+        <Sheet>
+          <EmptyChart
+            led="NO PROGRESS YET"
+            title="Nothing to track yet"
+            action={
+              <Link href="/analyze">
+                <Button size="lg"><Plus size={17} strokeWidth={2.5} /> Run an analysis</Button>
+              </Link>
+            }
+          >
+            Run your first analysis to start tracking your readiness.
+          </EmptyChart>
+        </Sheet>
       </div>
     );
   }
 
   return (
-    <div className="p-6 md:p-8 max-w-4xl mx-auto space-y-8">
-      <div>
-        <motion.h1 initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="text-xl font-bold text-ink">
-          Progress
-        </motion.h1>
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.05 }} className="text-sm text-ink-muted mt-0.5">
-          Track your readiness improvement over time
-        </motion.p>
-      </div>
+    <div className={APP_PAGE}>
+      <PageHeader
+        title="Progress"
+        description="Where your latest chart stands, and what to build to move it."
+        meta={`${result.role} · ${result.companyTier}`}
+      />
 
-      {/* Stats */}
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="grid grid-cols-3 gap-4">
-        {[
-          { label: "Current readiness", value: `${result.readiness}%`, icon: TrendingUp, color: "text-primary-600" },
-          { label: "ATS Score", value: `${result.atsScore}%`, icon: Target, color: result.atsScore >= 70 ? "text-success" : "text-warning" },
-          { label: "Gaps identified", value: `${result.careerGaps.length}`, icon: Award, color: "text-danger" },
-        ].map(({ label, value, icon: Icon, color }) => (
-          <Card key={label} variant="default" padding="md" className="text-center">
-            <Icon size={16} className={`mx-auto mb-2 ${color}`} />
-            <p className={`text-2xl font-bold ${color}`}>{value}</p>
-            <p className="text-xs text-ink-muted mt-1">{label}</p>
-          </Card>
-        ))}
-      </motion.div>
+      <Sheet title="Latest chart" aside={<VerdictBadge verdict={result.recruiterVerdict.verdict} waitlist={waitlistCount(result.careerGaps)} size="sm" />}>
+        <FigureStrip
+          items={[
+            { label: "Readiness", value: result.readiness },
+            { label: "ATS", value: result.atsScore, tone: result.atsScore >= 70 ? "text-success" : "text-warning" },
+            { label: "Gaps", value: result.careerGaps.length, note: `${result.careerGaps.filter((g) => g.priority === "Critical").length} critical` },
+          ]}
+        />
+      </Sheet>
 
-      {/* Readiness breakdown comparison */}
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-        <Card variant="default" padding="md">
-          <h2 className="text-sm font-semibold text-ink mb-1">Readiness Components</h2>
-          <p className="text-xs text-ink-muted mb-5">Estimated from the evidence visible in your resume</p>
-          <div className="space-y-4">
-            {[
-              { label: "Skill Match (40%)", score: result.readinessBreakdown.skillMatch.score, color: "primary" as const },
-              { label: "Project Complexity (30%)", score: result.readinessBreakdown.projectComplexity.score, color: "warning" as const },
-              { label: "Deployment Evidence (20%)", score: result.readinessBreakdown.deploymentEvidence.score, color: "danger" as const },
-              { label: "Team Collaboration (10%)", score: result.readinessBreakdown.teamCollaboration.score, color: "success" as const },
-            ].map((item) => (
-              <div key={item.label}>
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-xs text-ink-secondary">{item.label}</span>
-                  <span className="text-xs font-semibold text-ink">{item.score}%</span>
-                </div>
-                <Progress value={item.score} color={item.color} size="sm" />
-              </div>
-            ))}
-          </div>
-        </Card>
-      </motion.div>
+      <Sheet title="Readiness components" aside="Weighted into readiness">
+        <Breakdown
+          pulledBy={result.recruiterVerdict.topGap}
+          items={[
+            { label: "Skill match", score: result.readinessBreakdown.skillMatch.score, weight: "40%" },
+            { label: "Project complexity", score: result.readinessBreakdown.projectComplexity.score, weight: "30%" },
+            { label: "Deployment evidence", score: result.readinessBreakdown.deploymentEvidence.score, weight: "20%" },
+            { label: "Team collaboration", score: result.readinessBreakdown.teamCollaboration.score, weight: "10%" },
+          ]}
+        />
+      </Sheet>
 
-      {/* Skills */}
-      <div className="grid md:grid-cols-2 gap-6">
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-          <Card variant="default" padding="md">
-            <h2 className="text-sm font-semibold text-ink mb-4">Strong Skills</h2>
-            <div className="flex flex-wrap gap-2">
-              {result.strongSkills.map((skill) => (
-                <span key={skill} className="px-2.5 py-1 rounded-full bg-success-bg border border-success-border text-xs font-medium text-success">{skill}</span>
-              ))}
-            </div>
-          </Card>
-        </motion.div>
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-          <Card variant="default" padding="md">
-            <h2 className="text-sm font-semibold text-ink mb-4">Skills to Build</h2>
-            <div className="flex flex-wrap gap-2">
-              {result.missingSkills.map((skill) => (
-                <span key={skill} className="px-2.5 py-1 rounded-full bg-danger-bg border border-danger-border text-xs font-medium text-danger">○ {skill}</span>
-              ))}
-            </div>
-          </Card>
-        </motion.div>
-      </div>
+      <Sheet title="Skills">
+        <SkillsLedger strong={result.strongSkills} missing={result.missingSkills} />
+      </Sheet>
 
-      {/* Prompt to run again */}
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
-        <div className="p-5 bg-primary-50 rounded-[6px] border border-primary-100 text-center">
-          <p className="text-sm font-semibold text-primary-700 mb-1">Ready to improve?</p>
-          <p className="text-xs text-primary-600/70 mb-4">Once you&apos;ve worked on your gaps, re-analyze to see your readiness grow.</p>
-          <Link href="/analyze"><Button size="sm" variant="secondary" className="gap-1.5"><Plus size={14} /> Re-analyze</Button></Link>
+      <div className="led-ground rounded-[6px] px-5 sm:px-8 py-8 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+        <div>
+          <h2 className="text-xl font-[800] tracking-[-0.015em] text-surface-muted">Worked on your gaps?</h2>
+          <p className="mt-1 text-surface-muted/70">Re-analyze your updated resume to see your readiness move.</p>
         </div>
-      </motion.div>
+        <Link href="/analyze" className="shrink-0">
+          <Button size="lg"><Plus size={17} strokeWidth={2.5} /> Re-analyze</Button>
+        </Link>
+      </div>
     </div>
   );
 }

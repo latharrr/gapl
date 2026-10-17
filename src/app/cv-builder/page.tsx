@@ -6,6 +6,10 @@ import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
 import { Navbar } from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/Button";
+import { StepRoute } from "@/components/brand/StepRoute";
+import { DepartureBoard } from "@/components/brand/DepartureBoard";
+import { OptionList, ChipGroup, FieldLabel, fieldClass } from "@/components/ui/Choice";
+import { Sheet, FigureStrip } from "@/components/ui/Sheet";
 import { ResumePreview, type CVData } from "@/components/cv/ResumePreview";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
@@ -13,7 +17,7 @@ import { saveCV } from "@/lib/firebase";
 import { authFetch } from "@/lib/auth-fetch";
 import {
   Upload, FileText, ChevronRight, AlertCircle,
-  Download, ArrowLeft, PenLine, Target, ArrowUp, Check, CloudCheck, Mail,
+  Download, ArrowLeft, PenLine, Check, CloudCheck, Mail, ClipboardPaste,
 } from "lucide-react";
 
 const ROLES = ["SDE Intern", "SDE Full Time", "Frontend Engineer", "Backend Engineer",
@@ -29,33 +33,13 @@ const COMPANY_TYPES = [
 ];
 
 const STAGES = [
-  "Parsing your resume…",
-  "Identifying keyword gaps…",
-  "Injecting ATS keywords…",
-  "Rewriting bullets for impact…",
-  "Checking ATS fit signals…",
-  "Finalising your CV…",
+  "Parsing your resume",
+  "Finding keyword gaps",
+  "Adding ATS keywords",
+  "Rewriting bullets for impact",
+  "Checking ATS fit",
+  "Finalising your CV",
 ];
-
-// ── Step indicator ─────────────────────────────────────────────────────────────
-function StepDot({ n, current, label }: { n: number; current: number; label: string }) {
-  const done = current > n;
-  const active = current === n;
-  return (
-    <div className="flex flex-col items-center gap-1">
-      <div className={cn(
-        "w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all",
-        done ? "bg-[#111] border-[#111] text-white"
-          : active ? "border-[#111] text-[#111] bg-surface-DEFAULT"
-          : "border-border-strong text-ink-faint bg-surface-DEFAULT"
-      )}>
-        {done ? <Check size={12} /> : n}
-      </div>
-      <span className={cn("text-[10px] font-medium hidden sm:block",
-        active ? "text-[#111]" : "text-ink-faint")}>{label}</span>
-    </div>
-  );
-}
 
 export default function CVBuilderPage() {
   const { user } = useAuth();
@@ -216,44 +200,20 @@ export default function CVBuilderPage() {
 
   const downloadPDF = () => window.print();
 
+  const stepIndex = step - 1;
+  const STEP_LABELS = ["Target", "Resume", "Build", "Result"];
+
   // ── Loading ────────────────────────────────────────────────────────────────
   if (step === 3) {
     return (
-      <>
-        <Navbar />
-        <div className="min-h-screen pt-14 bg-surface-muted flex items-center justify-center">
-          <div className="text-center max-w-sm px-6">
-            <div className="relative w-16 h-16 mx-auto mb-8">
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                className="absolute inset-0 rounded-full border-2 border-primary-600/20 border-t-primary-600"
-              />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Target size={22} className="text-primary-600" />
-              </div>
-            </div>
-            <h2 className="text-lg font-bold text-[#111] mb-2">Building your ATS-ready CV</h2>
-            <AnimatePresence mode="wait">
-              <motion.p
-                key={loadingStage}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                className="text-sm text-ink-muted"
-              >
-                {STAGES[loadingStage]}
-              </motion.p>
-            </AnimatePresence>
-            <div className="flex justify-center gap-1.5 mt-6">
-              {STAGES.map((_, i) => (
-                <div key={i} className={cn("h-1 rounded-full transition-all duration-500",
-                  i <= loadingStage ? "w-6 bg-primary-600" : "w-2 bg-border-DEFAULT")} />
-              ))}
-            </div>
-          </div>
-        </div>
-      </>
+      <DepartureBoard
+        kicker={`${finalRole} · ${companyType}`}
+        title="Building your CV"
+        detail={`${STAGES[loadingStage]}…`}
+        stages={STAGES}
+        current={loadingStage}
+        footnote="Keep this tab open while your CV is built."
+      />
     );
   }
 
@@ -262,133 +222,112 @@ export default function CVBuilderPage() {
     const improvement = result.atsScore - result.originalAtsScore;
     return (
       <>
-        <Navbar />
-        <main className="pt-14 bg-surface-muted min-h-screen">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 space-y-6">
-
-            {/* Header */}
-            <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div className="print:hidden">
+          <Navbar />
+        </div>
+        <main className="pt-[59px] bg-surface-muted min-h-screen print:hidden">
+          <StepRoute steps={STEP_LABELS} current={stepIndex} />
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-5">
+            <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
-                <div className="flex items-center gap-3 mb-3 print:hidden">
-                  <button onClick={() => setStep(2)} className="inline-flex items-center gap-1.5 text-xs text-ink-muted hover:text-[#111] transition-colors">
-                    <ArrowLeft size={12} /> Rebuild
+                <div className="flex items-center gap-3 mb-2 text-sm">
+                  <button onClick={() => setStep(2)} className="inline-flex items-center gap-1.5 font-medium text-ink-muted hover:text-ink">
+                    <ArrowLeft size={14} /> Rebuild
                   </button>
-                  <span className="text-border-strong text-xs">|</span>
-                  <Link href="/dashboard" className="text-xs text-ink-muted hover:text-[#111] transition-colors">
-                    Dashboard
+                  <span aria-hidden className="text-border-strong">|</span>
+                  <Link href="/dashboard/my-cvs" className="font-medium text-ink-muted hover:text-ink">
+                    My CVs
                   </Link>
                 </div>
-                <h1 className="text-xl font-bold text-[#111]">Your Improved CV</h1>
-                <p className="text-xs text-ink-muted mt-0.5">{finalRole} · {companyType}</p>
-                {savedId && (
-                  <p className="text-xs text-success mt-1 flex items-center gap-1">
-                    <CloudCheck size={11} /> Saved to your account
+                <h1 className="display text-[clamp(2rem,4.5vw,3rem)]">Your improved CV</h1>
+                <p className="chart-data mt-1.5 text-xs text-ink-muted">
+                  {finalRole} · {companyType}
+                  {savedId && (
+                    <span className="ml-2 inline-flex items-center gap-1 text-success">
+                      <CloudCheck size={12} /> Saved to your account
+                    </span>
+                  )}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button variant="outline" size="md" onClick={emailCV} disabled={emailing} loading={emailing}>
+                  {!emailing && <Mail size={16} />} {emailing ? "Sending" : "Email me this"}
+                </Button>
+                <Button size="md" onClick={downloadPDF}>
+                  <Download size={16} /> Download PDF
+                </Button>
+              </div>
+            </div>
+
+            <Sheet title="ATS fit" aside="Estimated">
+              <FigureStrip
+                items={[
+                  { label: "Before", value: result.originalAtsScore, tone: "text-danger" },
+                  { label: "After", value: result.atsScore, tone: "text-success" },
+                  { label: "Change", value: `${improvement >= 0 ? "+" : ""}${improvement}` },
+                  { label: "Bullets rewritten", value: result.bulletsImproved },
+                ]}
+              />
+              {result.topWin && (
+                <div className="border-t border-border-DEFAULT px-4 sm:px-6 py-4 grid grid-cols-[1.25rem_minmax(0,1fr)] gap-x-2">
+                  <PenLine size={16} className="mt-0.5 text-primary-600" />
+                  <p className="text-[0.9375rem]">
+                    <span className="font-bold">Biggest win: </span>
+                    <span className="text-ink-secondary">{result.topWin}</span>
                   </p>
-                )}
-              </div>
-              <div className="flex items-center gap-2 print:hidden">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-1.5"
-                  onClick={emailCV}
-                  disabled={emailing}
-                >
-                  <Mail size={14} /> {emailing ? "Emailing..." : "Email me this"}
-                </Button>
-                <Button variant="primary" size="sm" className="gap-1.5" onClick={downloadPDF}>
-                  <Download size={14} /> Download PDF
-                </Button>
-              </div>
-            </div>
-
-            {/* Score banner */}
-            <div className="grid grid-cols-4 gap-3">
-              {[
-                { label: "ATS Before", value: `${result.originalAtsScore}%`, color: "text-danger" },
-                { label: "ATS After", value: `${result.atsScore}%`, color: "text-success" },
-                { label: "Improvement", value: `+${improvement}%`, color: "text-primary-600" },
-                { label: "Bullets Rewritten", value: result.bulletsImproved, color: "text-[#111]" },
-              ].map(({ label, value, color }) => (
-                <div key={label} className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] p-3 text-center">
-                  <p className="text-[10px] text-ink-muted mb-1">{label}</p>
-                  <span className={`text-xl font-bold ${color}`}>{value}</span>
                 </div>
-              ))}
-            </div>
+              )}
+            </Sheet>
 
-            {/* Top win */}
-            <div className="flex items-start gap-3 p-4 bg-primary-50 rounded-[6px] border border-primary-100">
-              <PenLine size={14} className="text-primary-600 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="text-xs font-semibold text-primary-700 mb-0.5">Biggest win</p>
-                <p className="text-sm text-ink-secondary">{result.topWin}</p>
-              </div>
-            </div>
-
-            <div className="grid lg:grid-cols-3 gap-6">
-              {/* Resume preview */}
-              <div className="lg:col-span-2 bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] overflow-hidden shadow-sm">
-                <div className="flex items-center justify-between px-5 py-3.5 border-b border-border-DEFAULT">
-                  <p className="text-xs font-semibold text-[#111]">Resume Preview</p>
-                  <button onClick={downloadPDF} className="text-xs text-ink-muted hover:text-[#111] flex items-center gap-1 transition-colors">
-                    <Download size={12} /> Download PDF
+            <div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+              <Sheet
+                title="Preview"
+                aside={
+                  <button onClick={downloadPDF} className="font-sans text-xs font-bold text-primary-600 hover:underline inline-flex items-center gap-1">
+                    <Download size={13} /> PDF
                   </button>
+                }
+              >
+                <div className="bg-surface-subtle p-3 sm:p-6 max-h-[760px] overflow-y-auto">
+                  <div className="bg-white shadow-md mx-auto max-w-[800px] p-5 sm:p-8">
+                    <ResumePreview cv={result} />
+                  </div>
                 </div>
-                <div className="p-6 max-h-[700px] overflow-y-auto">
-                  <ResumePreview cv={result} />
-                </div>
-              </div>
+              </Sheet>
 
-              {/* Sidebar */}
-              <div className="space-y-4">
-                {/* Keywords */}
-                <div className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] p-5">
-                  <p className="text-xs font-semibold text-[#111] mb-3">Keywords injected ({result.keywordsInjected?.length})</p>
-                  <div className="flex flex-wrap gap-1.5">
+              <div className="space-y-5">
+                <Sheet title="Keywords added" aside={`${result.keywordsInjected?.length ?? 0}`}>
+                  <ul className="px-4 sm:px-6 py-4 flex flex-wrap gap-2">
                     {result.keywordsInjected?.map((kw) => (
-                      <span key={kw} className="inline-flex items-center gap-1 px-2 py-0.5 bg-success-bg border border-success-border rounded-full text-xs text-success font-medium">
-                        <ArrowUp size={8} />{kw}
-                      </span>
+                      <li key={kw} className="chart-data inline-flex items-center gap-1.5 rounded-[3px] border border-border-strong bg-surface-DEFAULT px-2 py-1 text-xs">
+                        <span aria-hidden className="font-bold text-success">+</span>
+                        {kw}
+                      </li>
                     ))}
-                  </div>
-                </div>
+                  </ul>
+                </Sheet>
 
-                {/* ATS tips */}
-                <div className="bg-[#111] rounded-[6px] p-5">
-                  <p className="text-xs font-semibold text-white mb-3">ATS Score: {result.atsScore}%</p>
-                  <div className="h-2 bg-surface-DEFAULT/10 rounded-full overflow-hidden mb-4">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${result.atsScore}%` }}
-                      transition={{ duration: 1, ease: "easeOut" }}
-                      className="h-full rounded-full bg-primary-600"
-                    />
-                  </div>
-                  {[
-                    "Action verbs on every bullet",
-                    "Quantified metrics injected",
-                    "ATS-standard section headings",
-                    "Keyword density optimised",
-                  ].map((tip) => (
-                    <p key={tip} className="flex items-center gap-2 text-xs text-ink-muted mb-1.5">
-                      <Check size={13} strokeWidth={3} className="text-success shrink-0" /> {tip}
-                    </p>
-                  ))}
-                </div>
+                <Sheet title="What changed">
+                  <ul className="divide-y divide-border-DEFAULT">
+                    {[
+                      "Action verbs on every bullet",
+                      "Quantified metrics added",
+                      "ATS-standard section headings",
+                      "Keyword density tuned",
+                    ].map((tip) => (
+                      <li key={tip} className="flex items-center gap-2.5 px-4 sm:px-6 py-3 text-sm">
+                        <Check size={15} strokeWidth={3} className="text-success shrink-0" /> {tip}
+                      </li>
+                    ))}
+                  </ul>
+                </Sheet>
 
                 <div className="flex flex-col gap-2">
-                  <Button variant="primary" size="lg" className="w-full gap-2" onClick={downloadPDF}>
-                    <Download size={16} /> Download as PDF
+                  <Button size="lg" className="w-full" onClick={downloadPDF}>
+                    <Download size={17} /> Download as PDF
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="w-full gap-2"
-                    onClick={emailCV}
-                    disabled={emailing}
-                  >
-                    <Mail size={16} /> {emailing ? "Emailing..." : "Email me this"}
+                  <Button variant="outline" size="lg" className="w-full" onClick={emailCV} disabled={emailing} loading={emailing}>
+                    {!emailing && <Mail size={17} />} {emailing ? "Sending" : "Email me this"}
                   </Button>
                 </div>
               </div>
@@ -397,11 +336,7 @@ export default function CVBuilderPage() {
         </main>
 
         {/* Hidden print-only layer — rendered outside the clipped scroll container */}
-        <div
-          id="cv-print-target"
-          style={{ display: "none" }}
-          aria-hidden="true"
-        >
+        <div id="cv-print-target" style={{ display: "none" }} aria-hidden="true">
           <ResumePreview cv={result} />
         </div>
 
@@ -426,183 +361,181 @@ export default function CVBuilderPage() {
     );
   }
 
+  const stepMotion = {
+    initial: { opacity: 0, y: 8 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -8 },
+    transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] as const },
+  };
+
   // ── Step 1 & 2 wizard ─────────────────────────────────────────────────────
   return (
     <>
       <Navbar />
-      <main className="pt-14 bg-surface-muted min-h-screen">
-        <div className="max-w-xl mx-auto px-4 py-12">
-
-          {/* Step indicator */}
-          <div className="flex items-center justify-center gap-3 mb-10">
-            <StepDot n={1} current={step} label="Target" />
-            <div className="w-12 h-px bg-border-DEFAULT" />
-            <StepDot n={2} current={step} label="Resume" />
-            <div className="w-12 h-px bg-border-DEFAULT" />
-            <StepDot n={3} current={step} label="Build" />
-            <div className="w-12 h-px bg-border-DEFAULT" />
-            <StepDot n={4} current={step} label="Result" />
-          </div>
-
+      <main className="pt-[59px] bg-surface-muted min-h-screen">
+        <StepRoute steps={STEP_LABELS} current={stepIndex} />
+        <div className="max-w-xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
           <AnimatePresence mode="wait">
-            {/* ── Step 1: Target ────────────────────────────────────────────── */}
             {step === 1 && (
-              <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                <Link href="/dashboard" className="inline-flex items-center gap-1.5 text-xs text-ink-muted hover:text-[#111] mb-6 transition-colors">
-                  <ArrowLeft size={12} /> Back to Dashboard
+              <motion.div key="step1" {...stepMotion}>
+                <Link href="/dashboard" className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-muted hover:text-ink mb-4">
+                  <ArrowLeft size={14} /> Dashboard
                 </Link>
-                <h1 className="text-2xl font-bold text-[#111] mb-1">What are you targeting?</h1>
-                <p className="text-sm text-ink-muted mb-8">Tell us your goal — we'll build your CV around it.</p>
+                <h1 className="display text-[clamp(1.9rem,5vw,2.6rem)]">What are you targeting?</h1>
+                <p className="mt-2 text-ink-secondary">Tell Gapl your goal and it builds your CV around it.</p>
 
-                <div className="space-y-5">
-                  {/* Role */}
+                <div className="mt-8 space-y-7">
                   <div>
-                    <label className="text-xs font-semibold text-[#111] mb-2 block">Target Role</label>
-                    <div className="grid grid-cols-2 gap-2 mb-2">
-                      {ROLES.map((r) => (
-                        <button key={r} onClick={() => setRole(r)}
-                          className={cn("px-3 py-2 rounded-[5px] border text-xs font-medium text-left transition-all",
-                            role === r ? "bg-[#111] text-white border-[#111]" : "bg-surface-DEFAULT border-border-DEFAULT text-[#444] hover:border-[#111]")}>
-                          {r}
-                        </button>
-                      ))}
-                      <button onClick={() => setRole("Other")}
-                        className={cn("px-3 py-2 rounded-[5px] border text-xs font-medium text-left transition-all",
-                          role === "Other" ? "bg-[#111] text-white border-[#111]" : "bg-surface-DEFAULT border-border-DEFAULT text-[#444] hover:border-[#111]")}>
-                        Other…
-                      </button>
-                    </div>
+                    <FieldLabel>Target role</FieldLabel>
+                    <ChipGroup
+                      name="Target role"
+                      value={role}
+                      onChange={setRole}
+                      options={[...ROLES.map((r) => ({ value: r, label: r })), { value: "Other", label: "Other…" }]}
+                    />
                     {role === "Other" && (
-                      <input value={customRole} onChange={(e) => setCustomRole(e.target.value)}
+                      <input
+                        aria-label="Your role"
+                        value={customRole}
+                        onChange={(e) => setCustomRole(e.target.value)}
                         placeholder="e.g. Embedded Systems Engineer"
-                        className="w-full px-3 py-2 text-sm border border-border-DEFAULT rounded-[5px] focus:outline-none focus:border-[#111]" />
+                        className={cn(fieldClass, "mt-3 h-11")}
+                      />
                     )}
                   </div>
 
-                  {/* Seniority */}
                   <div>
-                    <label className="text-xs font-semibold text-[#111] mb-2 block">Experience Level</label>
-                    <div className="flex flex-wrap gap-2">
-                      {SENIORITY.map((s) => (
-                        <button key={s} onClick={() => setSeniority(s)}
-                          className={cn("px-3 py-1.5 rounded-full border text-xs font-medium transition-all",
-                            seniority === s ? "bg-[#111] text-white border-[#111]" : "bg-surface-DEFAULT border-border-DEFAULT text-[#444] hover:border-[#111]")}>
-                          {s}
-                        </button>
-                      ))}
-                    </div>
+                    <FieldLabel>Experience level</FieldLabel>
+                    <ChipGroup name="Experience level" value={seniority} onChange={setSeniority} options={SENIORITY.map((x) => ({ value: x, label: x }))} />
                   </div>
 
-                  {/* Company type */}
                   <div>
-                    <label className="text-xs font-semibold text-[#111] mb-2 block">Company Type</label>
-                    <div className="space-y-2">
-                      {COMPANY_TYPES.map((c) => (
-                        <button key={c.value} onClick={() => setCompanyType(c.value)}
-                          className={cn("w-full px-4 py-3 rounded-[6px] border text-sm font-medium text-left transition-all",
-                            companyType === c.value ? "bg-[#111] text-white border-[#111]" : "bg-surface-DEFAULT border-border-DEFAULT text-[#444] hover:border-[#111]")}>
-                          {c.label}
-                        </button>
-                      ))}
-                    </div>
+                    <FieldLabel>Company type</FieldLabel>
+                    <OptionList name="Company type" value={companyType} onChange={setCompanyType} options={COMPANY_TYPES.map((c) => ({ value: c.value, label: c.label }))} />
                   </div>
 
-                  {/* Optional company name */}
                   <div>
-                    <label className="text-xs font-semibold text-[#111] mb-2 block">Specific Company <span className="text-ink-faint font-normal">(optional)</span></label>
-                    <input value={companyName} onChange={(e) => setCompanyName(e.target.value)}
+                    <FieldLabel htmlFor="cv-company" optional>
+                      Specific company
+                    </FieldLabel>
+                    <input
+                      id="cv-company"
+                      value={companyName}
+                      onChange={(e) => setCompanyName(e.target.value)}
                       placeholder="e.g. Zepto, Razorpay, Google"
-                      className="w-full px-3 py-2 text-sm border border-border-DEFAULT rounded-[5px] focus:outline-none focus:border-[#111]" />
+                      className={cn(fieldClass, "h-11")}
+                    />
                   </div>
 
-                  {/* Optional JD */}
                   <div>
-                    <label className="text-xs font-semibold text-[#111] mb-2 block">Job Description <span className="text-ink-faint font-normal">(optional but recommended)</span></label>
-                    <textarea value={jdText} onChange={(e) => setJdText(e.target.value)}
-                      placeholder="Paste the job description for hyper-targeted keywords…"
+                    <FieldLabel htmlFor="cv-jd" optional>
+                      Job description
+                    </FieldLabel>
+                    <textarea
+                      id="cv-jd"
+                      value={jdText}
+                      onChange={(e) => setJdText(e.target.value)}
+                      placeholder="Paste the job description for sharper keywords…"
                       rows={4}
-                      className="w-full px-3 py-2 text-sm border border-border-DEFAULT rounded-[6px] focus:outline-none focus:border-[#111] resize-none" />
+                      className={cn(fieldClass, "py-2.5 resize-y")}
+                    />
                   </div>
 
-                  <Button size="lg" variant="primary" className="w-full gap-2" disabled={!step1Valid} onClick={() => setStep(2)}>
-                    Continue <ChevronRight size={16} />
+                  <Button size="lg" className="w-full" disabled={!step1Valid} onClick={() => setStep(2)}>
+                    Continue <ChevronRight size={17} />
                   </Button>
                 </div>
               </motion.div>
             )}
 
-            {/* ── Step 2: Resume ────────────────────────────────────────────── */}
             {step === 2 && (
-              <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                <button onClick={() => setStep(1)} className="inline-flex items-center gap-1.5 text-xs text-ink-muted hover:text-[#111] mb-6 transition-colors">
-                  <ArrowLeft size={12} /> Back
+              <motion.div key="step2" {...stepMotion}>
+                <button onClick={() => setStep(1)} className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-muted hover:text-ink mb-4">
+                  <ArrowLeft size={14} /> Back
                 </button>
-                <h1 className="text-2xl font-bold text-[#111] mb-1">Upload your resume</h1>
-                <p className="text-sm text-ink-muted mb-2">
-                  Targeting <strong className="text-[#111]">{finalRole}</strong> · <strong className="text-[#111]">{companyType}</strong>
-                  {companyName && <> · <strong className="text-[#111]">{companyName}</strong></>}
+                <h1 className="display text-[clamp(1.9rem,5vw,2.6rem)]">Upload your resume</h1>
+                <p className="mt-2 text-ink-secondary">
+                  {finalRole} · {companyType}
+                  {companyName && <> · {companyName}</>}
                 </p>
-                <p className="text-xs text-primary-600 font-medium mb-8">Goal: stronger, evidence-based ATS fit</p>
 
                 {error && (
-                  <div className="flex items-start gap-2 p-3 bg-danger-bg border border-danger-border rounded-[6px] mb-4">
-                    <AlertCircle size={14} className="text-danger mt-0.5 flex-shrink-0" />
-                    <p className="text-xs text-danger">{error}</p>
+                  <div role="alert" className="mt-5 flex items-start gap-2 p-3 bg-danger-bg border border-danger-border rounded-[5px]">
+                    <AlertCircle size={16} className="text-danger mt-0.5 shrink-0" />
+                    <p className="text-sm text-danger">{error}</p>
                   </div>
                 )}
 
-                {/* Toggle */}
-                <div className="flex gap-1 bg-surface-subtle rounded-[6px] p-1 mb-4">
+                <div role="tablist" aria-label="Resume input" className="mt-6 grid grid-cols-2 rounded-[6px] bg-surface-subtle p-1">
                   {(["upload", "paste"] as const).map((m) => (
-                    <button key={m} onClick={() => setInputMode(m)}
-                      className={cn("flex-1 py-2 rounded-[5px] text-xs font-medium transition-all capitalize",
-                        inputMode === m ? "bg-surface-DEFAULT text-[#111] shadow-sm" : "text-ink-muted")}>
-                      {m === "upload" ? "Upload File" : "Paste Text"}
+                    <button
+                      key={m}
+                      role="tab"
+                      aria-selected={inputMode === m}
+                      onClick={() => setInputMode(m)}
+                      className={cn(
+                        "inline-flex items-center justify-center gap-2 h-10 rounded-[4px] text-sm font-semibold",
+                        inputMode === m ? "bg-surface-DEFAULT text-ink shadow-sm" : "text-ink-muted hover:text-ink"
+                      )}
+                    >
+                      {m === "upload" ? <Upload size={15} /> : <ClipboardPaste size={15} />}
+                      {m === "upload" ? "Upload file" : "Paste text"}
                     </button>
                   ))}
                 </div>
 
                 {inputMode === "upload" ? (
-                  <div>
-                    <div {...getRootProps()} className={cn(
-                      "border-2 border-dashed rounded-[6px] p-10 text-center cursor-pointer transition-all",
-                      isDragActive ? "border-primary-600 bg-primary-50" : resumeFile ? "border-success bg-success-bg" : "border-border-DEFAULT hover:border-[#111] bg-surface-DEFAULT"
-                    )}>
+                  <div className="mt-3">
+                    <div
+                      {...getRootProps()}
+                      className={cn(
+                        "rounded-[6px] border-2 border-dashed px-6 py-10 text-center cursor-pointer transition-colors",
+                        isDragActive
+                          ? "border-primary-600 bg-primary-50"
+                          : resumeFile
+                          ? "border-success bg-success-bg"
+                          : "border-border-strong bg-surface-DEFAULT hover:border-ink"
+                      )}
+                    >
                       <input {...getInputProps()} />
                       {resumeFile ? (
                         <>
-                          <FileText size={28} className="text-success mx-auto mb-3" />
-                          <p className="text-sm font-semibold text-[#111]">{resumeFile.name}</p>
-                          <p className="text-xs text-ink-muted mt-1">Click to replace</p>
+                          <FileText size={28} className="text-success mx-auto" />
+                          <p className="mt-3 font-bold break-all">{resumeFile.name}</p>
+                          <p className="mt-1 text-sm text-ink-muted">Tap to replace</p>
                         </>
                       ) : (
                         <>
-                          <Upload size={28} className="text-ink-faint mx-auto mb-3" />
-                          <p className="text-sm font-medium text-[#111]">Drop your CV here</p>
-                          <p className="text-xs text-ink-muted mt-1">PDF or TXT · max 5 MB</p>
+                          <Upload size={28} className="text-ink-muted mx-auto" />
+                          <p className="mt-3 font-bold">{isDragActive ? "Drop it here" : "Drop your CV here, or tap to choose"}</p>
+                          <p className="mt-1 text-sm text-ink-muted">PDF or TXT, up to 5 MB</p>
                         </>
                       )}
                     </div>
-                    {fileError && <p className="text-xs text-danger mt-2">{fileError}</p>}
+                    {fileError && (
+                      <p role="alert" className="mt-2 text-sm text-danger">
+                        {fileError}
+                      </p>
+                    )}
                   </div>
                 ) : (
-                  <div className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] p-1">
-                    <div className="px-4 pt-3 pb-1">
-                      <p className="text-xs font-medium text-[#111] mb-1">Paste your resume text</p>
-                    </div>
-                    <textarea value={resumeText} onChange={(e) => setResumeText(e.target.value)}
-                      placeholder="Paste your full resume content here…"
-                      rows={16}
-                      className="w-full px-4 py-2 text-sm text-[#111] placeholder:text-ink-faint focus:outline-none resize-none" />
+                  <div className="mt-3">
+                    <label htmlFor="cv-resume-text" className="sr-only">Resume text</label>
+                    <textarea
+                      id="cv-resume-text"
+                      value={resumeText}
+                      onChange={(e) => setResumeText(e.target.value)}
+                      placeholder="Paste your full resume…"
+                      rows={14}
+                      className={cn(fieldClass, "py-3 resize-y")}
+                    />
                   </div>
                 )}
 
-                <div className="mt-6">
-                  <Button size="lg" variant="primary" className="w-full gap-2" disabled={!step2Valid} onClick={build}>
-                    <PenLine size={16} /> Build ATS-ready CV
-                  </Button>
-                  <p className="text-center text-xs text-ink-faint mt-3">~20 seconds · AI-powered · No Overleaf needed</p>
-                </div>
+                <Button size="lg" className="w-full mt-6" disabled={!step2Valid} onClick={build}>
+                  <PenLine size={17} /> Build my CV
+                </Button>
+                <p className="mt-3 text-center text-sm text-ink-muted">PDF or text in, a print-ready CV out.</p>
               </motion.div>
             )}
           </AnimatePresence>
