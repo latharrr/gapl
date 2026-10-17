@@ -16,7 +16,7 @@ export default function LegacyReportRedirect() {
 
   return (
     <div className="flex items-center justify-center h-screen">
-      <div className="w-6 h-6 border-2 border-[#4F46E5]/20 border-t-[#4F46E5] rounded-full animate-spin" />
+      <div className="w-6 h-6 border-2 border-primary-600/20 border-t-primary-600 rounded-full animate-spin" />
     </div>
   );
 }

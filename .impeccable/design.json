@@ -1,0 +1,929 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-17T00:00:00Z",
+  "title": "Design System: Gapl",
+  "extensions": {
+    "colorMeta": {
+      "ink": {
+        "role": "neutral",
+        "displayName": "Rail Ink",
+        "canonical": "#17181f",
+        "oklch": "oklch(21.1% 0.014 278.7)",
+        "cssVar": "--color-ink",
+        "purpose": "Body text, headlines, sheet header rules.",
+        "tonalRamp": [
+          "#0a0b11",
+          "#22232b",
+          "#3e3f47",
+          "#5c5d66",
+          "#7e8089",
+          "#a2a4ad",
+          "#c8cad4",
+          "#eceef8"
+        ]
+      },
+      "ink-secondary": {
+        "role": "neutral",
+        "displayName": "Ink Secondary",
+        "canonical": "#383b47",
+        "oklch": "oklch(35.4% 0.021 274.2)",
+        "cssVar": "--color-ink-secondary",
+        "purpose": "Prose and descriptions.",
+        "tonalRamp": [
+          "#080a14",
+          "#21232e",
+          "#3c3f4b",
+          "#5a5d6a",
+          "#7c808d",
+          "#a0a4b2",
+          "#c6cad9",
+          "#eaeefd"
+        ]
+      },
+      "ink-muted": {
+        "role": "neutral",
+        "displayName": "Ink Muted",
+        "canonical": "#595c69",
+        "oklch": "oklch(47.7% 0.021 275.3)",
+        "cssVar": "--color-ink-muted",
+        "purpose": "Metadata, column headers, annotations.",
+        "tonalRamp": [
+          "#090a14",
+          "#21232e",
+          "#3c3f4b",
+          "#5a5d6a",
+          "#7c7f8d",
+          "#a0a4b2",
+          "#c6cad9",
+          "#eaeefd"
+        ]
+      },
+      "ink-faint": {
+        "role": "neutral",
+        "displayName": "Ink Faint",
+        "canonical": "#8a8c96",
+        "oklch": "oklch(64.2% 0.015 276.9)",
+        "cssVar": "--color-ink-faint",
+        "purpose": "Placeholders, empty cells, unfilled rows.",
+        "tonalRamp": [
+          "#090b12",
+          "#22232b",
+          "#3d3f48",
+          "#5b5d66",
+          "#7e8089",
+          "#a2a4ae",
+          "#c8cad5",
+          "#eceef9"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Chart Paper",
+        "canonical": "#fcfcf7",
+        "oklch": "oklch(99.0% 0.007 106.5)",
+        "cssVar": "--color-surface-DEFAULT",
+        "purpose": "Sheets, cards, inputs.",
+        "tonalRamp": [
+          "#0b0b08",
+          "#242421",
+          "#40403c",
+          "#5e5e5a",
+          "#80807c",
+          "#a5a5a0",
+          "#cbcbc6",
+          "#efefea"
+        ]
+      },
+      "surface-muted": {
+        "role": "neutral",
+        "displayName": "Platform Ground",
+        "canonical": "#f0f0e8",
+        "oklch": "oklch(95.3% 0.011 106.6)",
+        "cssVar": "--color-surface-muted",
+        "purpose": "Page background; light text on LED.",
+        "tonalRamp": [
+          "#0c0b07",
+          "#24241f",
+          "#40403a",
+          "#5e5e57",
+          "#81817a",
+          "#a5a59e",
+          "#cbcbc3",
+          "#efefe7"
+        ]
+      },
+      "surface-subtle": {
+        "role": "neutral",
+        "displayName": "Pasted Backing",
+        "canonical": "#e6e6dc",
+        "oklch": "oklch(92.2% 0.013 106.7)",
+        "cssVar": "--color-surface-subtle",
+        "purpose": "Progress tracks, flat cards, ghost hover.",
+        "tonalRamp": [
+          "#0c0c06",
+          "#25251d",
+          "#404038",
+          "#5e5e56",
+          "#818178",
+          "#a5a59c",
+          "#cbcbc1",
+          "#efefe5"
+        ]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Rule",
+        "canonical": "#d2d1c4",
+        "oklch": "oklch(85.8% 0.018 103.2)",
+        "cssVar": "--color-border-DEFAULT",
+        "purpose": "Row dividers and default card borders.",
+        "tonalRamp": [
+          "#0c0b04",
+          "#25241b",
+          "#414036",
+          "#5f5e53",
+          "#828175",
+          "#a6a599",
+          "#cccbbe",
+          "#f0efe2"
+        ]
+      },
+      "border-strong": {
+        "role": "neutral",
+        "displayName": "Strong Rule",
+        "canonical": "#a9a89a",
+        "oklch": "oklch(72.8% 0.020 103.6)",
+        "cssVar": "--color-border-strong",
+        "purpose": "Input, outline-button and chip strokes.",
+        "tonalRamp": [
+          "#0d0c03",
+          "#262519",
+          "#414034",
+          "#5f5e52",
+          "#828174",
+          "#a6a597",
+          "#cccbbd",
+          "#f0efe0"
+        ]
+      },
+      "primary": {
+        "role": "primary",
+        "displayName": "Rail Navy",
+        "canonical": "#1d2b6b",
+        "oklch": "oklch(31.9% 0.113 269.6)",
+        "cssVar": "--color-primary-600",
+        "purpose": "Structure: rail bar, enquiry strip, sidebar, footer, links, focus.",
+        "tonalRamp": [
+          "#080c26",
+          "#0c1236",
+          "#131d4f",
+          "#1d2b6b",
+          "#2d3d8c",
+          "#6676bd",
+          "#d8dcee",
+          "#eceef6"
+        ]
+      },
+      "primary-foreground": {
+        "role": "primary",
+        "displayName": "Navy Foreground",
+        "canonical": "#fcfcf7",
+        "oklch": "oklch(99.0% 0.007 106.5)",
+        "cssVar": "--color-primary-foreground",
+        "purpose": "Text on navy.",
+        "tonalRamp": [
+          "#0b0b08",
+          "#242421",
+          "#40403c",
+          "#5e5e5a",
+          "#80807c",
+          "#a5a5a0",
+          "#cbcbc6",
+          "#efefea"
+        ]
+      },
+      "primary-50": {
+        "role": "primary",
+        "displayName": "Navy 50",
+        "canonical": "#eceef6",
+        "oklch": "oklch(95.0% 0.011 274.9)",
+        "cssVar": "--color-primary-50",
+        "purpose": "Tint fills.",
+        "tonalRamp": [
+          "#0a0b10",
+          "#222429",
+          "#3e3f46",
+          "#5c5d64",
+          "#7e8087",
+          "#a2a4ac",
+          "#c8cad2",
+          "#eceef6"
+        ]
+      },
+      "primary-100": {
+        "role": "primary",
+        "displayName": "Navy 100",
+        "canonical": "#d8dcee",
+        "oklch": "oklch(89.7% 0.025 275.9)",
+        "cssVar": "--color-primary-100",
+        "purpose": "Muted text and links on navy.",
+        "tonalRamp": [
+          "#080a16",
+          "#212330",
+          "#3c3f4d",
+          "#595d6c",
+          "#7c7f90",
+          "#a0a4b5",
+          "#c6cadb",
+          "#eaeefe"
+        ]
+      },
+      "primary-400": {
+        "role": "primary",
+        "displayName": "Navy 400",
+        "canonical": "#6676bd",
+        "oklch": "oklch(58.4% 0.111 272.9)",
+        "cssVar": "--color-primary-400",
+        "purpose": "Inactive icons, You tag outline.",
+        "tonalRamp": [
+          "#050032",
+          "#151958",
+          "#2e3879",
+          "#49579b",
+          "#6a7bc2",
+          "#8ea0ea",
+          "#b9c8ff",
+          "#e9eefe"
+        ]
+      },
+      "primary-500": {
+        "role": "primary",
+        "displayName": "Navy 500",
+        "canonical": "#2d3d8c",
+        "oklch": "oklch(39.5% 0.132 270.6)",
+        "cssVar": "--color-primary-500",
+        "purpose": "Ramp step.",
+        "tonalRamp": [
+          "#040032",
+          "#111562",
+          "#273684",
+          "#4256a7",
+          "#637acf",
+          "#859ff7",
+          "#b7c9ff",
+          "#e9eefe"
+        ]
+      },
+      "primary-700": {
+        "role": "primary",
+        "displayName": "Navy 700",
+        "canonical": "#131d4f",
+        "oklch": "oklch(25.7% 0.093 270.0)",
+        "cssVar": "--color-primary-700",
+        "purpose": "Hover on navy surfaces.",
+        "tonalRamp": [
+          "#030131",
+          "#141e50",
+          "#2d3b70",
+          "#495a92",
+          "#6b7db8",
+          "#8ea2df",
+          "#b6c9ff",
+          "#e8eefe"
+        ]
+      },
+      "primary-900": {
+        "role": "primary",
+        "displayName": "Navy 900",
+        "canonical": "#0c1236",
+        "oklch": "oklch(20.3% 0.070 271.5)",
+        "cssVar": "--color-primary-900",
+        "purpose": "Drawer scrim at 50%.",
+        "tonalRamp": [
+          "#040528",
+          "#182046",
+          "#323d65",
+          "#4f5b86",
+          "#717eab",
+          "#94a3d2",
+          "#bac9f9",
+          "#e9eefe"
+        ]
+      },
+      "board": {
+        "role": "secondary",
+        "displayName": "Station-Board Yellow",
+        "canonical": "#f5c518",
+        "oklch": "oklch(84.2% 0.168 90.4)",
+        "cssVar": "--color-board",
+        "purpose": "Primary action, wordmark, headline plate, rules and labels on navy.",
+        "tonalRamp": [
+          "#100a00",
+          "#2e2301",
+          "#4f3d02",
+          "#725a05",
+          "#9c7c01",
+          "#c89f05",
+          "#f4c416",
+          "#ffeebe"
+        ]
+      },
+      "board-deep": {
+        "role": "secondary",
+        "displayName": "Board Deep",
+        "canonical": "#e2b106",
+        "oklch": "oklch(78.3% 0.159 88.4)",
+        "cssVar": "--color-board-deep",
+        "purpose": "Primary button hover.",
+        "tonalRamp": [
+          "#100a00",
+          "#2f2200",
+          "#503d01",
+          "#745a02",
+          "#9e7b06",
+          "#ca9e00",
+          "#f5c332",
+          "#ffedc2"
+        ]
+      },
+      "board-ink": {
+        "role": "secondary",
+        "displayName": "Board Ink",
+        "canonical": "#14140f",
+        "oklch": "oklch(18.9% 0.010 107.3)",
+        "cssVar": "--color-board-ink",
+        "purpose": "Type and rim on yellow plates.",
+        "tonalRamp": [
+          "#0b0b07",
+          "#24241f",
+          "#40403a",
+          "#5e5e58",
+          "#81817a",
+          "#a5a59e",
+          "#cbcbc4",
+          "#efefe8"
+        ]
+      },
+      "led": {
+        "role": "tertiary",
+        "displayName": "LED Amber",
+        "canonical": "#ffb01f",
+        "oklch": "oklch(81.3% 0.165 75.1)",
+        "cssVar": "--color-led",
+        "purpose": "Dot-matrix type, lit route track.",
+        "tonalRamp": [
+          "#130900",
+          "#332001",
+          "#573901",
+          "#7e5405",
+          "#ab7305",
+          "#db9403",
+          "#febd5a",
+          "#feebd2"
+        ]
+      },
+      "led-dim": {
+        "role": "tertiary",
+        "displayName": "Unlit Dot",
+        "canonical": "#4a3a17",
+        "oklch": "oklch(35.8% 0.056 84.6)",
+        "cssVar": "--color-led-dim",
+        "purpose": "Unlit track and LED dividers.",
+        "tonalRamp": [
+          "#110a00",
+          "#2f2201",
+          "#4d3d1a",
+          "#6c5b38",
+          "#907e5a",
+          "#b5a27d",
+          "#dbc8a2",
+          "#ffedc8"
+        ]
+      },
+      "led-ground": {
+        "role": "tertiary",
+        "displayName": "Board Ground",
+        "canonical": "#141412",
+        "oklch": "oklch(19.0% 0.004 106.8)",
+        "cssVar": "--color-led-ground",
+        "purpose": "Black ground of LED sections.",
+        "tonalRamp": [
+          "#0b0b09",
+          "#242422",
+          "#40403d",
+          "#5e5e5b",
+          "#80807e",
+          "#a5a5a2",
+          "#cbcbc8",
+          "#efefec"
+        ]
+      },
+      "greenbar": {
+        "role": "neutral",
+        "displayName": "Greenbar",
+        "canonical": "#e3ecdc",
+        "oklch": "oklch(93.2% 0.023 131.1)",
+        "cssVar": "--color-greenbar",
+        "purpose": "Even rows of chart sheets.",
+        "tonalRamp": [
+          "#080d04",
+          "#20261b",
+          "#3b4236",
+          "#596153",
+          "#7b8375",
+          "#9fa899",
+          "#c5cebe",
+          "#e9f2e2"
+        ]
+      },
+      "success": {
+        "role": "status",
+        "displayName": "CNF Green",
+        "canonical": "#1d7337",
+        "oklch": "oklch(49.1% 0.123 149.1)",
+        "cssVar": "--color-success",
+        "purpose": "Shortlist / CNF, strengths, done.",
+        "tonalRamp": [
+          "#001003",
+          "#002d0e",
+          "#024e1e",
+          "#187034",
+          "#439456",
+          "#69ba7a",
+          "#8fe19e",
+          "#c8ffd1"
+        ]
+      },
+      "success-bg": {
+        "role": "status",
+        "displayName": "CNF Fill",
+        "canonical": "#e3efe3",
+        "oklch": "oklch(94.0% 0.020 145.4)",
+        "cssVar": "--color-success-bg",
+        "purpose": "Stamp fill for CNF.",
+        "tonalRamp": [
+          "#060d06",
+          "#1e271e",
+          "#394339",
+          "#576157",
+          "#798479",
+          "#9da89d",
+          "#c3cec3",
+          "#e6f2e6"
+        ]
+      },
+      "success-border": {
+        "role": "status",
+        "displayName": "CNF Border",
+        "canonical": "#a9cfb1",
+        "oklch": "oklch(81.9% 0.058 151.2)",
+        "cssVar": "--color-success-border",
+        "purpose": "Badge border for success.",
+        "tonalRamp": [
+          "#001004",
+          "#092c15",
+          "#274830",
+          "#45674d",
+          "#678a6f",
+          "#8aaf92",
+          "#b0d6b8",
+          "#d3fadb"
+        ]
+      },
+      "warning": {
+        "role": "status",
+        "displayName": "RAC Ochre",
+        "canonical": "#8f5300",
+        "oklch": "oklch(50.1% 0.113 64.2)",
+        "cssVar": "--color-warning",
+        "purpose": "Maybe / RAC, High priority.",
+        "tonalRamp": [
+          "#150800",
+          "#371d01",
+          "#5d3401",
+          "#864e03",
+          "#af702d",
+          "#d69554",
+          "#febb7a",
+          "#ffead8"
+        ]
+      },
+      "warning-bg": {
+        "role": "status",
+        "displayName": "RAC Fill",
+        "canonical": "#f8edd4",
+        "oklch": "oklch(94.8% 0.035 87.1)",
+        "cssVar": "--color-warning-bg",
+        "purpose": "Stamp fill for RAC.",
+        "tonalRamp": [
+          "#100a00",
+          "#2b230f",
+          "#483f2a",
+          "#665d47",
+          "#897f69",
+          "#aea48c",
+          "#d4cab1",
+          "#f9eed5"
+        ]
+      },
+      "warning-border": {
+        "role": "status",
+        "displayName": "RAC Border",
+        "canonical": "#e3c483",
+        "oklch": "oklch(83.2% 0.090 85.0)",
+        "cssVar": "--color-warning-border",
+        "purpose": "Badge border for warning.",
+        "tonalRamp": [
+          "#110a00",
+          "#2f2201",
+          "#523c03",
+          "#755913",
+          "#997c3c",
+          "#bfa060",
+          "#e6c785",
+          "#ffedc7"
+        ]
+      },
+      "danger": {
+        "role": "status",
+        "displayName": "WL Red",
+        "canonical": "#b0241c",
+        "oklch": "oklch(49.4% 0.177 28.8)",
+        "cssVar": "--color-danger",
+        "purpose": "Reject / WL, Critical, weakest component, errors.",
+        "tonalRamp": [
+          "#1f0000",
+          "#4b0101",
+          "#7d0102",
+          "#ab1e17",
+          "#d54a3d",
+          "#fe7363",
+          "#feb5aa",
+          "#fee9e6"
+        ]
+      },
+      "danger-bg": {
+        "role": "status",
+        "displayName": "WL Fill",
+        "canonical": "#f6e1dd",
+        "oklch": "oklch(92.6% 0.024 30.5)",
+        "cssVar": "--color-danger-bg",
+        "purpose": "Stamp fill for WL.",
+        "tonalRamp": [
+          "#140706",
+          "#2f201d",
+          "#4c3b38",
+          "#6a5956",
+          "#8e7b78",
+          "#b39f9c",
+          "#dac5c1",
+          "#fee9e5"
+        ]
+      },
+      "danger-border": {
+        "role": "status",
+        "displayName": "WL Border",
+        "canonical": "#e4aea7",
+        "oklch": "oklch(79.8% 0.064 27.0)",
+        "cssVar": "--color-danger-border",
+        "purpose": "Badge border for danger.",
+        "tonalRamp": [
+          "#1f0001",
+          "#3e1512",
+          "#5d322d",
+          "#7e4f4a",
+          "#a3726b",
+          "#ca968f",
+          "#f2bbb4",
+          "#ffe9e6"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Hero headline on the signboard; one per page."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section titles on landing, pricing, FAQ."
+      },
+      "page-title": {
+        "displayName": "Page Title",
+        "purpose": "App page heads and analyze step questions."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Plan names, empty-state heads, role in a chart row."
+      },
+      "sheet-title": {
+        "displayName": "Sheet Title",
+        "purpose": "Uppercase header of every chart sheet."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Remarks, descriptions, answers; 62-68ch max."
+      },
+      "body-lead": {
+        "displayName": "Body Lead",
+        "purpose": "Lead paragraph under a headline."
+      },
+      "button": {
+        "displayName": "Button",
+        "purpose": "Button labels."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Uppercase column headers, field labels, dt terms. Never an eyebrow above a headline."
+      },
+      "data": {
+        "displayName": "Data",
+        "purpose": "Martian Mono: figures, codes, dates, annotations. Chart data only."
+      },
+      "data-figure": {
+        "displayName": "Data Figure",
+        "purpose": "Headline figures in rows; scales to clamp(6rem,14vw,10rem) for the one giant number."
+      },
+      "stamp": {
+        "displayName": "Stamp",
+        "purpose": "Status, priority and code stamps."
+      },
+      "led": {
+        "displayName": "LED",
+        "purpose": "Doto, uppercase, LED boards only."
+      }
+    },
+    "shadows": [
+      {
+        "name": "sheet",
+        "value": "0 1px 2px 0 rgb(23 24 31 / 0.08), 0 4px 14px -6px rgb(23 24 31 / 0.12)",
+        "purpose": "Chart sheets and elevated cards (--shadow-card)."
+      },
+      {
+        "name": "button-rest",
+        "value": "0 1px 2px 0 rgb(23 24 31 / 0.08), 0 1px 1px -1px rgb(23 24 31 / 0.05)",
+        "purpose": "Yellow primary button at rest (--shadow-sm)."
+      },
+      {
+        "name": "button-hover",
+        "value": "0 6px 16px -4px rgb(23 24 31 / 0.14), 0 2px 4px -2px rgb(23 24 31 / 0.06)",
+        "purpose": "Yellow primary on hover; mobile sidebar toggle (--shadow-md)."
+      },
+      {
+        "name": "drop",
+        "value": "0 14px 32px -8px rgb(23 24 31 / 0.18), 0 4px 8px -4px rgb(23 24 31 / 0.06)",
+        "purpose": "Mobile nav menu (--shadow-lg)."
+      },
+      {
+        "name": "signboard-rim",
+        "value": "inset 0 0 0 5px #f5c518, inset 0 0 0 6px rgb(20 20 15 / 0.85), 0 2px 0 0 rgb(20 20 15 / 0.08)",
+        "purpose": "Printed double rim of the yellow plate, with 3px board-ink border. Small plate: inset 2px / 3px, 2px border."
+      },
+      {
+        "name": "focus-ring-input",
+        "value": "0 0 0 3px rgb(29 43 107 / 0.15)",
+        "purpose": "Input focus ring with navy border."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out-expo",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "The single system curve."
+      },
+      {
+        "name": "control-transition",
+        "value": "150ms ease-out",
+        "purpose": "Button and input colour, border, shadow, transform."
+      },
+      {
+        "name": "menu-drop",
+        "value": "180ms ease-out-expo, opacity + 6px rise",
+        "purpose": "Mobile nav panel."
+      },
+      {
+        "name": "step-change",
+        "value": "250ms ease-out-expo, opacity + 8px rise",
+        "purpose": "Analyze step transitions."
+      },
+      {
+        "name": "faq-open",
+        "value": "280ms ease-out-expo height + opacity; icon rotate 45deg 300ms",
+        "purpose": "FAQ accordion."
+      },
+      {
+        "name": "drawer",
+        "value": "300ms ease-out-expo, translateX(-240px) to 0",
+        "purpose": "Dashboard mobile sidebar."
+      },
+      {
+        "name": "led-roll",
+        "value": "450ms ease-out-expo, y 100% to 0, every 4200ms (2800ms in CTA)",
+        "purpose": "LED board message roll."
+      },
+      {
+        "name": "led-blink",
+        "value": "1.1s steps(2, jump-none) infinite, opacity 1 to 0.25",
+        "purpose": "NOW stage and PREPARING CHART lamp."
+      },
+      {
+        "name": "progress-fill",
+        "value": "700ms ease-out-expo width",
+        "purpose": "Progress bars."
+      },
+      {
+        "name": "route-spring",
+        "value": "spring stiffness 140, damping 28, mass 0.4",
+        "purpose": "Scroll-scrubbed route track; stops light over 300ms."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "animation/transition 0.01ms, 1 iteration; scroll-behavior auto; LED crossfade at 0ms; route track fully lit",
+        "purpose": "prefers-reduced-motion: reduce. Nothing is carried by motion alone."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "container-marketing",
+        "value": "1280px"
+      },
+      {
+        "name": "container-app",
+        "value": "1024px"
+      },
+      {
+        "name": "container-form",
+        "value": "576px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Station-board yellow plate; the one action per view.",
+      "html": "<button class=\"ds-btn-primary\">Check my status <svg width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12h14\"/><path d=\"m12 5 7 7-7 7\"/></svg></button>",
+      "css": ".ds-btn-primary { display:inline-flex; align-items:center; gap:8px; height:48px; padding:0 24px; font-family: var(--font-sans, Archivo, system-ui, sans-serif); font-size:0.9375rem; font-weight:600; letter-spacing:-0.005em; background:var(--color-board,#f5c518); color:var(--color-board-ink,#14140f); border:2px solid var(--color-board-ink,#14140f); border-radius:6px; box-shadow:0 1px 2px 0 rgb(23 24 31 / 0.08), 0 1px 1px -1px rgb(23 24 31 / 0.05); cursor:pointer; transition:background-color 150ms ease-out, box-shadow 150ms ease-out, transform 150ms ease-out; } .ds-btn-primary:hover { background:var(--color-board-deep,#e2b106); box-shadow:0 6px 16px -4px rgb(23 24 31 / 0.14), 0 2px 4px -2px rgb(23 24 31 / 0.06); } .ds-btn-primary:focus-visible { outline:2px solid var(--color-primary-600,#1d2b6b); outline-offset:2px; } .ds-btn-primary:active { transform:translateY(1px); }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Rail navy; structural actions.",
+      "html": "<button class=\"ds-btn-secondary\">Open report</button>",
+      "css": ".ds-btn-secondary { height:40px; padding:0 16px; font-family: var(--font-sans, Archivo, system-ui, sans-serif); font-size:0.875rem; font-weight:600; background:var(--color-primary-600,#1d2b6b); color:var(--color-primary-foreground,#fcfcf7); border:2px solid var(--color-primary-600,#1d2b6b); border-radius:5px; cursor:pointer; transition:background-color 150ms ease-out, border-color 150ms ease-out, transform 150ms ease-out; } .ds-btn-secondary:hover { background:var(--color-primary-700,#131d4f); border-color:var(--color-primary-700,#131d4f); } .ds-btn-secondary:focus-visible { outline:2px solid var(--color-primary-600,#1d2b6b); outline-offset:2px; } .ds-btn-secondary:active { transform:translateY(1px); }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Paper with strong rule; the second choice beside yellow.",
+      "html": "<button class=\"ds-btn-outline\">View the sample report</button>",
+      "css": ".ds-btn-outline { height:40px; padding:0 16px; font-family: var(--font-sans, Archivo, system-ui, sans-serif); font-size:0.875rem; font-weight:600; background:var(--color-surface-DEFAULT,#fcfcf7); color:var(--color-ink,#17181f); border:1.5px solid var(--color-border-strong,#a9a89a); border-radius:5px; cursor:pointer; transition:border-color 150ms ease-out, transform 150ms ease-out; } .ds-btn-outline:hover { border-color:var(--color-ink,#17181f); } .ds-btn-outline:focus-visible { outline:2px solid var(--color-primary-600,#1d2b6b); outline-offset:2px; } .ds-btn-outline:active { transform:translateY(1px); }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Paper field, 1.5px rule, navy focus ring.",
+      "html": "<label class=\"ds-input-wrap\"><span class=\"ds-input-label\">Email</span><input class=\"ds-input\" placeholder=\"you@college.edu\"/></label>",
+      "css": ".ds-input-wrap { display:grid; gap:6px; max-width:320px; } .ds-input-label { font-family: var(--font-sans, Archivo, system-ui, sans-serif); font-size:0.8125rem; font-weight:600; color:var(--color-ink-secondary,#383b47); } .ds-input { height:44px; padding:0 12px; font-family: var(--font-sans, Archivo, system-ui, sans-serif); font-size:0.9375rem; color:var(--color-ink,#17181f); background:var(--color-surface-DEFAULT,#fcfcf7); border:1.5px solid var(--color-border-strong,#a9a89a); border-radius:5px; transition:border-color 150ms, box-shadow 150ms; } .ds-input::placeholder { color:var(--color-ink-faint,#8a8c96); } .ds-input:hover { border-color:var(--color-ink-muted,#595c69); } .ds-input:focus { outline:none; border-color:var(--color-primary-600,#1d2b6b); box-shadow:0 0 0 3px rgb(29 43 107 / 0.15); }"
+    },
+    {
+      "name": "Rail Bar",
+      "kind": "nav",
+      "refersTo": "rail-bar",
+      "description": "Fixed navy nav with 3px yellow rule, wordmark plate and yellow action.",
+      "html": "<nav class=\"ds-rail\"><span class=\"ds-wordmark\">Gapl</span><a class=\"ds-rail-link\" href=\"#\">How it works</a><a class=\"ds-rail-link ds-active\" href=\"#\">Sample report</a><a class=\"ds-rail-link\" href=\"#\">Pricing</a><button class=\"ds-rail-cta\">Check my status</button></nav>",
+      "css": ".ds-rail { display:flex; align-items:center; gap:4px; height:56px; padding:0 24px; background:var(--color-primary-600,#1d2b6b); border-bottom:3px solid var(--color-board,#f5c518); font-family: var(--font-sans, Archivo, system-ui, sans-serif); } .ds-wordmark { display:inline-flex; align-items:center; height:32px; padding:0 14px; margin-right:20px; background:var(--color-board,#f5c518); color:var(--color-board-ink,#14140f); border:2px solid var(--color-board-ink,#14140f); border-radius:4px; box-shadow:inset 0 0 0 2px var(--color-board,#f5c518), inset 0 0 0 3px rgb(20 20 15 / 0.85); font-weight:850; font-size:1.0625rem; letter-spacing:-0.02em; line-height:1; } .ds-rail-link { padding:6px 12px; font-size:0.875rem; font-weight:500; color:var(--color-primary-100,#d8dcee); text-decoration:none; border-radius:4px; transition:color 150ms, background-color 150ms; } .ds-rail-link:hover { color:#fff; background:rgb(255 255 255 / 0.1); } .ds-rail-link.ds-active { color:var(--color-board,#f5c518); } .ds-rail-link:focus-visible { outline:2px solid var(--color-board,#f5c518); outline-offset:2px; } .ds-rail-cta { margin-left:auto; height:32px; padding:0 12px; font:inherit; font-size:0.8125rem; font-weight:600; background:var(--color-board,#f5c518); color:var(--color-board-ink,#14140f); border:2px solid var(--color-board-ink,#14140f); border-radius:4px; cursor:pointer; } .ds-rail-cta:hover { background:var(--color-board-deep,#e2b106); }"
+    },
+    {
+      "name": "Verdict Stamps",
+      "kind": "chip",
+      "refersTo": "stamp-wl",
+      "description": "Status always written out: code / verdict word. WL number = Critical + High gaps.",
+      "html": "<div class=\"ds-stamps\"><span class=\"ds-stamp ds-wl\">WL 3 <i>/</i> Reject</span><span class=\"ds-stamp ds-rac\">RAC <i>/</i> Maybe</span><span class=\"ds-stamp ds-cnf\">CNF <i>/</i> Shortlist</span><span class=\"ds-stamp ds-pending\">Not charted</span></div>",
+      "css": ".ds-stamps { display:flex; flex-wrap:wrap; gap:10px; } .ds-stamp { display:inline-flex; align-items:center; gap:0.4em; font-family: var(--font-mono, 'Martian Mono', ui-monospace, monospace); font-variation-settings: 'wdth' 85; font-variant-numeric: tabular-nums; font-weight:700; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.02em; line-height:1.3; border:1.5px solid currentColor; border-radius:3px; padding:0.15em 0.5em; white-space:nowrap; } .ds-stamp i { font-style:normal; opacity:0.5; } .ds-wl { color:var(--color-danger,#b0241c); background:var(--color-danger-bg,#f6e1dd); } .ds-rac { color:var(--color-warning,#8f5300); background:var(--color-warning-bg,#f8edd4); } .ds-cnf { color:var(--color-success,#1d7337); background:var(--color-success-bg,#e3efe3); } .ds-pending { color:var(--color-ink-muted,#595c69); border-style:dashed; }"
+    },
+    {
+      "name": "Chart Sheet",
+      "kind": "card",
+      "refersTo": "chart-sheet",
+      "description": "Ruled sheet: uppercase header over 1.5px ink rule, column headers, greenbar rows.",
+      "html": "<section class=\"ds-sheet\"><header class=\"ds-sheet-head\"><h3>Career gaps</h3><span>Ranked by impact</span></header><div class=\"ds-sheet-cols\"><span>Priority</span><span>Gap</span><span class=\"r\">Weeks</span></div><ol class=\"ds-sheet-rows\"><li><span class=\"ds-mini ds-crit\">Critical</span><b>Backend Development</b><span class=\"r\">3w</span></li><li><span class=\"ds-mini ds-high\">High</span><b>Deployment &amp; DevOps</b><span class=\"r\">1w</span></li><li><span class=\"ds-mini ds-high\">High</span><b>System Design</b><span class=\"r\">1w</span></li></ol></section>",
+      "css": ".ds-sheet { font-family: var(--font-sans, Archivo, system-ui, sans-serif); background:var(--color-surface-DEFAULT,#fcfcf7); border-radius:6px; overflow:hidden; box-shadow:0 1px 2px 0 rgb(23 24 31 / 0.08), 0 4px 14px -6px rgb(23 24 31 / 0.12); color:var(--color-ink,#17181f); max-width:560px; } .ds-sheet-head { display:flex; justify-content:space-between; align-items:baseline; padding:12px 24px; border-bottom:1.5px solid var(--color-ink,#17181f); } .ds-sheet-head h3 { margin:0; font-size:0.875rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; } .ds-sheet-head span { font-family: var(--font-mono, 'Martian Mono', ui-monospace, monospace); font-variation-settings: 'wdth' 85; font-variant-numeric: tabular-nums; font-size:0.6875rem; color:var(--color-ink-muted,#595c69); } .ds-sheet-cols, .ds-sheet-rows li { display:grid; grid-template-columns:6.5rem 1fr 4rem; gap:16px; padding:8px 24px; align-items:baseline; } .ds-sheet-cols { border-bottom:1px solid var(--color-border-DEFAULT,#d2d1c4); font-size:0.6875rem; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:var(--color-ink-muted,#595c69); } .ds-sheet-rows { list-style:none; margin:0; padding:0; } .ds-sheet-rows li { padding:14px 24px; } .ds-sheet-rows li:nth-child(even) { background:var(--color-greenbar,#e3ecdc); } .ds-sheet-rows li span.r { font-family: var(--font-mono, 'Martian Mono', ui-monospace, monospace); font-variation-settings: 'wdth' 85; font-variant-numeric: tabular-nums; font-size:0.875rem; } .r { text-align:right; } .ds-mini { font-family: var(--font-mono, 'Martian Mono', ui-monospace, monospace); font-variation-settings: 'wdth' 85; font-variant-numeric: tabular-nums; font-weight:700; font-size:0.6875rem; text-transform:uppercase; border:1.5px solid currentColor; border-radius:3px; padding:0.15em 0.5em; justify-self:start; } .ds-crit { color:var(--color-danger,#b0241c); background:var(--color-danger-bg,#f6e1dd); } .ds-high { color:var(--color-warning,#8f5300); background:var(--color-warning-bg,#f8edd4); }"
+    },
+    {
+      "name": "LED Departure Board",
+      "kind": "custom",
+      "refersTo": "led-board",
+      "description": "Amber Doto on dot-matrix ground for live, rolling and loading states; mirrored in sr-only text.",
+      "html": "<div class=\"ds-led\"><span class=\"ds-led-tag\">GAPL</span><span class=\"ds-led-msg\">NEXT BUILD › DEPLOY ANY PROJECT · 1 WEEK</span><span class=\"ds-led-now\">NOW</span></div>",
+      "css": ".ds-led { display:flex; align-items:center; gap:16px; height:44px; padding:0 16px; border-radius:4px; background-color:var(--color-led-ground,#141412); background-image:radial-gradient(circle at center, rgb(255 176 31 / 0.07) 0.9px, transparent 1.4px); background-size:5px 5px; color:var(--color-led,#ffb01f); font-family:var(--font-led, Doto, ui-monospace, monospace); font-weight:900; font-size:1.05rem; letter-spacing:0.04em; white-space:nowrap; overflow:hidden; } .ds-led-tag { padding-right:16px; border-right:1px solid var(--color-led-dim,#4a3a17); } .ds-led-msg { flex:1; overflow:hidden; text-overflow:ellipsis; } .ds-led-now { animation:ds-blink 1.1s steps(2, jump-none) infinite; } @keyframes ds-blink { 0% { opacity:1; } 100% { opacity:0.25; } } @media (prefers-reduced-motion: reduce) { .ds-led-now { animation:none; } }"
+    },
+    {
+      "name": "Signboard Headline",
+      "kind": "custom",
+      "refersTo": "signboard",
+      "description": "Yellow station nameboard with printed double rim carrying the display headline.",
+      "html": "<div class=\"ds-signboard\"><h1>Know why you're not getting shortlisted.</h1><p>Recruiter verdict · Skill gaps · What to build next</p></div>",
+      "css": ".ds-signboard { font-family: var(--font-sans, Archivo, system-ui, sans-serif); padding:32px 40px 24px; background:var(--color-board,#f5c518); color:var(--color-board-ink,#14140f); border:3px solid var(--color-board-ink,#14140f); border-radius:6px; box-shadow:inset 0 0 0 5px var(--color-board,#f5c518), inset 0 0 0 6px rgb(20 20 15 / 0.85), 0 2px 0 0 rgb(20 20 15 / 0.08); } .ds-signboard h1 { margin:0; font-size:clamp(2.4rem, 6.4vw, 5.6rem); font-weight:850; font-variation-settings:'wdth' 94; letter-spacing:-0.02em; line-height:0.98; text-wrap:balance; } .ds-signboard p { margin:16px 0 0; font-size:0.875rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; }"
+    },
+    {
+      "name": "Leader-Line Breakdown Row",
+      "kind": "custom",
+      "refersTo": "progress-fill",
+      "description": "Score, bar, dashed leader line, reason; the weakest component prints in WL red with words.",
+      "html": "<ul class=\"ds-break\"><li><b>Skill match</b><span class=\"ds-score\">78/100</span><span class=\"ds-bar\"><i style=\"width:78%\"></i></span><span class=\"ds-lead\"></span><span class=\"ds-why\">Core DSA and React present; no backend framework listed</span></li><li class=\"weak\"><b>Deployment evidence</b><span class=\"ds-score\">42/100</span><span class=\"ds-bar\"><i style=\"width:42%\"></i></span><span class=\"ds-lead\"></span><span class=\"ds-why\">Pulled down most by: zero deployed projects</span></li></ul>",
+      "css": ".ds-break { list-style:none; margin:0; padding:0; font-family: var(--font-sans, Archivo, system-ui, sans-serif); color:var(--color-ink,#17181f); max-width:720px; } .ds-break li { display:grid; grid-template-columns:10rem 4rem 10rem 1fr auto; gap:12px; align-items:center; padding:14px 0; border-bottom:1px solid var(--color-border-DEFAULT,#d2d1c4); } .ds-score { font-family: var(--font-mono, 'Martian Mono', ui-monospace, monospace); font-variation-settings: 'wdth' 85; font-variant-numeric: tabular-nums; font-size:0.75rem; font-weight:700; } .ds-bar { height:10px; background:var(--color-surface-subtle,#e6e6dc); border-radius:2px; overflow:hidden; } .ds-bar i { display:block; height:100%; background:var(--color-primary-600,#1d2b6b); border-radius:2px; transition:width 700ms cubic-bezier(0.16,1,0.3,1); } .ds-lead { border-top:1px dashed var(--color-ink-faint,#8a8c96); } .ds-why { font-size:0.875rem; color:var(--color-ink-secondary,#383b47); text-align:right; max-width:22rem; } .weak .ds-score, .weak .ds-why { color:var(--color-danger,#b0241c); font-weight:600; } .weak .ds-bar i { background:var(--color-danger,#b0241c); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Reservation Chart",
+    "overview": "Gapl reads like a reservation chart pasted up on a platform: a pale chart-paper ground, rows banded in greenbar stationery, rail-navy ink for structure, a yellow station nameboard for the headline and the one action that matters, and an amber dot-matrix departure board for anything live. Readiness is a reservation status. Every candidate gets a row on the chart, and the verdict is printed in that row as a status stamp: WL for Reject, RAC for Maybe, CNF for Shortlist. The remark that explains it is printed next to it.\n\nThe density is that of printed stationery. Information sits in ruled sheets with a header rule, column headers and banded rows, not in floating cards. Display type is heavy and a little narrow, the way station signage is. Figures are set in a narrow monospace so they line up in columns. Three materials make up every screen: paper, navy and LED. A section commits to one of them for its full width, so there are no grey template bands between them. Motion follows the signage too: LED messages roll up one line at a time, stages blink from WAIT to NOW to DONE, and a marker runs down the route. Under reduced motion all of it becomes static or a crossfade.\n\nThe world sets itself against the generic AI SaaS look (indigo gradients, sparkle badges, glass, icon-card grids), against gamified products (confetti, mascots, streaks) and against the grey of a corporate HR tool. Its colour comes from railway materials. Nothing in it is decorative chrome.",
+    "keyCharacteristics": [
+      "Three materials: chart paper (light), rail navy (structure), LED board (live and dark).",
+      "Station-board yellow is reserved for the primary action, the wordmark and the headline plate.",
+      "Status is always written out as a code plus a word (`WL 3 / Reject`) and never shown by colour alone.",
+      "Data is printed in ruled sheets: a header over a 1.5px ink rule, uppercase column headers, and greenbar bands on even rows.",
+      "Every number sits next to its reason, joined by a leader line or an adjacent remark.",
+      "Square-ish corners (2–6px), one elevation cue per surface, and no gradients or blur."
+    ],
+    "rules": [
+      {
+        "name": "The Written Status Rule",
+        "body": "A status is never shown by colour alone. A verdict stamp always prints its code, a slash and the verdict word (`CNF / Shortlist`, `RAC / Maybe`, `WL 3 / Reject`), and the WL number is the count of Critical and High gaps between the resume and a shortlist. Priority stamps print their word (`Critical`, `High`). A coloured bar or note is always paired with text that names it.",
+        "section": "colors"
+      },
+      {
+        "name": "The Three Grounds Rule",
+        "body": "A full-width section is paper (`surface-muted`), navy (`primary`) or LED (`led-ground`). There are no grey or tinted template bands between them.",
+        "section": "colors"
+      },
+      {
+        "name": "The Yellow Is The Action Rule",
+        "body": "Yellow fills only the primary action, the wordmark and the headline plate, and on navy or LED grounds it is also the rule colour and label colour. Yellow is never used as text on paper.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Face Per Job Rule",
+        "body": "Archivo is the voice: headlines, prose, buttons, labels. Martian Mono is for chart data only: figures, codes, stamps and short printed annotations, never headlines or paragraphs. Doto is for the LED board only, always uppercase, on `led-ground` or black.",
+        "section": "typography"
+      },
+      {
+        "name": "The One Giant Rule",
+        "body": "Each viewport gets one jump to giant scale: the signboard headline, the readiness numeral, or the route readout. Everything else stays in the hierarchy above.",
+        "section": "typography"
+      },
+      {
+        "name": "The One Cue Rule",
+        "body": "A card gets either a border or a shadow, never both. `default` is bordered, `elevated` is shadowed, `flat` is a backing tint, and `bordered` is a 1.5px ink outline.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Signboard Rim Rule",
+        "body": "The yellow plate's depth is a printed frame rather than a shadow: a 3px `board-ink` border, a 5px inset yellow margin and a 1px inset ink line (2px/1px on the small plate), with at most a 2px soft ground line beneath.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Static Under Reduced Motion Rule",
+        "body": "Under `prefers-reduced-motion: reduce`, every CSS animation and transition is clamped to 0.01ms with one iteration, and smooth scrolling is off. The LED board swaps its roll for an instant crossfade. The route track renders fully lit and stops scrubbing. No information is carried by motion alone.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "**Do** write every status out as code plus word (`CNF / Shortlist`, `RAC / Maybe`, `WL 3 / Reject`), and keep WL red, RAC ochre and CNF green bound to those meanings.",
+      "**Do** put data in a chart sheet: an uppercase Sheet Title, a mono annotation and a 1.5px ink rule, then column headers in the Label style and greenbar bands on even rows.",
+      "**Do** set every number in Martian Mono with tabular figures, and print its reason beside it with a leader line or remark.",
+      "**Do** commit each full-width section to paper, navy or LED, and put a 3px yellow rule on the edge of every navy surface.",
+      "**Do** keep station-board yellow for the one primary action per view, the wordmark and the headline plate.",
+      "**Do** mark progress and state with a shape (tick, lit dot, flag, dashed stamp), not a hue alone.",
+      "**Do** mirror every LED message in screen-reader text or an `aria-live` region.",
+      "**Do** keep corners between 2px and 6px, and reserve circles for stops and step dots.",
+      "**Do** collapse chart columns below 768px into two-column rows with inline labels, so a report reads at 360px."
+    ],
+    "donts": [
+      "**Don't** show a status, priority or strength by colour alone. No unlabelled dots, tinted rows or coloured bars without words.",
+      "**Don't** use Martian Mono for headlines or prose paragraphs, or Doto anywhere outside an LED board.",
+      "**Don't** use neutral zinc, slate or gray. Greys here are blue-tinted ink on warm chart paper.",
+      "**Don't** use gradients, glass blur, glows or pill-shaped buttons.",
+      "**Don't** give a card both a border and a shadow.",
+      "**Don't** set yellow text on paper. Yellow is a fill, or text only on navy and LED grounds.",
+      "**Don't** put an uppercase eyebrow above a headline. Uppercase is for sheet titles, column headers, field labels and `dt` terms.",
+      "**Don't** add confetti, mascots, streaks or sparkle badges. The product is not gamified."
+    ]
+  }
+}

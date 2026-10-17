@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown } from "lucide-react";
+import { Plus } from "lucide-react";
 
 const FAQ_ITEMS = [
   {
@@ -32,74 +32,65 @@ const FAQ_ITEMS = [
 ];
 
 export function FAQ() {
-  const [open, setOpen] = useState<number | null>(null);
+  const [open, setOpen] = useState<number | null>(0);
 
   return (
-    <section id="faq" className="py-24 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="max-w-2xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-14">
-            <motion.p
-              initial={{ opacity: 0, y: 8 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-xs font-semibold text-primary-600 uppercase tracking-widest mb-3"
-            >
-              FAQ
-            </motion.p>
-            <motion.h2
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="text-3xl font-bold text-ink tracking-tight"
-            >
-              Common questions
-            </motion.h2>
-          </div>
+    <section id="faq" className="bg-surface-muted scroll-mt-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 grid gap-10 lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)] lg:gap-14">
+        <div>
+          <h2 className="display text-[clamp(2rem,4.2vw,3.5rem)]">Enquiry.</h2>
+          <p className="mt-4 text-lg text-ink-secondary">
+            Something else?{" "}
+            <a href="mailto:hello@gapl.in" className="font-semibold text-primary-600 underline hover:text-primary-700">
+              hello@gapl.in
+            </a>
+          </p>
+        </div>
 
-          {/* Items */}
-          <div className="space-y-1">
-            {FAQ_ITEMS.map((item, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 8 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.06 }}
-                className="border border-border-DEFAULT rounded-xl overflow-hidden"
-              >
-                <button
-                  onClick={() => setOpen(open === i ? null : i)}
-                  className="w-full text-left px-5 py-4 flex items-center justify-between gap-4 hover:bg-surface-subtle transition-colors"
-                  aria-expanded={open === i}
-                >
-                  <span className="text-sm font-medium text-ink">{item.q}</span>
-                  <ChevronDown
-                    size={16}
-                    className={`text-ink-muted flex-shrink-0 transition-transform duration-200 ${
-                      open === i ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
+        <div className="border-t-[1.5px] border-ink">
+          {FAQ_ITEMS.map((item, i) => {
+            const isOpen = open === i;
+            return (
+              <div key={item.q} className="border-b border-border-strong">
+                <h3>
+                  <button
+                    onClick={() => setOpen(isOpen ? null : i)}
+                    className="group w-full text-left py-5 flex items-start gap-4"
+                    aria-expanded={isOpen}
+                    aria-controls={`faq-${i}`}
+                  >
+                    <span className="chart-data pt-0.5 text-sm font-bold text-ink-muted">Q{i + 1}</span>
+                    <span className="flex-1 text-[1.0625rem] font-bold tracking-[-0.01em] group-hover:text-primary-600">
+                      {item.q}
+                    </span>
+                    <Plus
+                      size={20}
+                      strokeWidth={2.25}
+                      className={`mt-0.5 shrink-0 text-ink-muted transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                        isOpen ? "rotate-45" : ""
+                      }`}
+                    />
+                  </button>
+                </h3>
                 <AnimatePresence initial={false}>
-                  {open === i && (
+                  {isOpen && (
                     <motion.div
+                      id={`faq-${i}`}
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
+                      transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+                      className="overflow-hidden"
                     >
-                      <div className="px-5 pb-4 text-sm text-ink-muted leading-relaxed border-t border-border-DEFAULT pt-3">
+                      <p className="pb-5 pl-[2.6rem] pr-8 max-w-[68ch] text-[0.9375rem] leading-relaxed text-ink-secondary">
                         {item.a}
-                      </div>
+                      </p>
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </motion.div>
-            ))}
-          </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>

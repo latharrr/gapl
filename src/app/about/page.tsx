@@ -11,13 +11,13 @@ export default function AboutPage() {
   return (
     <>
       <Navbar />
-      <main className="pt-24 pb-16 bg-[#FAFAFA] min-h-screen text-[#111111]">
+      <main className="pt-24 pb-16 bg-surface-muted min-h-screen text-ink">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
           <h1 className="text-4xl font-extrabold tracking-tight mb-8">
             About Gapl
           </h1>
-          <div className="prose prose-zinc max-w-none space-y-6 text-sm text-zinc-700 leading-relaxed">
-            <p className="text-lg text-zinc-600 font-medium leading-relaxed">
+          <div className="prose prose-zinc max-w-none space-y-6 text-sm text-ink-secondary leading-relaxed">
+            <p className="text-lg text-ink-muted font-medium leading-relaxed">
               We don&apos;t build resumes. We help you build readiness.
             </p>
             <p>
@@ -33,12 +33,12 @@ export default function AboutPage() {
               <li>What specific evidence should I build next to get shortlisted?</li>
             </ul>
 
-            <h2 className="text-xl font-bold text-zinc-900 pt-6">Our Philosophy</h2>
+            <h2 className="text-xl font-bold text-ink pt-6">Our Philosophy</h2>
             <p>
               We believe in evidence over credentials. A candidate who can demonstrate clear proof of project deployment, testing coverage, and architectural understanding will always outperform a generic candidate. Gapl parses your credentials and simulates a recruiter review to tell you where your evidence is weak, giving you a step-by-step roadmap to build the missing pieces.
             </p>
 
-            <h2 className="text-xl font-bold text-zinc-900 pt-6">Contact the Team</h2>
+            <h2 className="text-xl font-bold text-ink pt-6">Contact the Team</h2>
             <p>
               Have feedback, questions, or ideas? We are always listening. Drop us a line at{" "}
               <a href="mailto:hello@gapl.in" className="text-primary-600 font-medium hover:underline">

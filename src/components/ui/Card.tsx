@@ -8,29 +8,25 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
   padding?: "none" | "sm" | "md" | "lg";
 }
 
+// A card is a sheet of chart paper: one elevation cue each, border or shadow, never both.
 function Card({ className, variant = "default", padding = "md", children, ...props }: CardProps) {
   const variants = {
-    default: "bg-white shadow-card border border-border-DEFAULT",
-    elevated: "bg-white shadow-md border border-border-DEFAULT",
-    flat: "bg-surface-subtle border border-border-DEFAULT",
-    bordered: "bg-white border-2 border-border-DEFAULT",
+    default: "bg-surface-DEFAULT border border-border-DEFAULT",
+    elevated: "bg-surface-DEFAULT shadow-card",
+    flat: "bg-surface-subtle",
+    bordered: "bg-surface-DEFAULT border-[1.5px] border-ink",
   };
 
   const paddings = {
     none: "",
     sm: "p-4",
-    md: "p-6",
-    lg: "p-8",
+    md: "p-5 sm:p-6",
+    lg: "p-6 sm:p-8",
   };
 
   return (
     <div
-      className={cn(
-        "rounded-xl",
-        variants[variant],
-        paddings[padding],
-        className
-      )}
+      className={cn("rounded-[6px]", variants[variant], paddings[padding], className)}
       {...props}
     >
       {children}
@@ -48,7 +44,7 @@ function CardHeader({ className, children, ...props }: HTMLAttributes<HTMLDivEle
 
 function CardTitle({ className, children, ...props }: HTMLAttributes<HTMLHeadingElement>) {
   return (
-    <h3 className={cn("text-base font-semibold text-ink", className)} {...props}>
+    <h3 className={cn("text-base font-bold tracking-[-0.01em] text-ink", className)} {...props}>
       {children}
     </h3>
   );
@@ -72,7 +68,7 @@ function CardContent({ className, children, ...props }: HTMLAttributes<HTMLDivEl
 
 function CardFooter({ className, children, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn("mt-4 pt-4 border-t border-border-DEFAULT", className)} {...props}>
+    <div className={cn("mt-4 pt-4 border-t border-dashed border-border-strong", className)} {...props}>
       {children}
     </div>
   );

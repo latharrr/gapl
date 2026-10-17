@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { AuthPanel, AuthMobileBar } from "@/components/brand/AuthPanel";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { signInWithEmail, signInWithGoogle, createUserDocument } from "@/lib/firebase";
-import { ArrowLeft } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -47,50 +47,21 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] flex">
-      {/* Left panel */}
-      <div className="hidden lg:flex lg:flex-col lg:w-1/2 bg-[#111111] p-12 justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-white/10 rounded-lg flex items-center justify-center">
-            <span className="text-white text-xs font-bold">G</span>
-          </div>
-          <span className="text-white text-sm font-semibold">Gapl</span>
-        </Link>
-
-        <div>
-          <blockquote className="text-2xl font-medium text-white leading-snug mb-4 text-balance">
-            See the evidence gaps behind your applications, then work through the next most valuable improvement.
-          </blockquote>
-          <div className="flex items-center gap-3 mt-6">
-            <div className="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white text-xs font-bold">
-              G
-            </div>
-            <div>
-              <p className="text-sm font-medium text-white">Application readiness intelligence</p>
-              <p className="text-xs text-zinc-400">Evidence before guesswork</p>
-            </div>
-          </div>
-        </div>
-
-        <p className="text-xs text-zinc-600">
-          Scores are estimates. The reasons stay visible.
-        </p>
-      </div>
+    <div className="min-h-screen bg-surface-muted flex flex-col lg:flex-row">
+      <AuthMobileBar />
+      <AuthPanel
+        headline="Your chart is waiting."
+        lines={['See the evidence gaps behind your applications.', 'Work through the next most valuable improvement.', 'Re-check and watch your status move.']}
+      />
 
       {/* Right panel */}
-      <div className="flex-1 flex items-center justify-center p-6">
+      <div className="flex-1 flex items-center justify-center px-4 py-10 sm:p-6">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           className="w-full max-w-sm"
         >
-          {/* Mobile logo */}
-          <Link href="/" className="lg:hidden flex items-center gap-2 mb-8">
-            <ArrowLeft size={16} className="text-ink-muted" />
-            <span className="text-sm text-ink-muted">Back to home</span>
-          </Link>
-
-          <h1 className="text-2xl font-bold text-ink tracking-tight mb-1">Welcome back</h1>
+          <h1 className="display text-[2.25rem] mb-2">Welcome back</h1>
           <p className="text-sm text-ink-muted mb-8">Sign in to your Gapl account</p>
 
           {/* Google */}
@@ -135,7 +106,7 @@ export default function LoginPage() {
             />
 
             {error && (
-              <p className="text-xs text-danger bg-danger-bg px-3 py-2 rounded-lg border border-danger-border">
+              <p className="text-xs text-danger bg-danger-bg px-3 py-2 rounded-[5px] border border-danger-border">
                 {error}
               </p>
             )}

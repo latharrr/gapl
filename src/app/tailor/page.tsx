@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import {
   Download,
   ArrowLeft,
-  Sparkles,
+  PenLine,
   TrendingUp,
   AlertCircle,
   ChevronRight,
@@ -47,10 +47,10 @@ interface TailoredResume {
 }
 
 const CHANGE_META = {
-  improved: { icon: <TrendingUp size={11} />, color: "bg-[#eef2ff] border-[#e0e7ff] text-[#4338ca]" },
-  added:    { icon: <Plus size={11} />,       color: "bg-[#f0fdf4] border-[#bbf7d0] text-[#16a34a]" },
-  removed:  { icon: <Minus size={11} />,      color: "bg-[#fef2f2] border-[#fecaca] text-[#dc2626]" },
-  reordered:{ icon: <RefreshCw size={11} />,  color: "bg-[#fefce8] border-[#fde68a] text-[#b45309]" },
+  improved: { icon: <TrendingUp size={11} />, color: "bg-primary-50 border-primary-100 text-primary-700" },
+  added:    { icon: <Plus size={11} />,       color: "bg-success-bg border-success-border text-success" },
+  removed:  { icon: <Minus size={11} />,      color: "bg-danger-bg border-danger-border text-danger" },
+  reordered:{ icon: <RefreshCw size={11} />,  color: "bg-warning-bg border-warning-border text-warning" },
 };
 
 // ─── Resume renderer (printable) ─────────────────────────────────────────────
@@ -58,11 +58,11 @@ function ResumePreview({ r }: { r: TailoredResume }) {
   return (
     <div
       id="resume-print-area"
-      className="bg-white font-serif text-[#111111]"
+      className="bg-surface-DEFAULT font-serif text-ink"
       style={{ fontFamily: "'Times New Roman', serif", fontSize: "11pt", lineHeight: 1.4 }}
     >
       {/* Header */}
-      <div className="text-center border-b-2 border-[#111111] pb-3 mb-4">
+      <div className="text-center border-b-2 border-ink pb-3 mb-4">
         <h1 style={{ fontSize: "20pt", fontWeight: 700, letterSpacing: "0.05em", marginBottom: "4px" }}>
           {r.name}
         </h1>
@@ -239,15 +239,15 @@ export default function TailorPage() {
     return (
       <>
         <Navbar />
-        <div className="min-h-screen pt-14 bg-[#FAFAFA] flex items-center justify-center">
+        <div className="min-h-screen pt-14 bg-surface-muted flex items-center justify-center">
           <div className="text-center max-w-xs px-4">
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-              className="w-10 h-10 mx-auto mb-6 border-2 border-[#4F46E5]/20 border-t-[#4F46E5] rounded-full"
+              className="w-10 h-10 mx-auto mb-6 border-2 border-primary-600/20 border-t-primary-600 rounded-full"
             />
-            <h2 className="text-base font-bold text-[#111111] mb-1">Tailoring your CV…</h2>
-            <p className="text-xs text-[#71717a]">
+            <h2 className="text-base font-bold text-ink mb-1">Tailoring your CV…</h2>
+            <p className="text-xs text-ink-muted">
               Rewriting for <strong>{analysis?.companyTier ?? "your target"}</strong> · {analysis?.role ?? "your role"}. ~15 seconds.
             </p>
           </div>
@@ -269,17 +269,17 @@ export default function TailorPage() {
           </div>
         </div>
 
-        <main className="pt-14 bg-[#FAFAFA] min-h-screen">
+        <main className="pt-14 bg-surface-muted min-h-screen">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 space-y-6">
 
             {/* Header */}
             <div className="flex items-start justify-between gap-4 flex-wrap">
               <div>
-                <button onClick={() => setStep("paste")} className="inline-flex items-center gap-1.5 text-xs text-[#71717a] hover:text-[#111111] mb-3 transition-colors">
+                <button onClick={() => setStep("paste")} className="inline-flex items-center gap-1.5 text-xs text-ink-muted hover:text-ink mb-3 transition-colors">
                   <ArrowLeft size={12} /> Re-tailor
                 </button>
-                <h1 className="text-xl font-bold text-[#111111]">Your Tailored CV</h1>
-                <p className="text-xs text-[#71717a] mt-0.5">{analysis?.role} · {analysis?.companyTier}</p>
+                <h1 className="text-xl font-bold text-ink">Your Tailored CV</h1>
+                <p className="text-xs text-ink-muted mt-0.5">{analysis?.role} · {analysis?.companyTier}</p>
               </div>
               <Button variant="primary" size="sm" className="gap-1.5" onClick={downloadPDF}>
                 <Download size={14} /> Download PDF
@@ -289,34 +289,34 @@ export default function TailorPage() {
             {/* ATS scores */}
             <div className="grid grid-cols-3 gap-4">
               {[
-                { label: "Before ATS", value: result.beforeAtsScore, color: "text-[#dc2626]" },
-                { label: "After ATS",  value: result.afterAtsScore,  color: "text-[#16a34a]" },
-                { label: "Improvement", value: `+${improvement}`, color: "text-[#4F46E5]", raw: true },
+                { label: "Before ATS", value: result.beforeAtsScore, color: "text-danger" },
+                { label: "After ATS",  value: result.afterAtsScore,  color: "text-success" },
+                { label: "Improvement", value: `+${improvement}`, color: "text-primary-600", raw: true },
               ].map(({ label, value, color, raw }) => (
-                <div key={label} className="bg-white border border-[#e4e4e7] rounded-xl p-4 text-center">
-                  <p className="text-xs text-[#71717a] mb-1">{label}</p>
+                <div key={label} className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] p-4 text-center">
+                  <p className="text-xs text-ink-muted mb-1">{label}</p>
                   <span className={`text-2xl font-bold ${color}`}>{value}</span>
-                  {!raw && <span className="text-sm text-[#71717a]">%</span>}
+                  {!raw && <span className="text-sm text-ink-muted">%</span>}
                 </div>
               ))}
             </div>
 
             {/* Top change callout */}
-            <div className="flex items-start gap-3 p-4 bg-[#eef2ff] rounded-xl border border-[#e0e7ff]">
-              <Sparkles size={14} className="text-[#4F46E5] mt-0.5 flex-shrink-0" />
+            <div className="flex items-start gap-3 p-4 bg-primary-50 rounded-[6px] border border-primary-100">
+              <PenLine size={14} className="text-primary-600 mt-0.5 flex-shrink-0" />
               <div>
-                <p className="text-xs font-semibold text-[#4338ca] mb-0.5">Biggest impact change</p>
-                <p className="text-sm text-[#3f3f46]">{result.topChange}</p>
+                <p className="text-xs font-semibold text-primary-700 mb-0.5">Biggest impact change</p>
+                <p className="text-sm text-ink-secondary">{result.topChange}</p>
               </div>
             </div>
 
             <div className="grid lg:grid-cols-3 gap-6">
               {/* Resume preview — 2/3 width */}
               <div className="lg:col-span-2">
-                <div className="bg-white border border-[#e4e4e7] rounded-2xl overflow-hidden shadow-sm">
-                  <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#e4e4e7]">
-                    <p className="text-xs font-semibold text-[#111111]">Resume Preview</p>
-                    <button onClick={downloadPDF} className="flex items-center gap-1 text-xs text-[#71717a] hover:text-[#111111] transition-colors">
+                <div className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] overflow-hidden shadow-sm">
+                  <div className="flex items-center justify-between px-5 py-3.5 border-b border-border-DEFAULT">
+                    <p className="text-xs font-semibold text-ink">Resume Preview</p>
+                    <button onClick={downloadPDF} className="flex items-center gap-1 text-xs text-ink-muted hover:text-ink transition-colors">
                       <Download size={12} /> Download PDF
                     </button>
                   </div>
@@ -329,10 +329,10 @@ export default function TailorPage() {
               {/* Changes + keywords — 1/3 width */}
               <div className="space-y-4">
                 {/* Changes */}
-                <div className="bg-white border border-[#e4e4e7] rounded-2xl overflow-hidden">
-                  <div className="px-5 py-3.5 border-b border-[#e4e4e7]">
-                    <p className="text-xs font-semibold text-[#111111]">What changed</p>
-                    <p className="text-[0.625rem] text-[#a1a1aa] mt-0.5">{result.changes.length} modifications</p>
+                <div className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] overflow-hidden">
+                  <div className="px-5 py-3.5 border-b border-border-DEFAULT">
+                    <p className="text-xs font-semibold text-ink">What changed</p>
+                    <p className="text-[0.625rem] text-ink-faint mt-0.5">{result.changes.length} modifications</p>
                   </div>
                   <div className="p-4 space-y-2">
                     {result.changes.map((c, i) => (
@@ -341,7 +341,7 @@ export default function TailorPage() {
                         initial={{ opacity: 0, x: -8 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: i * 0.05 }}
-                        className={cn("flex items-start gap-2 p-2.5 rounded-lg border", CHANGE_META[c.type].color)}
+                        className={cn("flex items-start gap-2 p-2.5 rounded-[5px] border", CHANGE_META[c.type].color)}
                       >
                         <div className="mt-0.5 flex-shrink-0">{CHANGE_META[c.type].icon}</div>
                         <div>
@@ -356,11 +356,11 @@ export default function TailorPage() {
                 </div>
 
                 {/* Keywords added */}
-                <div className="bg-white border border-[#e4e4e7] rounded-2xl p-5">
-                  <p className="text-xs font-semibold text-[#111111] mb-3">ATS keywords added</p>
+                <div className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] p-5">
+                  <p className="text-xs font-semibold text-ink mb-3">ATS keywords added</p>
                   <div className="flex flex-wrap gap-2">
                     {result.keywordsAdded.map((kw) => (
-                      <span key={kw} className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#f0fdf4] border border-[#bbf7d0] rounded-full text-xs font-medium text-[#16a34a]">
+                      <span key={kw} className="inline-flex items-center gap-1 px-2.5 py-1 bg-success-bg border border-success-border rounded-full text-xs font-medium text-success">
                         <ArrowUp size={9} /> {kw}
                       </span>
                     ))}
@@ -402,50 +402,50 @@ export default function TailorPage() {
   return (
     <>
       <Navbar />
-      <main className="pt-14 bg-[#FAFAFA] min-h-screen flex items-center justify-center p-6">
+      <main className="pt-14 bg-surface-muted min-h-screen flex items-center justify-center p-6">
         <div className="w-full max-w-lg">
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
             <Link
               href={analysis ? `/report/${analysis.id}` : "/analyze"}
-              className="inline-flex items-center gap-1.5 text-xs text-[#71717a] hover:text-[#111111] mb-6 transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs text-ink-muted hover:text-ink mb-6 transition-colors"
             >
               <ArrowLeft size={12} /> Back to report
             </Link>
 
             <div className="flex items-center gap-2 mb-1">
-              <div className="w-5 h-5 bg-[#111111] rounded-md flex items-center justify-center">
-                <Sparkles size={11} className="text-white" />
+              <div className="w-5 h-5 bg-ink rounded-[4px] flex items-center justify-center">
+                <PenLine size={11} className="text-white" />
               </div>
-              <h1 className="text-xl font-bold text-[#111111]">Tailor my CV</h1>
+              <h1 className="text-xl font-bold text-ink">Tailor my CV</h1>
             </div>
-            <p className="text-sm text-[#71717a] mb-8">
+            <p className="text-sm text-ink-muted mb-8">
               AI rewrites your resume for{" "}
-              <strong className="text-[#111111]">{analysis?.companyTier ?? "your target"}</strong>{" "}
+              <strong className="text-ink">{analysis?.companyTier ?? "your target"}</strong>{" "}
               companies. Preview and download as PDF — no Overleaf needed.
             </p>
 
             {error && (
-              <div className="flex items-start gap-2 p-3 bg-[#fef2f2] border border-[#fecaca] rounded-xl mb-4">
-                <AlertCircle size={14} className="text-[#dc2626] mt-0.5 flex-shrink-0" />
-                <p className="text-xs text-[#dc2626]">{error}</p>
+              <div className="flex items-start gap-2 p-3 bg-danger-bg border border-danger-border rounded-[6px] mb-4">
+                <AlertCircle size={14} className="text-danger mt-0.5 flex-shrink-0" />
+                <p className="text-xs text-danger">{error}</p>
               </div>
             )}
 
-            <div className="bg-white border border-[#e4e4e7] rounded-2xl p-1 mb-4">
+            <div className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] p-1 mb-4">
               <div className="px-4 pt-3 pb-1">
-                <p className="text-xs font-medium text-[#111111] mb-2">Paste your resume</p>
+                <p className="text-xs font-medium text-ink mb-2">Paste your resume</p>
               </div>
               <textarea
                 value={resumeText}
                 onChange={(e) => setResumeText(e.target.value)}
                 placeholder="Paste your full resume text here…"
                 rows={14}
-                className="w-full px-4 py-2 text-sm text-[#111111] placeholder:text-[#a1a1aa] focus:outline-none resize-none bg-transparent"
+                className="w-full px-4 py-2 text-sm text-ink placeholder:text-ink-faint focus:outline-none resize-none bg-transparent"
               />
             </div>
 
-            <div className="p-4 bg-[#f4f4f5] rounded-xl border border-[#e4e4e7] mb-6">
-              <p className="text-xs font-semibold text-[#111111] mb-2">What you get</p>
+            <div className="p-4 bg-surface-subtle rounded-[6px] border border-border-DEFAULT mb-6">
+              <p className="text-xs font-semibold text-ink mb-2">What you get</p>
               <ul className="space-y-1.5">
                 {[
                   "Rewritten bullets — action verbs + quantified impact",
@@ -453,8 +453,8 @@ export default function TailorPage() {
                   "Live resume preview on this page",
                   "One-click PDF download — no external tools",
                 ].map((item) => (
-                  <li key={item} className="flex items-center gap-2 text-xs text-[#71717a]">
-                    <ChevronRight size={11} className="text-[#4F46E5] flex-shrink-0" />
+                  <li key={item} className="flex items-center gap-2 text-xs text-ink-muted">
+                    <ChevronRight size={11} className="text-primary-600 flex-shrink-0" />
                     {item}
                   </li>
                 ))}
@@ -468,10 +468,10 @@ export default function TailorPage() {
               disabled={resumeText.trim().length < 100 || loading}
               onClick={runTailor}
             >
-              <Sparkles size={16} />
+              <PenLine size={16} />
               Tailor for {analysis?.companyTier ?? "target company"}
             </Button>
-            <p className="text-center text-xs text-[#a1a1aa] mt-3">~15 seconds · Uses 1 analysis credit</p>
+            <p className="text-center text-xs text-ink-faint mt-3">~15 seconds · Uses 1 analysis credit</p>
           </motion.div>
         </div>
       </main>

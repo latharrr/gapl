@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useCallback, useRef, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDropzone } from "react-dropzone";
 import { Button } from "@/components/ui/Button";
@@ -15,14 +15,13 @@ import {
   Upload,
   FileText,
   ChevronRight,
-  Loader2,
   AlertCircle,
   ClipboardPaste,
-  Zap,
-  Lock,
   Shield,
 } from "lucide-react";
 import Link from "next/link";
+import { Wordmark } from "@/components/brand/Wordmark";
+import { ROLES, TIERS } from "@/lib/targets";
 
 // ── Client-side resume content check (mirrors backend heuristic) ──────────────
 const RESUME_SIGNALS = [
@@ -45,20 +44,27 @@ function currentUsageMonth(): string {
 
 const ALLOWED_EXTENSIONS = new Set([".pdf", ".txt"]);
 
-const ROLES = ["SDE Intern", "SDE Full Time", "Data Analyst", "AI/ML Engineer", "Product Manager"];
-const TIERS = [
-  { label: "Mass Recruiter", description: "Companies hiring 500+ engineers/year" },
-  { label: "Product Startup", description: "Series A–C startups with strong engineering culture" },
-  { label: "Top Product", description: "FAANG, Stripe, Razorpay, Notion-tier companies" },
-];
-
 type Stage = "role" | "tier" | "resume" | "jd" | "loading";
 
 export default function AnalyzePage() {
+  return (
+    <Suspense>
+      <AnalyzeFlow />
+    </Suspense>
+  );
+}
+
+function AnalyzeFlow() {
   const { user, userDoc } = useAuth();
-  const [stage, setStage] = useState<Stage>("role");
-  const [selectedRole, setSelectedRole] = useState("");
-  const [selectedTier, setSelectedTier] = useState("");
+  // Prefill from the landing enquiry (/analyze?role=…&tier=…) and skip the answered steps.
+  const searchParams = useSearchParams();
+  const paramRole = searchParams.get("role") ?? "";
+  const paramTier = searchParams.get("tier") ?? "";
+  const initialRole = ROLES.includes(paramRole) ? paramRole : "";
+  const initialTier = TIERS.some((t) => t.label === paramTier) ? paramTier : "";
+  const [stage, setStage] = useState<Stage>(initialRole && initialTier ? "resume" : initialRole ? "tier" : "role");
+  const [selectedRole, setSelectedRole] = useState(initialRole);
+  const [selectedTier, setSelectedTier] = useState(initialTier);
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [resumeText, setResumeText] = useState("");
   const [showPaste, setShowPaste] = useState(false);
@@ -263,397 +269,326 @@ export default function AnalyzePage() {
   };
 
   const steps = [
-    { key: "role", label: "Select Role" },
-    { key: "tier", label: "Company Tier" },
-    { key: "resume", label: "Upload Resume" },
-    { key: "jd", label: "Job Description" },
+    { key: "role", label: "Role" },
+    { key: "tier", label: "Tier" },
+    { key: "resume", label: "Resume" },
+    { key: "jd", label: "Job description" },
   ];
   const stageOrder: Stage[] = ["role", "tier", "resume", "jd", "loading"];
   const currentIndex = stageOrder.indexOf(stage);
+  const remaining = Math.max(0, monthlyLimit - usageCount);
 
   if (stage === "loading") {
-    return <LoadingScreen loadingStep={loadingStep} />;
+    return <LoadingScreen loadingStep={loadingStep} role={selectedRole} tier={selectedTier} />;
   }
 
-  // ── Paywall modal ─────────────────────────────────────────────────────────
-  if (showPaywall) {
-    return (
-      <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center p-6">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.97 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="w-full max-w-sm"
-        >
-          <div className="bg-white rounded-2xl border border-[#e4e4e7] p-8 text-center shadow-sm">
-            <div className="w-12 h-12 bg-[#f4f4f5] rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Lock size={20} className="text-[#71717a]" />
-            </div>
-            <h2 className="text-lg font-bold text-[#111111] mb-2">Plan limit reached</h2>
-            <p className="text-sm text-[#71717a] mb-1">
-              You&apos;ve used all <strong>{monthlyLimit}</strong> analyses included in your {currentPlan} plan this month.
-            </p>
-            <p className="text-xs text-[#a1a1aa] mb-8">
-              Upgrade for more monthly analyses and keep working through your roadmap.
-            </p>
-            <div className="space-y-3">
-              <Link href="/pricing">
-                <Button size="lg" variant="primary" className="w-full gap-2">
-                  <Zap size={16} /> Upgrade to Pro
-                </Button>
-              </Link>
-              <button
-                onClick={() => setShowPaywall(false)}
-                className="w-full text-xs text-[#a1a1aa] hover:text-[#71717a] py-2 transition-colors"
-              >
-                Maybe later
-              </button>
-            </div>
-          </div>
-          <p className="text-center text-xs text-[#a1a1aa] mt-4">
-            Resets on the 1st of each month
-          </p>
-        </motion.div>
-      </div>
-    );
-  }
+  const stepMotion = {
+    initial: { opacity: 0, y: 8 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -8 },
+    transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] as const },
+  };
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] flex flex-col">
-      {/* Header */}
-      <div className="border-b border-[#e4e4e7] bg-white px-4 sm:px-6 py-4">
-        <div className="max-w-2xl mx-auto">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-5 h-5 bg-[#111111] rounded-md flex items-center justify-center">
-              <span className="text-white text-xs font-bold">G</span>
-            </div>
-            <span className="text-xs font-semibold text-[#111111]">Gapl</span>
-            <span className="text-xs text-[#a1a1aa] mx-1">·</span>
-            <span className="text-xs text-[#71717a]">New Analysis</span>
-            <div className="ml-auto flex items-center gap-1.5">
-              <span className={cn(
-                "text-xs font-medium px-2 py-0.5 rounded-full",
-                usageCount >= monthlyLimit
-                  ? "bg-[#fef2f2] text-[#dc2626]"
-                  : monthlyLimit - usageCount === 1
-                  ? "bg-[#fefce8] text-[#b45309]"
-                  : "bg-[#f0fdf4] text-[#16a34a]"
-              )}>
-                {usageLabel}
-              </span>
-            </div>
-          </div>
+    <div className="min-h-screen bg-surface-muted flex flex-col">
+      {/* Rail bar */}
+      <header className="bg-primary-600 text-primary-foreground border-b-[3px] border-board">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 h-14 flex items-center gap-3">
+          <Link href={user ? "/dashboard" : "/"} aria-label="Gapl home">
+            <Wordmark size="sm" />
+          </Link>
+          <span className="text-sm font-semibold text-primary-100">New chart</span>
+          <span
+            className={cn(
+              "stamp ml-auto text-[0.6875rem] bg-surface-DEFAULT",
+              remaining === 0 ? "text-danger" : remaining === 1 ? "text-warning" : "text-success"
+            )}
+            title="Analyses used this month"
+          >
+            {usageLabel}
+          </span>
+        </div>
+      </header>
 
-          {/* Progress steps */}
-          <div className="flex items-center gap-1">
-            {steps.map((s, i) => {
-              const done = i < currentIndex;
-              const active = i === currentIndex;
-              return (
-                <div key={s.key} className="flex items-center gap-1 flex-1">
-                  <div className="flex items-center gap-1.5">
-                    <div
-                      className={cn(
-                        "w-5 h-5 rounded-full flex items-center justify-center text-xs font-semibold transition-colors",
-                        done ? "bg-[#16a34a] text-white"
-                          : active ? "bg-[#111111] text-white"
-                          : "bg-[#e4e4e7] text-[#a1a1aa]"
-                      )}
-                    >
-                      {done ? <Check size={10} /> : i + 1}
-                    </div>
-                    <span className={cn(
-                      "text-xs hidden sm:block",
-                      active ? "font-medium text-[#111111]"
-                        : done ? "text-[#71717a]"
-                        : "text-[#a1a1aa]"
-                    )}>
-                      {s.label}
-                    </span>
-                  </div>
-                  {i < steps.length - 1 && (
-                    <div className="flex-1 h-px bg-[#e4e4e7] mx-2" />
+      {/* Route strip of the four steps */}
+      <nav aria-label="Steps" className="border-b border-border-strong bg-surface-DEFAULT">
+        <ol className="max-w-3xl mx-auto px-4 sm:px-6 py-4 grid grid-cols-4">
+          {steps.map((s, i) => {
+            const done = i < currentIndex;
+            const active = i === currentIndex;
+            return (
+              <li key={s.key} className="relative flex flex-col items-start" aria-current={active ? "step" : undefined}>
+                {i < steps.length - 1 && (
+                  <span
+                    aria-hidden
+                    className={cn("absolute left-5 right-0 top-[0.6875rem] h-[3px]", done ? "bg-ink" : "bg-border-DEFAULT")}
+                  />
+                )}
+                <span
+                  className={cn(
+                    "relative z-10 h-6 w-6 rounded-full border-[3px] grid place-items-center",
+                    done ? "border-ink bg-ink text-white" : active ? "border-ink bg-board" : "border-border-strong bg-surface-DEFAULT"
                   )}
-                </div>
-              );
-            })}
+                >
+                  {done && <Check size={12} strokeWidth={3.5} />}
+                </span>
+                <span
+                  className={cn(
+                    "mt-2 text-xs sm:text-sm pr-2",
+                    active ? "font-bold text-ink" : done ? "font-medium text-ink-secondary" : "text-ink-muted"
+                  )}
+                >
+                  {s.label}
+                </span>
+              </li>
+            );
+          })}
+        </ol>
+      </nav>
+
+      {/* Paywall */}
+      {showPaywall && (
+        <div className="max-w-xl mx-auto w-full px-4 sm:px-6 pt-8">
+          <div className="chart-sheet rounded-[6px] overflow-hidden">
+            <div className="led-board px-4 py-2.5 text-[0.95rem]">PLAN LIMIT REACHED</div>
+            <div className="p-5 sm:p-6">
+              <h2 className="text-xl font-[800] tracking-[-0.015em]">You&apos;ve used every analysis on your plan</h2>
+              <p className="mt-2 text-[0.9375rem] text-ink-secondary">
+                All <strong>{monthlyLimit}</strong> analyses included in your {currentPlan} plan this month are used.
+                Upgrade for more and keep working through your roadmap. Limits reset on the 1st of each month.
+              </p>
+              <div className="mt-5 flex flex-col sm:flex-row gap-2">
+                <Link href="/pricing" className="sm:flex-1">
+                  <Button size="lg" className="w-full">See plans</Button>
+                </Link>
+                <Button variant="outline" size="lg" onClick={() => setShowPaywall(false)}>
+                  Not now
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Error Card */}
+      {/* Error */}
       {loadingError && (
-        <div className="max-w-md mx-auto w-full px-4 pt-8 animate-in fade-in-50 duration-200">
-          <div className="bg-white border border-[#fecaca] rounded-2xl p-6 shadow-sm space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-[#fef2f2] rounded-xl flex items-center justify-center flex-shrink-0">
-                <AlertCircle size={18} className="text-[#dc2626]" />
-              </div>
+        <div className="max-w-xl mx-auto w-full px-4 sm:px-6 pt-8" role="alert">
+          <div className="chart-sheet rounded-[6px] overflow-hidden">
+            <div className="px-5 py-3 bg-danger-bg border-b border-danger-border flex items-center gap-2 text-danger">
+              <AlertCircle size={17} />
+              <h3 className="text-sm font-bold">The analysis was interrupted</h3>
+            </div>
+            <div className="p-5 space-y-4">
+              <p className="text-[0.9375rem] text-ink">{loadingError}</p>
               <div>
-                <h3 className="text-sm font-bold text-[#111111]">Analysis Interrupted</h3>
-                <p className="text-xs text-[#71717a] mt-0.5">We couldn&apos;t complete your resume evaluation.</p>
+                <p className="text-sm font-bold">Before you retry</p>
+                <ul className="mt-1.5 text-sm text-ink-secondary space-y-1">
+                  <li>— Check your internet connection.</li>
+                  <li>— Make sure your PDF has selectable text, not a scanned image.</li>
+                  <li>— Keep clear sections: Skills, Projects, Education.</li>
+                  <li>— If the upload keeps failing, paste the text instead.</li>
+                </ul>
               </div>
-            </div>
-
-            <div className="p-3.5 bg-[#fef2f2]/40 rounded-xl border border-[#fecaca]/50 text-xs text-[#b91c1c] leading-relaxed">
-              {loadingError}
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-xs font-semibold text-[#111111]">Troubleshooting checklist:</p>
-              <ul className="text-xs text-[#71717a] list-disc list-inside space-y-1">
-                <li>Check your internet connection and try again.</li>
-                <li>Make sure your PDF has selectable text (not a scanned image).</li>
-                <li>Ensure the resume has clear sections (Skills, Projects, Education).</li>
-                <li>If the file upload continues to fail, try pasting the text directly.</li>
-              </ul>
-            </div>
-
-            <div className="flex gap-2 pt-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1"
-                onClick={() => {
-                  setLoadingError("");
-                  setStage("resume");
-                }}
-              >
-                Reset Upload
-              </Button>
-              <Button
-                variant="primary"
-                size="sm"
-                className="flex-1 bg-[#111111]"
-                onClick={() => {
-                  setLoadingError("");
-                  runAnalysis();
-                }}
-              >
-                Retry Analysis
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    setLoadingError("");
+                    setStage("resume");
+                  }}
+                >
+                  Change resume
+                </Button>
+                <Button
+                  className="flex-1"
+                  onClick={() => {
+                    setLoadingError("");
+                    runAnalysis();
+                  }}
+                >
+                  Retry analysis
+                </Button>
+              </div>
             </div>
           </div>
         </div>
       )}
 
       {/* Content */}
-      <div className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-lg">
+      <div className="flex-1 px-4 sm:px-6 py-8 sm:py-12">
+        <div className="w-full max-w-xl mx-auto">
           <AnimatePresence mode="wait">
-            {/* Step 1: Role */}
             {stage === "role" && (
-              <motion.div
-                key="role"
-                initial={{ opacity: 0, x: 16 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -16 }}
-              >
-                <h2 className="text-xl font-bold text-[#111111] mb-1">What role are you targeting?</h2>
-                <p className="text-sm text-[#71717a] mb-6">This shapes how we evaluate your resume.</p>
-                <div className="space-y-2">
-                  {ROLES.map((role) => (
-                    <button
-                      key={role}
-                      onClick={() => setSelectedRole(role)}
-                      className={cn(
-                        "w-full text-left p-4 rounded-xl border transition-all duration-150",
-                        selectedRole === role
-                          ? "border-[#111111] bg-[#111111] text-white"
-                          : "border-[#e4e4e7] bg-white text-[#111111] hover:border-[#a1a1aa] hover:shadow-sm"
-                      )}
-                    >
-                      <span className="text-sm font-medium">{role}</span>
-                    </button>
-                  ))}
-                </div>
-                <Button
-                  className="w-full mt-6"
-                  size="lg"
-                  disabled={!selectedRole}
-                  onClick={() => setStage("tier")}
-                >
-                  Continue <ChevronRight size={16} />
+              <motion.div key="role" {...stepMotion}>
+                <h1 className="display text-[clamp(1.9rem,5vw,2.6rem)]">What role are you applying for?</h1>
+                <p className="mt-2 text-ink-secondary">This decides what a recruiter looks for in your resume.</p>
+                <OptionList
+                  name="role"
+                  value={selectedRole}
+                  onChange={setSelectedRole}
+                  options={ROLES.map((r) => ({ value: r, label: r }))}
+                />
+                <Button className="w-full mt-6" size="lg" disabled={!selectedRole} onClick={() => setStage("tier")}>
+                  Continue <ChevronRight size={17} />
                 </Button>
               </motion.div>
             )}
 
-            {/* Step 2: Tier */}
             {stage === "tier" && (
-              <motion.div
-                key="tier"
-                initial={{ opacity: 0, x: 16 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -16 }}
-              >
-                <h2 className="text-xl font-bold text-[#111111] mb-1">What companies are you targeting?</h2>
-                <p className="text-sm text-[#71717a] mb-6">The bar is very different across tiers.</p>
-                <div className="space-y-3">
-                  {TIERS.map((tier) => (
-                    <button
-                      key={tier.label}
-                      onClick={() => setSelectedTier(tier.label)}
-                      className={cn(
-                        "w-full text-left p-4 rounded-xl border transition-all duration-150",
-                        selectedTier === tier.label
-                          ? "border-[#111111] bg-[#111111] text-white"
-                          : "border-[#e4e4e7] bg-white hover:border-[#a1a1aa] hover:shadow-sm"
-                      )}
-                    >
-                      <p className={cn("text-sm font-semibold", selectedTier === tier.label ? "text-white" : "text-[#111111]")}>
-                        {tier.label}
-                      </p>
-                      <p className={cn("text-xs mt-0.5", selectedTier === tier.label ? "text-[#a1a1aa]" : "text-[#71717a]")}>
-                        {tier.description}
-                      </p>
-                    </button>
-                  ))}
-                </div>
+              <motion.div key="tier" {...stepMotion}>
+                <h1 className="display text-[clamp(1.9rem,5vw,2.6rem)]">Which companies are you targeting?</h1>
+                <p className="mt-2 text-ink-secondary">The bar for a {selectedRole || "candidate"} is very different across tiers.</p>
+                <OptionList
+                  name="tier"
+                  value={selectedTier}
+                  onChange={setSelectedTier}
+                  options={TIERS.map((t) => ({ value: t.label, label: t.label, hint: t.description }))}
+                />
                 <div className="flex gap-2 mt-6">
-                  <Button variant="outline" size="lg" onClick={() => setStage("role")} className="flex-1">Back</Button>
+                  <Button variant="outline" size="lg" onClick={() => setStage("role")}>Back</Button>
                   <Button size="lg" disabled={!selectedTier} onClick={() => setStage("resume")} className="flex-1">
-                    Continue <ChevronRight size={16} />
+                    Continue <ChevronRight size={17} />
                   </Button>
                 </div>
               </motion.div>
             )}
 
-            {/* Step 3: Resume */}
             {stage === "resume" && (
-              <motion.div
-                key="resume"
-                initial={{ opacity: 0, x: 16 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -16 }}
-              >
-                <h2 className="text-xl font-bold text-[#111111] mb-1">Upload your resume</h2>
-                <p className="text-sm text-[#71717a] mb-6">PDF or TXT. For DOCX files, paste the text directly.</p>
+              <motion.div key="resume" {...stepMotion}>
+                <h1 className="display text-[clamp(1.9rem,5vw,2.6rem)]">Upload your resume</h1>
+                <p className="mt-2 text-ink-secondary">
+                  {selectedRole} · {selectedTier}. PDF or TXT; for DOCX, paste the text.
+                </p>
 
-                {/* File type error */}
                 {fileError && (
-                  <div className="flex items-start gap-2 p-3 mb-3 bg-[#fef2f2] border border-[#fecaca] rounded-xl">
-                    <AlertCircle size={14} className="text-[#dc2626] mt-0.5 flex-shrink-0" />
-                    <p className="text-xs text-[#dc2626] leading-relaxed">{fileError}</p>
+                  <div role="alert" className="mt-5 flex items-start gap-2 p-3 bg-danger-bg border border-danger-border rounded-[5px]">
+                    <AlertCircle size={16} className="text-danger mt-0.5 shrink-0" />
+                    <p className="text-sm text-danger leading-relaxed">{fileError}</p>
                   </div>
                 )}
 
-                {/* Drop zone */}
                 {!showPaste && (
                   <div
                     {...getRootProps()}
                     className={cn(
-                      "border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all duration-200 mb-3",
-                      isDragActive ? "border-[#4F46E5] bg-[#eef2ff]"
-                        : resumeFile ? "border-[#16a34a] bg-[#f0fdf4]"
-                        : "border-[#e4e4e7] bg-white hover:border-[#a1a1aa] hover:bg-[#f4f4f5]"
+                      "mt-5 rounded-[6px] border-2 border-dashed px-6 py-10 text-center cursor-pointer transition-colors",
+                      isDragActive
+                        ? "border-primary-600 bg-primary-50"
+                        : resumeFile
+                        ? "border-success bg-success-bg"
+                        : "border-border-strong bg-surface-DEFAULT hover:border-ink"
                     )}
                   >
                     <input {...getInputProps()} />
                     {resumeFile ? (
                       <div>
-                        <div className="w-10 h-10 bg-[#f0fdf4] border border-[#bbf7d0] rounded-xl flex items-center justify-center mx-auto mb-3">
-                          <FileText size={20} className="text-[#16a34a]" />
-                        </div>
-                        <p className="text-sm font-semibold text-[#111111]">{resumeFile.name}</p>
-                        <p className="text-xs text-[#71717a] mt-1">{(resumeFile.size / 1024).toFixed(0)} KB · Click to replace</p>
+                        <FileText size={28} className="mx-auto text-success" />
+                        <p className="mt-3 font-bold break-all">{resumeFile.name}</p>
+                        <p className="chart-data mt-1 text-xs text-ink-muted">
+                          {(resumeFile.size / 1024).toFixed(0)} KB · tap to replace
+                        </p>
                       </div>
                     ) : (
                       <div>
-                        <div className="w-10 h-10 bg-[#f4f4f5] border border-[#e4e4e7] rounded-xl flex items-center justify-center mx-auto mb-3">
-                          <Upload size={20} className="text-[#71717a]" />
-                        </div>
-                        <p className="text-sm font-semibold text-[#111111]">
-                          {isDragActive ? "Drop it here" : "Drag & drop your resume"}
-                        </p>
-                        <p className="text-xs text-[#71717a] mt-1 mb-3">or click to browse · PDF or TXT</p>
-                        <button
+                        <Upload size={28} className="mx-auto text-ink-muted" />
+                        <p className="mt-3 font-bold">{isDragActive ? "Drop it here" : "Drag your resume here"}</p>
+                        <p className="mt-1 text-sm text-ink-muted">PDF or TXT, up to 5 MB</p>
+                        <Button
                           type="button"
+                          variant="secondary"
+                          size="md"
+                          className="mt-4"
                           onClick={(e) => {
                             e.stopPropagation();
                             open();
                           }}
-                          className="inline-flex items-center justify-center px-4 py-2 bg-[#111111] hover:bg-black text-white text-xs font-semibold rounded-xl transition-all shadow-sm active:scale-95"
                         >
-                          Choose File
-                        </button>
+                          Choose file
+                        </Button>
                       </div>
                     )}
                   </div>
                 )}
 
-                {/* Paste option */}
                 <button
-                  onClick={() => { setShowPaste(!showPaste); setResumeFile(null); }}
-                  className="w-full flex items-center gap-2 justify-center text-xs text-[#71717a] hover:text-[#111111] mb-3 transition-colors"
+                  onClick={() => {
+                    setShowPaste(!showPaste);
+                    setResumeFile(null);
+                  }}
+                  className="mt-3 w-full inline-flex items-center justify-center gap-2 py-2 text-sm font-semibold text-primary-600 hover:text-primary-700"
                 >
-                  <ClipboardPaste size={12} />
-                  {showPaste ? "Upload file instead" : "Or paste resume text"}
+                  <ClipboardPaste size={15} />
+                  {showPaste ? "Upload a file instead" : "Paste resume text instead"}
                 </button>
 
                 {showPaste && (
-                  <div className="mb-3">
+                  <div className="mt-2">
+                    <label htmlFor="resume-text" className="sr-only">Resume text</label>
                     <textarea
+                      id="resume-text"
                       value={resumeText}
-                      onChange={(e) => { setResumeText(e.target.value); setPasteError(""); }}
-                      placeholder="Paste your full resume text here — include Education, Skills, Experience, Projects..."
+                      onChange={(e) => {
+                        setResumeText(e.target.value);
+                        setPasteError("");
+                      }}
+                      placeholder="Paste your full resume: Education, Skills, Experience, Projects…"
                       rows={12}
                       className={cn(
-                        "w-full px-4 py-3 rounded-xl border bg-white text-sm text-[#111111] placeholder:text-[#a1a1aa] focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] resize-none transition-all",
-                        pasteError ? "border-[#fecaca]" : "border-[#e4e4e7]"
+                        "w-full px-4 py-3 rounded-[6px] border-[1.5px] bg-surface-DEFAULT text-[0.9375rem] text-ink focus:outline-none focus:ring-[3px] focus:ring-primary-600/15 focus:border-primary-600 resize-y",
+                        pasteError ? "border-danger" : "border-border-strong"
                       )}
                     />
                     {pasteError && (
-                      <div className="flex items-start gap-2 mt-2">
-                        <AlertCircle size={12} className="text-[#dc2626] mt-0.5 flex-shrink-0" />
-                        <p className="text-xs text-[#dc2626] leading-relaxed">{pasteError}</p>
-                      </div>
+                      <p role="alert" className="mt-2 flex items-start gap-2 text-sm text-danger">
+                        <AlertCircle size={15} className="mt-0.5 shrink-0" />
+                        {pasteError}
+                      </p>
                     )}
                   </div>
                 )}
 
-                <div className="flex items-center gap-1.5 justify-center text-xs text-[#71717a] mt-4 mb-2">
-                  <Shield size={12} className="text-[#a1a1aa] shrink-0" />
-                  <span>Your resume is processed for analysis and is not stored. Only the generated report is saved.</span>
-                </div>
+                <p className="mt-4 flex items-start gap-2 text-sm text-ink-muted">
+                  <Shield size={15} className="mt-0.5 shrink-0" />
+                  Your resume is processed for analysis and is not stored. Only the generated report is saved.
+                </p>
 
-                <div className="flex gap-2 mt-2">
-                  <Button variant="outline" size="lg" onClick={() => setStage("tier")} className="flex-1">Back</Button>
-                  <Button size="lg" onClick={handleContinueToJD} className="flex-1" disabled={!hasResume || validating} loading={validating}>
-                    Continue <ChevronRight size={16} />
+                <div className="flex gap-2 mt-6">
+                  <Button variant="outline" size="lg" onClick={() => setStage("tier")}>Back</Button>
+                  <Button
+                    size="lg"
+                    onClick={handleContinueToJD}
+                    className="flex-1"
+                    disabled={!hasResume || validating}
+                    loading={validating}
+                  >
+                    {validating ? "Checking resume" : "Continue"} {!validating && <ChevronRight size={17} />}
                   </Button>
                 </div>
               </motion.div>
             )}
 
-            {/* Step 4: JD */}
             {stage === "jd" && (
-              <motion.div
-                key="jd"
-                initial={{ opacity: 0, x: 16 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -16 }}
-              >
-                <h2 className="text-xl font-bold text-[#111111] mb-1">Add a job description</h2>
-                <p className="text-sm text-[#71717a] mb-1">Optional — but adds precision to gap analysis.</p>
-                <p className="text-xs text-[#a1a1aa] mb-6">Paste the JD text or skip to use role-based defaults.</p>
+              <motion.div key="jd" {...stepMotion}>
+                <h1 className="display text-[clamp(1.9rem,5vw,2.6rem)]">Add a job description</h1>
+                <p className="mt-2 text-ink-secondary">
+                  Optional, but it sharpens the gap analysis. Skip it to use defaults for {selectedRole || "your role"}.
+                </p>
+                <label htmlFor="jd-text" className="sr-only">Job description</label>
                 <textarea
+                  id="jd-text"
                   value={jdText}
                   onChange={(e) => setJdText(e.target.value)}
-                  placeholder="Paste job description here..."
-                  rows={8}
-                  className="w-full px-4 py-3 rounded-xl border border-[#e4e4e7] bg-white text-sm text-[#111111] placeholder:text-[#a1a1aa] focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] resize-none transition-all"
+                  placeholder="Paste the job description…"
+                  rows={9}
+                  className="mt-5 w-full px-4 py-3 rounded-[6px] border-[1.5px] border-border-strong bg-surface-DEFAULT text-[0.9375rem] text-ink focus:outline-none focus:ring-[3px] focus:ring-primary-600/15 focus:border-primary-600 resize-y"
                 />
-                <div className="flex gap-2 mt-4">
-                  <Button variant="outline" size="lg" onClick={() => setStage("resume")} className="flex-1">Back</Button>
-                  <Button size="lg" onClick={runAnalysis} className="flex-1 bg-[#111111]">
-                    Run Analysis
+                <div className="flex gap-2 mt-5">
+                  <Button variant="outline" size="lg" onClick={() => setStage("resume")}>Back</Button>
+                  <Button size="lg" onClick={runAnalysis} className="flex-1">
+                    {jdText.trim() ? "Prepare my chart" : "Skip and prepare my chart"} <ChevronRight size={17} />
                   </Button>
                 </div>
-                <button
-                  onClick={runAnalysis}
-                  className="w-full mt-3 text-xs text-[#a1a1aa] hover:text-[#71717a] text-center transition-colors"
-                >
-                  Skip and analyze without JD →
-                </button>
               </motion.div>
             )}
           </AnimatePresence>
@@ -663,84 +598,99 @@ export default function AnalyzePage() {
   );
 }
 
-function LoadingScreen({ loadingStep }: { loadingStep: number }) {
-  const STAGE_DETAILS = [
-    "Extracting skills, project complexity, and experience details...",
-    "Matching keywords and filtering missing requirements...",
-    "Running simulated 6-second recruiter screening heuristic...",
-    "Synthesizing custom 4-week task list to address critical gaps...",
-    "Weighting overall scores and determining readiness percentage...",
-  ];
+function OptionList({
+  name,
+  value,
+  onChange,
+  options,
+}: {
+  name: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: { value: string; label: string; hint?: string }[];
+}) {
+  return (
+    <div role="radiogroup" aria-label={name} className="mt-6 chart-sheet rounded-[6px] overflow-hidden divide-y divide-border-DEFAULT">
+      {options.map((o) => {
+        const selected = value === o.value;
+        return (
+          <button
+            key={o.value}
+            role="radio"
+            aria-checked={selected}
+            onClick={() => onChange(o.value)}
+            className={cn(
+              "w-full flex items-center gap-4 px-4 py-4 text-left transition-colors",
+              selected ? "bg-board/30" : "hover:bg-surface-muted"
+            )}
+          >
+            <span
+              className={cn(
+                "h-5 w-5 shrink-0 rounded-full border-[2px] grid place-items-center",
+                selected ? "border-ink bg-ink" : "border-border-strong"
+              )}
+            >
+              {selected && <span className="h-2 w-2 rounded-full bg-board" />}
+            </span>
+            <span className="min-w-0">
+              <span className="block font-bold">{o.label}</span>
+              {o.hint && <span className="block text-sm text-ink-muted">{o.hint}</span>}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
-  const activeStage = ANALYSIS_STAGES[loadingStep] || ANALYSIS_STAGES[ANALYSIS_STAGES.length - 1];
-  const activeDetail = STAGE_DETAILS[loadingStep] || "Finalizing report details...";
-  const progressPct = Math.round((Math.min(loadingStep, ANALYSIS_STAGES.length) / ANALYSIS_STAGES.length) * 100);
+const STAGE_DETAILS = [
+  "Extracting skills, project complexity and experience",
+  "Matching keywords and finding missing requirements",
+  "Running the 6-second recruiter screen",
+  "Building a week-by-week plan for your critical gaps",
+  "Weighting the scores and setting your readiness",
+];
+
+// The analysis as a departure board: each stage is a row that goes WAIT → NOW → DONE.
+function LoadingScreen({ loadingStep, role, tier }: { loadingStep: number; role: string; tier: string }) {
+  const active = ANALYSIS_STAGES[loadingStep] ?? ANALYSIS_STAGES[ANALYSIS_STAGES.length - 1];
+  const detail = STAGE_DETAILS[loadingStep] ?? "Finalizing your report";
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center p-6">
-      <div className="max-w-md w-full bg-white border border-[#e4e4e7] rounded-3xl p-8 shadow-sm space-y-8">
-        <div className="text-center space-y-2">
-          {/* Pulsing state icon */}
-          <div className="relative w-16 h-16 mx-auto mb-4 flex items-center justify-center bg-[#4F46E5]/10 rounded-2xl">
-            <Loader2 size={24} className="text-[#4F46E5] animate-spin" />
-            <span className="absolute inline-flex h-full w-full rounded-2xl bg-[#4F46E5]/5 animate-ping opacity-75" />
-          </div>
-          <h2 className="text-xl font-extrabold text-[#111111] tracking-tight">{activeStage.label}...</h2>
-          <p className="text-xs text-[#71717a] font-mono leading-relaxed h-8">
-            {activeDetail}
-          </p>
-        </div>
+    <div className="min-h-screen led-ground text-surface-muted flex items-center justify-center p-4 sm:p-6">
+      <div className="w-full max-w-xl">
+        <p className="chart-data text-xs text-surface-muted/60">
+          {role} · {tier}
+        </p>
+        <h1 className="display mt-2 text-[clamp(1.9rem,5vw,2.6rem)]">Preparing your chart</h1>
+        <p className="mt-2 text-surface-muted/70" aria-live="polite">{detail}…</p>
 
-        {/* Progress bar */}
-        <div className="space-y-1.5">
-          <div className="flex justify-between items-center text-[10px] font-bold text-[#a1a1aa] uppercase tracking-wider">
-            <span>Analysis Progress</span>
-            <span>{progressPct}%</span>
+        <div className="mt-8 rounded-[6px] border border-led-dim bg-black/40 font-[family-name:var(--font-led)] font-black text-led">
+          <div className="flex justify-between px-4 py-2 border-b border-led-dim text-sm tracking-[0.06em]">
+            <span>STAGE</span>
+            <span>STATUS</span>
           </div>
-          <div className="w-full h-1.5 bg-[#f4f4f5] rounded-full overflow-hidden border border-[#e4e4e7]/45">
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${progressPct}%` }}
-              className="h-full bg-gradient-to-r from-[#4f46e5] to-[#818cf8] rounded-full"
-              transition={{ duration: 0.3 }}
-            />
-          </div>
-        </div>
-
-        {/* Checklist of stages */}
-        <div className="space-y-3 pt-2 border-t border-[#f4f4f5]">
-          {ANALYSIS_STAGES.map((s, i) => {
-            const done = i < loadingStep;
-            const active = i === loadingStep;
-            return (
-              <motion.div
-                key={s.id}
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: done || active ? 1 : 0.35, y: 0 }}
-                className="flex items-center gap-3"
-              >
-                <div className={cn(
-                  "w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 transition-colors duration-300",
-                  done ? "bg-[#16a34a] text-white" : active ? "bg-[#4F46E5] text-white" : "bg-[#f4f4f5] border border-[#e4e4e7] text-[#a1a1aa]"
-                )}>
-                  {done ? (
-                    <Check size={10} className="text-white" />
-                  ) : active ? (
-                    <Loader2 size={10} className="text-white animate-spin" />
-                  ) : (
-                    <span className="text-[10px] font-bold font-mono">{i + 1}</span>
+          <ol>
+            {ANALYSIS_STAGES.map((s, i) => {
+              const done = i < loadingStep;
+              const now = i === loadingStep;
+              return (
+                <li
+                  key={s.id}
+                  className={cn(
+                    "flex items-center justify-between gap-4 px-4 py-3 text-[1.05rem] tracking-[0.04em] border-b border-led-dim/50 last:border-0",
+                    !done && !now && "opacity-35"
                   )}
-                </div>
-                <span className={cn(
-                  "text-xs tracking-wide",
-                  done ? "text-[#71717a] line-through font-normal" : active ? "text-[#111111] font-bold" : "text-[#a1a1aa] font-normal"
-                )}>
-                  {s.label}
-                </span>
-              </motion.div>
-            );
-          })}
+                >
+                  <span className="truncate">{s.label.toUpperCase()}</span>
+                  <span className={cn("shrink-0", now && "animate-led-blink")}>{done ? "DONE" : now ? "NOW" : "WAIT"}</span>
+                </li>
+              );
+            })}
+          </ol>
         </div>
+        <p className="sr-only" aria-live="polite">Current stage: {active.label}</p>
+        <p className="mt-4 text-sm text-surface-muted/60">Keep this tab open while the chart is prepared.</p>
       </div>
     </div>
   );

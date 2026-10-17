@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
-import { Loader2 } from "lucide-react";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -18,10 +17,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (loading) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-[#FAFAFA]">
+      <div className="flex h-screen w-screen items-center justify-center bg-surface-muted">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="h-6 w-6 animate-spin text-[#4F46E5]" />
-          <p className="text-xs font-medium text-[#71717a]">Loading workspace...</p>
+          <div className="led-board h-11 px-4 flex items-center rounded-[4px] text-[1.05rem]">
+            <span className="animate-led-blink">LOADING WORKSPACE</span>
+          </div>
         </div>
       </div>
     );
@@ -32,7 +32,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="flex h-screen bg-[#FAFAFA] overflow-hidden">
+    <div className="flex h-screen bg-surface-muted overflow-hidden">
       <DashboardSidebar />
       <main className="flex-1 overflow-y-auto">
         {children}

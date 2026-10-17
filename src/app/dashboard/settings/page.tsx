@@ -105,9 +105,9 @@ export default function SettingsPage() {
           <div className="space-y-4">
             <Input label="Display Name" value={name} onChange={(e) => setName(e.target.value)} id="settings-name" />
             <Input label="Email" value={user?.email || ""} disabled hint="Email cannot be changed" id="settings-email" />
-            {error && <p className="text-xs text-red-500 font-medium">{error}</p>}
+            {error && <p className="text-xs text-danger font-medium">{error}</p>}
             <Button size="sm" onClick={handleSave} variant={saved ? "outline" : "primary"} disabled={saving}>
-              {saving ? "Saving..." : saved ? "Saved ✓" : "Save changes"}
+              {saving ? "Saving..." : saved ? "Saved" : "Save changes"}
             </Button>
           </div>
         </Card>
@@ -132,7 +132,7 @@ export default function SettingsPage() {
                   <p className="text-xs text-ink-muted">{item.desc}</p>
                 </div>
                 <button className="w-9 h-5 rounded-full bg-primary-600 relative transition-colors">
-                  <span className="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow-sm" />
+                  <span className="absolute right-0.5 top-0.5 w-4 h-4 bg-surface-DEFAULT rounded-full shadow-sm" />
                 </button>
               </div>
             ))}
@@ -148,14 +148,14 @@ export default function SettingsPage() {
             <h2 className="text-sm font-semibold text-ink">Security</h2>
           </div>
           <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 bg-surface-subtle rounded-xl">
+            <div className="flex items-center justify-between p-3 bg-surface-subtle rounded-[6px]">
               <div>
                 <p className="text-sm font-medium text-ink">Password</p>
                 <p className="text-xs text-ink-muted">Last changed: never</p>
               </div>
               <Button size="sm" variant="outline">Change</Button>
             </div>
-            <div className="flex items-center justify-between p-3 bg-surface-subtle rounded-xl">
+            <div className="flex items-center justify-between p-3 bg-surface-subtle rounded-[6px]">
               <div>
                 <p className="text-sm font-medium text-ink">Active sessions</p>
                 <p className="text-xs text-ink-muted">1 session active</p>
@@ -175,12 +175,12 @@ export default function SettingsPage() {
           </div>
           <div className="space-y-4">
             {reportsSuccess && (
-              <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-xl text-xs text-green-500 font-medium">
+              <div className="p-3 bg-success/10 border border-success/20 rounded-[6px] text-xs text-success font-medium">
                 All reports and associated analysis data have been deleted.
               </div>
             )}
             {error && (
-              <div className="p-3 bg-danger/10 border border-danger/20 rounded-xl text-xs text-danger font-medium">
+              <div className="p-3 bg-danger/10 border border-danger/20 rounded-[6px] text-xs text-danger font-medium">
                 {error}
               </div>
             )}
@@ -206,9 +206,9 @@ export default function SettingsPage() {
                 )}
               </div>
               {showDeleteReportsConfirm && (
-                <div className="p-4 bg-surface-subtle border border-border rounded-xl space-y-3">
+                <div className="p-4 bg-surface-subtle border border-border rounded-[6px] space-y-3">
                   <div className="flex gap-2 items-start text-xs text-ink-muted">
-                    <AlertTriangle size={14} className="text-amber-500 shrink-0 mt-0.5" />
+                    <AlertTriangle size={14} className="text-warning shrink-0 mt-0.5" />
                     <p>Are you sure you want to delete all reports? This action cannot be undone and will permanently purge all report documents and AI trace calls.</p>
                   </div>
                   <div className="flex gap-2 justify-end">
@@ -247,7 +247,7 @@ export default function SettingsPage() {
                 )}
               </div>
               {showDeleteAccountConfirm && (
-                <div className="p-4 bg-surface-subtle border border-danger/20 rounded-xl space-y-3">
+                <div className="p-4 bg-surface-subtle border border-danger/20 rounded-[6px] space-y-3">
                   <div className="flex gap-2 items-start text-xs text-ink-muted">
                     <AlertTriangle size={14} className="text-danger shrink-0 mt-0.5" />
                     <p>

@@ -29,32 +29,32 @@ export default function BlogPage() {
   return (
     <>
       <Navbar />
-      <main className="pt-24 pb-16 bg-[#FAFAFA] min-h-screen text-[#111111]">
+      <main className="pt-24 pb-16 bg-surface-muted min-h-screen text-ink">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
           <h1 className="text-4xl font-extrabold tracking-tight mb-8">
             Gapl Blog
           </h1>
-          <p className="text-lg text-zinc-500 mb-12">
+          <p className="text-lg text-ink-muted mb-12">
             No fluff. Just tactical advice on building strong engineering signals and getting shortlisted.
           </p>
 
           <div className="space-y-12">
             {POSTS.map((post) => (
-              <article key={post.slug} className="border-b border-zinc-200 pb-8 last:border-b-0">
-                <div className="flex items-center gap-3 text-xs text-zinc-400 mb-3">
+              <article key={post.slug} className="border-b border-border-DEFAULT pb-8 last:border-b-0">
+                <div className="flex items-center gap-3 text-xs text-ink-faint mb-3">
                   <span>{post.date}</span>
                   <span>•</span>
                   <span>{post.readTime}</span>
                 </div>
-                <h2 className="text-2xl font-bold text-zinc-950 hover:text-zinc-800 transition-colors mb-3">
+                <h2 className="text-2xl font-bold text-ink hover:text-ink transition-colors mb-3">
                   <Link href={`/blog/${post.slug}`}>
                     {post.title}
                   </Link>
                 </h2>
-                <p className="text-zinc-600 text-sm leading-relaxed mb-4">
+                <p className="text-ink-muted text-sm leading-relaxed mb-4">
                   {post.excerpt}
                 </p>
-                <Link href={`/blog/${post.slug}`} className="text-xs font-semibold text-zinc-900 hover:text-zinc-700 underline underline-offset-4">
+                <Link href={`/blog/${post.slug}`} className="text-xs font-semibold text-ink hover:text-ink-secondary underline underline-offset-4">
                   Read article
                 </Link>
               </article>

@@ -22,11 +22,11 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
 
   return (
     <html lang="en" className={inter.variable}>
-      <body className="bg-[#FAFAFA] text-[#111111] antialiased min-h-screen flex flex-col items-center justify-center p-6 text-center">
+      <body className="bg-surface-muted text-ink antialiased min-h-screen flex flex-col items-center justify-center p-6 text-center">
         <div className="max-w-md space-y-6">
-          <div className="w-16 h-16 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center justify-center mx-auto">
+          <div className="w-16 h-16 bg-danger/10 border border-danger/20 rounded-[6px] flex items-center justify-center mx-auto">
             <svg
-              className="w-8 h-8 text-red-500"
+              className="w-8 h-8 text-danger"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -41,8 +41,8 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
           </div>
 
           <div className="space-y-2">
-            <h2 className="text-xl font-bold text-[#111111]">Application Error</h2>
-            <p className="text-sm text-[#71717a] leading-relaxed">
+            <h2 className="text-xl font-bold text-ink">Application Error</h2>
+            <p className="text-sm text-ink-muted leading-relaxed">
               A critical failure occurred. Please reload the page or click Try Again.
             </p>
           </div>
@@ -50,13 +50,13 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
           <div className="flex gap-3 justify-center">
             <button
               onClick={() => window.location.reload()}
-              className="px-4 py-2 text-xs font-semibold border border-zinc-200 hover:bg-zinc-50 rounded-xl transition-all"
+              className="px-4 py-2 text-xs font-semibold border border-border-DEFAULT hover:bg-surface-muted rounded-[6px] transition-all"
             >
               Reload Page
             </button>
             <button
               onClick={() => reset()}
-              className="px-4 py-2 text-xs font-semibold bg-[#111111] text-white hover:bg-black rounded-xl transition-all"
+              className="px-4 py-2 text-xs font-semibold bg-ink text-white hover:bg-black rounded-[6px] transition-all"
             >
               Try again
             </button>

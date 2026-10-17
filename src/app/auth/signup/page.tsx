@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { AuthPanel, AuthMobileBar } from "@/components/brand/AuthPanel";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/Button";
@@ -64,65 +65,21 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] flex">
-      {/* Left panel */}
-      <div className="hidden lg:flex lg:flex-col lg:w-1/2 bg-[#111111] p-12 justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-white/10 rounded-lg flex items-center justify-center">
-            <span className="text-white text-xs font-bold">G</span>
-          </div>
-          <span className="text-white text-sm font-semibold">Gapl</span>
-        </Link>
-
-        <div className="space-y-6">
-          <div className="p-5 bg-white/5 rounded-xl border border-white/10">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 bg-danger-bg rounded-full flex items-center justify-center">
-                <span className="text-danger text-xs font-bold">✕</span>
-              </div>
-              <div>
-                <p className="text-xs text-zinc-400">Start with evidence</p>
-                <p className="text-sm font-medium text-white">Understand the rejection risk</p>
-              </div>
-            </div>
-            <p className="text-xs text-zinc-400 leading-relaxed">
-              Find the visible skill, project, and deployment gaps that weaken your application.
-            </p>
-          </div>
-
-          <div className="flex justify-center">
-            <div className="w-px h-6 bg-white/10" />
-          </div>
-
-          <div className="p-5 bg-white/5 rounded-xl border border-white/10">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 bg-success-bg rounded-full flex items-center justify-center">
-                <span className="text-success text-xs font-bold">✓</span>
-              </div>
-              <div>
-                <p className="text-xs text-zinc-400">Build the next signal</p>
-                <p className="text-sm font-medium text-white">Work through a focused roadmap</p>
-              </div>
-            </div>
-            <p className="text-xs text-zinc-400 leading-relaxed">
-              Return with stronger evidence and compare how your readiness estimate changes.
-            </p>
-          </div>
-        </div>
-
-        <p className="text-xs text-zinc-600">
-          Free to start. No card required.
-        </p>
-      </div>
+    <div className="min-h-screen bg-surface-muted flex flex-col lg:flex-row">
+      <AuthMobileBar />
+      <AuthPanel
+        headline="Start with the evidence."
+        lines={['Understand the rejection risk.', 'Find the skill, project and deployment gaps that weaken it.', 'Build what closes them, week by week.']}
+      />
 
       {/* Right panel */}
-      <div className="flex-1 flex items-center justify-center p-6">
+      <div className="flex-1 flex items-center justify-center px-4 py-10 sm:p-6">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           className="w-full max-w-sm"
         >
-          <h1 className="text-2xl font-bold text-ink tracking-tight mb-1">Get started free</h1>
+          <h1 className="display text-[2.25rem] mb-2">Get started free</h1>
           <p className="text-sm text-ink-muted mb-8">Create your Gapl account</p>
 
           {/* Google */}
@@ -150,7 +107,7 @@ export default function SignupPage() {
             <Input
               label="Full name"
               type="text"
-              placeholder="Aryan Mehta"
+              placeholder="Name as on your resume"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -176,7 +133,7 @@ export default function SignupPage() {
             />
 
             {error && (
-              <p className="text-xs text-danger bg-danger-bg px-3 py-2 rounded-lg border border-danger-border">
+              <p className="text-xs text-danger bg-danger-bg px-3 py-2 rounded-[5px] border border-danger-border">
                 {error}
               </p>
             )}

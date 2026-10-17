@@ -5,65 +5,52 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/Button";
+import { Wordmark } from "@/components/brand/Wordmark";
 import { Menu, X } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 const navLinks = [
   { label: "How it works", href: "/#how-it-works" },
-  { label: "Features", href: "/#features" },
+  { label: "Sample report", href: "/demo" },
   { label: "Pricing", href: "/pricing" },
 ];
 
 export function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
   const { user, loading } = useAuth();
-
-  useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 12);
-    window.addEventListener("scroll", handler, { passive: true });
-    return () => window.removeEventListener("scroll", handler);
-  }, []);
 
   // Close mobile menu on route change
   useEffect(() => setMobileOpen(false), [pathname]);
 
   return (
     <>
-      <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled
-            ? "bg-white/90 backdrop-blur-md border-b border-border-DEFAULT shadow-xs"
-            : "bg-transparent"
-        }`}
-      >
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-          {/* Logo */}
-          <Link href={user ? "/dashboard" : "/"} className="flex items-center gap-2 group">
-            <div className="w-7 h-7 bg-[#111111] rounded-lg flex items-center justify-center">
-              <span className="text-white text-xs font-bold tracking-tight">G</span>
-            </div>
-            <span className="text-sm font-semibold text-ink tracking-tight">Gapl</span>
+      <header className="fixed top-0 left-0 right-0 z-50 bg-primary-600 text-primary-foreground border-b-[3px] border-board">
+        <nav className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-6">
+          <Link href={user ? "/dashboard" : "/"} aria-label="Gapl home" className="shrink-0">
+            <Wordmark />
           </Link>
 
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="px-3 py-1.5 text-sm text-ink-muted hover:text-ink transition-colors rounded-md hover:bg-surface-subtle"
-              >
-                {link.label}
-              </Link>
-            ))}
+          <div className="hidden md:flex items-center gap-1 mr-auto">
+            {navLinks.map((link) => {
+              const active = pathname === link.href;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-[4px] transition-colors ${
+                    active ? "text-board" : "text-primary-100 hover:text-white hover:bg-white/10"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
           </div>
 
-          {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-2">
             {loading ? (
-              <div className="w-20 h-8 bg-surface-subtle animate-pulse rounded-md" />
+              <div className="w-24 h-8 bg-white/10 animate-pulse rounded-[4px]" />
             ) : user ? (
               <Link href="/dashboard">
                 <Button variant="primary" size="sm">
@@ -72,71 +59,72 @@ export function Navbar() {
               </Link>
             ) : (
               <>
-                <Link href="/auth/login">
-                  <Button variant="ghost" size="sm">
-                    Sign in
-                  </Button>
+                <Link
+                  href="/auth/login"
+                  className="px-3 py-1.5 text-sm font-medium text-primary-100 hover:text-white rounded-[4px] hover:bg-white/10 transition-colors"
+                >
+                  Sign in
                 </Link>
-                <Link href="/auth/signup">
+                <Link href="/analyze">
                   <Button variant="primary" size="sm">
-                    Get started
+                    Check my status
                   </Button>
                 </Link>
               </>
             )}
           </div>
 
-          {/* Mobile menu toggle */}
           <button
-            className="md:hidden p-2 rounded-lg hover:bg-surface-subtle text-ink-secondary"
+            className="md:hidden -mr-2 p-2 rounded-[4px] text-primary-100 hover:bg-white/10"
             onClick={() => setMobileOpen((v) => !v)}
-            aria-label="Toggle menu"
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileOpen}
           >
-            {mobileOpen ? <X size={18} /> : <Menu size={18} />}
+            {mobileOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </nav>
       </header>
 
-      {/* Mobile menu */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -8 }}
+            initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2 }}
-            className="fixed top-14 left-0 right-0 z-40 bg-white border-b border-border-DEFAULT shadow-md md:hidden"
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed top-[59px] left-0 right-0 z-40 bg-primary-600 text-primary-foreground shadow-lg md:hidden"
           >
-            <div className="px-4 py-3 space-y-1">
+            <div className="px-4 pt-2 pb-4">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="block px-3 py-2 text-sm text-ink-secondary hover:text-ink rounded-lg hover:bg-surface-subtle"
+                  className="block py-3 text-base font-medium text-primary-100 border-b border-white/10 hover:text-white"
                 >
                   {link.label}
                 </Link>
               ))}
-              <div className="pt-2 border-t border-border-DEFAULT mt-2 flex flex-col gap-2">
+              <div className="pt-4 flex flex-col gap-2">
                 {loading ? (
-                  <div className="h-10 bg-surface-subtle animate-pulse rounded-md" />
+                  <div className="h-12 bg-white/10 animate-pulse rounded-[6px]" />
                 ) : user ? (
                   <Link href="/dashboard" className="w-full">
-                    <Button variant="primary" size="md" className="w-full">
+                    <Button variant="primary" size="lg" className="w-full">
                       Dashboard
                     </Button>
                   </Link>
                 ) : (
                   <>
-                    <Link href="/auth/login" className="w-full">
-                      <Button variant="outline" size="md" className="w-full">
-                        Sign in
+                    <Link href="/analyze" className="w-full">
+                      <Button variant="primary" size="lg" className="w-full">
+                        Check my status
                       </Button>
                     </Link>
-                    <Link href="/auth/signup" className="w-full">
-                      <Button variant="primary" size="md" className="w-full">
-                        Get started
-                      </Button>
+                    <Link
+                      href="/auth/login"
+                      className="w-full h-12 inline-flex items-center justify-center text-sm font-semibold text-primary-100 border-[1.5px] border-white/25 rounded-[6px]"
+                    >
+                      Sign in
                     </Link>
                   </>
                 )}

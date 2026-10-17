@@ -1,166 +1,123 @@
-"use client";
-
-import { motion } from "framer-motion";
-import { VerdictBadge, Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
-import { Progress } from "@/components/ui/Progress";
+import type { Metadata } from "next";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { VerdictBadge } from "@/components/ui/Badge";
+import { Sheet, ChartRow, RecruiterRemark, Breakdown, GapsTable } from "@/components/report/ReportParts";
+import { SAMPLE, waitlistCount } from "@/lib/sample-report";
+import { cn } from "@/lib/utils";
 
-// Static illustrative data — clearly labeled as example, not real AI output
-const DEMO_RESULT = {
-  role: "SDE Intern",
-  companyTier: "Product Startup",
-  atsScore: 68,
-  readiness: 65,
-  recruiterVerdict: {
-    verdict: "Reject" as const,
-    confidence: 72,
-    reason:
-      "Strong academics but missing deployed projects. Resume lacks evidence of real-world impact — no production systems, no GitHub contributions with meaningful stars, no backend depth.",
-    strongestSignal: "IIT/NIT academic foundation — recognized tier",
-    topGap: "Zero deployed projects visible in resume",
-    whatWouldChangeDecision:
-      "One end-to-end deployed SaaS or API with documented impact (users, requests, uptime) would flip this to a shortlist.",
-  },
-  careerGaps: [
-    { skill: "Backend Development", priority: "Critical", recommendedProject: "Expense Tracking SaaS", estimatedWeeks: 3 },
-    { skill: "Deployment & DevOps", priority: "High", recommendedProject: "Deploy any project on Railway/Render", estimatedWeeks: 1 },
-    { skill: "System Design", priority: "High", recommendedProject: "Design a URL Shortener", estimatedWeeks: 1 },
-  ],
+export const metadata: Metadata = {
+  title: "Sample report",
+  description: "An illustrative Gapl report: recruiter verdict, readiness breakdown, career gaps and the route to close them.",
 };
 
+const WL = waitlistCount(SAMPLE.gaps);
+
+// Static illustrative data — clearly labeled as a sample, not real AI output.
 export default function DemoPage() {
   return (
     <>
       <Navbar />
-      <main className="pt-14 bg-[#FAFAFA]">
-        {/* Banner */}
-        <div className="bg-[#111111] text-center py-3 px-4">
-          <p className="text-xs text-[#71717a]">
-            This is a sample report illustrating what Gapl outputs.{" "}
-            <Link href="/analyze" className="text-white underline underline-offset-2 hover:text-zinc-300">
-              Analyze your own resume →
-            </Link>
+      <main className="pt-[59px] bg-surface-muted">
+        <div className="led-board">
+          <p className="max-w-5xl mx-auto px-4 sm:px-6 py-2.5 text-[0.95rem] leading-snug">
+            SAMPLE · NOT A REAL CANDIDATE
           </p>
         </div>
 
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12 space-y-8">
-          {/* Header */}
-          <div className="flex items-start justify-between gap-4">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12 pb-16 space-y-5">
+          <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="text-xs text-[#71717a] mb-1">{DEMO_RESULT.role} · {DEMO_RESULT.companyTier} · Sample</p>
-              <h1 className="text-2xl font-bold text-[#111111]">Sample Analysis Report</h1>
+              <h1 className="display text-[clamp(2rem,4.5vw,3rem)]">Sample report</h1>
+              <p className="mt-2 text-ink-secondary max-w-xl">
+                This is what Gapl prints for one resume, checked for one role at one tier. Yours will be specific to
+                your resume.
+              </p>
             </div>
             <Link href="/analyze">
-              <Button size="sm" className="gap-1.5">
-                Analyze Mine <ArrowRight size={14} />
+              <Button size="md">
+                Check my status <ArrowRight size={16} strokeWidth={2.5} />
               </Button>
             </Link>
           </div>
 
-          {/* Shareable card */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-[#111111] rounded-2xl p-8"
-          >
-            <p className="text-xs text-[#52525b] uppercase tracking-widest font-medium mb-6">Report Card</p>
-            <div className="grid sm:grid-cols-2 gap-8">
-              <div>
-                <p className="text-[0.625rem] text-[#52525b] uppercase tracking-widest mb-1">Role</p>
-                <p className="text-xl font-bold text-white mb-4">{DEMO_RESULT.role}</p>
-                <p className="text-[0.625rem] text-[#52525b] uppercase tracking-widest mb-1">Target</p>
-                <p className="text-sm font-medium text-[#a1a1aa] mb-4">{DEMO_RESULT.companyTier}</p>
-                <p className="text-[0.625rem] text-[#52525b] uppercase tracking-widest mb-1.5">Verdict</p>
-                <VerdictBadge verdict={DEMO_RESULT.recruiterVerdict.verdict} />
-              </div>
-              <div className="space-y-4">
-                {[
-                  { label: "Readiness", value: DEMO_RESULT.readiness, color: "#4F46E5" },
-                  { label: "ATS Score", value: DEMO_RESULT.atsScore, color: "#f59e0b" },
-                  { label: "Confidence", value: DEMO_RESULT.recruiterVerdict.confidence, color: "#dc2626" },
-                ].map(({ label, value, color }) => (
-                  <div key={label}>
-                    <div className="flex justify-between mb-1.5">
-                      <span className="text-xs text-[#71717a]">{label}</span>
-                      <span className="text-xs font-semibold text-white">{value}%</span>
-                    </div>
-                    <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                      <div className="h-full rounded-full" style={{ width: `${value}%`, background: color }} />
-                    </div>
+          <Sheet title="Reservation chart" aside={`${SAMPLE.gaps.length} gaps found`}>
+            <ChartRow
+              role={SAMPLE.role}
+              tier={SAMPLE.companyTier}
+              ats={SAMPLE.atsScore}
+              readiness={SAMPLE.readiness}
+              verdict={SAMPLE.verdict}
+              waitlist={WL}
+              topGap={SAMPLE.topGap}
+              tag="Sample"
+            />
+          </Sheet>
+
+          <Sheet title="Recruiter's remark" aside={<VerdictBadge verdict={SAMPLE.verdict} waitlist={WL} size="sm" />}>
+            <RecruiterRemark
+              reason={SAMPLE.reason}
+              strongestSignal={SAMPLE.strongestSignal}
+              topGap={SAMPLE.topGap}
+              whatWouldChange={SAMPLE.whatWouldChangeDecision}
+              confidence={SAMPLE.confidence}
+              verdict={SAMPLE.verdict}
+            />
+          </Sheet>
+
+          <Sheet title="Readiness breakdown" aside={`${SAMPLE.readiness}/100 overall`}>
+            <Breakdown items={SAMPLE.breakdown.map((b) => ({ label: b.label, score: b.score, note: b.pulledBy }))} />
+          </Sheet>
+
+          <Sheet title="Career gaps" aside="Ranked by impact on shortlisting">
+            <GapsTable gaps={[...SAMPLE.gaps]} readiness={SAMPLE.readiness} />
+          </Sheet>
+
+          <Sheet title="Route" aside="Readiness values are illustrative">
+            <ol className="chart-rows">
+              {SAMPLE.route.map((stop) => (
+                <li
+                  key={stop.code}
+                  className="grid grid-cols-[4.5rem_minmax(0,1fr)] sm:grid-cols-[5rem_minmax(0,1fr)_8.5rem_5rem] gap-x-4 gap-y-1 px-4 sm:px-6 py-3.5 sm:items-baseline"
+                >
+                  <span className="chart-data text-sm font-bold text-primary-600">{stop.code}</span>
+                  <div>
+                    <p className="font-bold">{stop.build}</p>
+                    {"closes" in stop && <p className="text-sm text-ink-muted">Closes the {stop.closes} gap</p>}
                   </div>
-                ))}
-              </div>
-            </div>
-            <div className="mt-6 pt-5 border-t border-white/10">
-              <p className="text-[0.625rem] text-[#52525b] uppercase tracking-widest mb-1">Top Gap</p>
-              <p className="text-sm font-semibold text-white mb-3">{DEMO_RESULT.recruiterVerdict.topGap}</p>
-              <p className="text-[0.625rem] text-[#52525b] uppercase tracking-widest mb-1">Build Next</p>
-              <p className="text-sm font-semibold text-white">{DEMO_RESULT.careerGaps[0].recommendedProject}</p>
-            </div>
-          </motion.div>
-
-          {/* Rejection reason */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="p-5 bg-[#fef2f2] rounded-xl border border-[#fecaca]"
-          >
-            <p className="text-xs font-semibold text-[#dc2626] uppercase tracking-wider mb-2">Why this resume was rejected</p>
-            <p className="text-sm text-[#3f3f46] leading-relaxed">{DEMO_RESULT.recruiterVerdict.reason}</p>
-          </motion.div>
-
-          {/* Fix */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="p-5 bg-[#f0fdf4] rounded-xl border border-[#bbf7d0]"
-          >
-            <p className="text-xs font-semibold text-[#16a34a] uppercase tracking-wider mb-2">What would flip this to Shortlist</p>
-            <p className="text-sm text-[#3f3f46] leading-relaxed">{DEMO_RESULT.recruiterVerdict.whatWouldChangeDecision}</p>
-          </motion.div>
-
-          {/* Gaps */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-            <h2 className="text-base font-semibold text-[#111111] mb-4">Top Gaps Identified</h2>
-            <div className="space-y-3">
-              {DEMO_RESULT.careerGaps.map((gap) => (
-                <div key={gap.skill} className="p-4 bg-white rounded-xl border border-[#e4e4e7]">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-semibold text-[#111111]">{gap.skill}</p>
-                      <Badge variant={gap.priority === "Critical" ? "danger" : "warning"}>{gap.priority}</Badge>
-                    </div>
-                    <span className="text-xs text-[#71717a]">{gap.estimatedWeeks}w to fix</span>
-                  </div>
-                  <p className="text-xs text-[#71717a]">Build: <span className="text-[#111111]">{gap.recommendedProject}</span></p>
-                </div>
+                  <span className="chart-data col-start-2 sm:col-start-auto text-sm sm:text-right whitespace-nowrap">Readiness {stop.readiness}</span>
+                  <span className="col-start-2 sm:col-start-auto sm:text-right">
+                    <span
+                      className={cn(
+                        "stamp text-[0.6875rem]",
+                        stop.status.startsWith("WL") ? "text-danger bg-danger-bg" : "text-warning bg-warning-bg"
+                      )}
+                    >
+                      {stop.status}
+                    </span>
+                  </span>
+                </li>
               ))}
-            </div>
-          </motion.div>
+            </ol>
+          </Sheet>
 
-          {/* CTA */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25 }}
-            className="text-center py-10"
-          >
-            <h2 className="text-xl font-bold text-[#111111] mb-2">See your own report</h2>
-            <p className="text-sm text-[#71717a] mb-6">
-              GPT-OSS-120B analyzes your actual resume — results will be specific to your profile.
+          <div className="led-ground rounded-[6px] px-5 sm:px-8 py-10 sm:py-12">
+            <h2 className="display text-[clamp(1.9rem,4vw,2.75rem)] text-surface-muted max-w-2xl">
+              Get the chart for your own resume.
+            </h2>
+            <p className="mt-3 text-surface-muted/70 max-w-xl">
+              Your first analysis is free. Upload a PDF or paste the text, pick a role and tier, and get your status
+              with its reasons.
             </p>
-            <Link href="/analyze">
-              <Button size="lg" variant="primary" className="gap-2">
-                Analyze My Resume <ArrowRight size={16} />
+            <Link href="/analyze" className="inline-block mt-7">
+              <Button size="lg">
+                Check my status <ArrowRight size={17} strokeWidth={2.5} />
               </Button>
             </Link>
-          </motion.div>
+          </div>
         </div>
       </main>
       <Footer />

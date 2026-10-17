@@ -6,6 +6,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
+import { Wordmark } from "@/components/brand/Wordmark";
+import { Button } from "@/components/ui/Button";
 import { logOut } from "@/lib/firebase";
 import {
   LayoutDashboard,
@@ -51,15 +53,12 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
   return (
     <div className="flex flex-col h-full">
       {/* Logo */}
-      <div className="h-14 px-4 flex items-center justify-between border-b border-border-DEFAULT">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-6 h-6 bg-[#111111] rounded-md flex items-center justify-center">
-            <span className="text-white text-xs font-bold">G</span>
-          </div>
-          <span className="text-sm font-semibold text-ink">Gapl</span>
+      <div className="h-14 px-4 flex items-center justify-between border-b border-white/15">
+        <Link href="/" aria-label="Gapl home">
+          <Wordmark size="sm" />
         </Link>
         {onClose && (
-          <button onClick={onClose} className="p-1 rounded-md hover:bg-surface-subtle text-ink-muted">
+          <button onClick={onClose} aria-label="Close menu" className="p-1.5 rounded-[4px] hover:bg-white/10 text-primary-100">
             <X size={16} />
           </button>
         )}
@@ -67,11 +66,11 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
 
       {/* New analysis CTA */}
       <div className="px-3 pt-4 pb-2">
-        <Link href="/analyze">
-          <button className="w-full h-8 flex items-center gap-2 px-3 rounded-lg bg-[#111111] text-white text-xs font-medium hover:bg-zinc-800 transition-colors">
-            <Plus size={14} />
-            New Analysis
-          </button>
+        <Link href="/analyze" onClick={onClose}>
+          <Button size="md" className="w-full justify-start">
+            <Plus size={16} strokeWidth={2.5} />
+            New analysis
+          </Button>
         </Link>
       </div>
 
@@ -86,13 +85,12 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
               href={item.href}
               onClick={onClose}
               className={cn(
-                "flex items-center gap-2.5 h-8 px-3 rounded-lg text-xs font-medium transition-all duration-150",
-                active
-                  ? "bg-surface-subtle text-ink"
-                  : "text-ink-muted hover:text-ink hover:bg-surface-subtle"
+                "flex items-center gap-3 h-10 px-3 rounded-[4px] text-sm font-medium transition-colors",
+                active ? "bg-white/12 text-white font-semibold" : "text-primary-100 hover:text-white hover:bg-white/8"
               )}
+              aria-current={active ? "page" : undefined}
             >
-              <Icon size={14} className={active ? "text-ink" : "text-ink-muted"} />
+              <Icon size={17} className={active ? "text-board" : "text-primary-400"} />
               {item.label}
             </Link>
           );
@@ -100,21 +98,22 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
       </nav>
 
       {/* User */}
-      <div className="px-3 pb-4 pt-2 border-t border-border-DEFAULT mt-auto">
-        <div className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-surface-subtle transition-colors cursor-pointer group">
-          <div className="w-6 h-6 rounded-full bg-primary-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+      <div className="px-3 pb-4 pt-3 border-t border-white/15 mt-auto">
+        <div className="flex items-center gap-3 p-2">
+          <div className="w-8 h-8 rounded-[4px] bg-board text-board-ink grid place-items-center text-sm font-[800] flex-shrink-0">
             {name[0]?.toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium text-ink truncate">{name}</p>
-            <p className="text-2xs text-ink-faint truncate capitalize">{plan} plan</p>
+            <p className="text-sm font-semibold text-white truncate">{name}</p>
+            <p className="chart-data text-[0.6875rem] text-primary-100 truncate uppercase">{plan} plan</p>
           </div>
           <button
             onClick={handleLogout}
-            className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-border-DEFAULT text-ink-faint hover:text-ink transition-all"
+            className="p-2 rounded-[4px] text-primary-100 hover:text-white hover:bg-white/10"
             title="Sign out"
+            aria-label="Sign out"
           >
-            <LogOut size={12} />
+            <LogOut size={16} />
           </button>
         </div>
       </div>
@@ -128,16 +127,17 @@ export function DashboardSidebar() {
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex flex-col w-56 flex-shrink-0 border-r border-border-DEFAULT bg-white h-screen sticky top-0">
+      <aside className="hidden md:flex flex-col w-60 flex-shrink-0 bg-primary-600 border-r-[3px] border-board h-screen sticky top-0">
         <SidebarContent />
       </aside>
 
       {/* Mobile toggle */}
       <button
-        className="md:hidden fixed top-3 left-3 z-50 p-2 bg-white rounded-lg border border-border-DEFAULT shadow-sm"
+        className="md:hidden fixed top-3 left-3 z-50 p-2 bg-primary-600 rounded-[5px] shadow-md"
         onClick={() => setMobileOpen(true)}
+        aria-label="Open menu"
       >
-        <Menu size={16} className="text-ink" />
+        <Menu size={18} className="text-white" />
       </button>
 
       {/* Mobile overlay */}
@@ -148,15 +148,15 @@ export function DashboardSidebar() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/40 z-40 md:hidden"
+              className="fixed inset-0 bg-primary-900/50 z-40 md:hidden"
               onClick={() => setMobileOpen(false)}
             />
             <motion.aside
               initial={{ x: -240 }}
               animate={{ x: 0 }}
               exit={{ x: -240 }}
-              transition={{ type: "spring", stiffness: 400, damping: 40 }}
-              className="fixed left-0 top-0 bottom-0 w-56 bg-white z-50 md:hidden border-r border-border-DEFAULT"
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="fixed left-0 top-0 bottom-0 w-64 bg-primary-600 z-50 md:hidden border-r-[3px] border-board"
             >
               <SidebarContent onClose={() => setMobileOpen(false)} />
             </motion.aside>
