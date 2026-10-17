@@ -1,3 +1,4 @@
+import { emailLayout, emailButton, escapeHtml } from "@/lib/email-layout";
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminDb, requireAdmin } from "@/lib/firebase-admin";
 import { sendEmail } from "@/lib/resend";
@@ -86,35 +87,11 @@ export async function POST(req: NextRequest) {
 
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.in";
 
-      const bodyHtml = `
-        <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #111111; line-height: 1.6;">
-          <!-- Header bar -->
-          <div style="background: linear-gradient(135deg, #09090b 0%, #18181b 100%); border-radius: 12px 12px 0 0; padding: 28px 32px; border-bottom: 2px solid #6366f1;">
-            <span style="font-size: 20px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px;">Gapl</span>
-            <span style="font-size: 11px; color: #71717a; display: block; margin-top: 2px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em;">Application Readiness Intelligence</span>
-          </div>
-
-          <!-- Body -->
-          <div style="background: #ffffff; padding: 32px; border: 1px solid #e4e4e7; border-top: none; border-radius: 0 0 12px 12px;">
-            <h2 style="font-size: 18px; font-weight: 700; color: #09090b; margin: 0 0 16px 0;">
-              ${subject}
-            </h2>
-
-            <div style="font-size: 14px; color: #3f3f46; white-space: pre-wrap; line-height: 1.7; margin-bottom: 28px;">${message}</div>
-
-            <div style="border-top: 1px solid #f4f4f5; padding-top: 20px; margin-top: 20px;">
-              <a href="${appUrl}/dashboard" style="display: inline-block; background: #6366f1; color: #ffffff; font-size: 13px; font-weight: 600; padding: 11px 22px; border-radius: 8px; text-decoration: none;">
-                Open Gapl Dashboard →
-              </a>
-            </div>
-
-            <p style="font-size: 11px; color: #a1a1aa; margin-top: 32px; margin-bottom: 0;">
-              Gapl · Application Readiness Intelligence<br/>
-              <a href="${appUrl}" style="color: #a1a1aa;">${appUrl}</a>
-            </p>
-          </div>
-        </div>
-      `;
+      const bodyHtml = emailLayout(
+        `<h1 style="margin:0 0 14px 0;font-size:22px;line-height:1.25;font-weight:800;letter-spacing:-0.02em;">${escapeHtml(subject)}</h1>
+         <div style="white-space:pre-wrap;">${escapeHtml(message)}</div>
+         <div style="margin:28px 0 0 0;">${emailButton(`${appUrl}/dashboard`, "Open my dashboard")}</div>`
+      );
 
       await sendEmail({
         to: targetEmail,

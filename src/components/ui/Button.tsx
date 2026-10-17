@@ -25,7 +25,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       ghost:
         "text-ink-secondary hover:bg-surface-subtle hover:text-ink",
       danger:
-        "bg-danger text-white border-2 border-danger hover:bg-[#8f1b15] hover:border-[#8f1b15]",
+        "bg-danger text-white border-2 border-danger hover:bg-danger-deep hover:border-danger-deep",
     };
 
     const sizes = {

@@ -1,3 +1,4 @@
+import { emailLayout, emailButton, escapeHtml, EMAIL } from "@/lib/email-layout";
 import { NextRequest, NextResponse } from "next/server";
 import { isAuthorizedCron } from "@/lib/cron-auth";
 import { getAdminDb } from "@/lib/firebase-admin";
@@ -42,20 +43,12 @@ export async function GET(req: NextRequest) {
     // Construct HTML table rows for active alerts
     const alertsHtmlList = activeAlerts
       .map(
-        (alert) => `
-      <tr style="border-bottom: 1px solid #e4e4e7;">
-        <td style="padding: 12px; font-weight: bold; color: ${alert.type === "danger" ? "#dc2626" : "#d97706"};">
-          ${alert.type.toUpperCase()}
-        </td>
-        <td style="padding: 12px; font-weight: 600; color: #111111;">
-          ${alert.title}
-        </td>
-        <td style="padding: 12px; color: #4b5563; line-height: 1.4;">
-          ${alert.message}
-        </td>
-        <td style="padding: 12px; font-weight: bold; color: #111111; white-space: nowrap;">
-          ${alert.metric}
-        </td>
+        (alert, i) => `
+      <tr style="${i % 2 ? "background-color:#e3ecdc;" : ""}">
+        <td style="padding:10px 12px;font-family:${EMAIL.mono};font-weight:700;color:${alert.type === "danger" ? EMAIL.danger : "#8f5300"};">${escapeHtml(alert.type.toUpperCase())}</td>
+        <td style="padding:10px 12px;font-weight:700;">${escapeHtml(alert.title)}</td>
+        <td style="padding:10px 12px;color:${EMAIL.muted};line-height:1.4;">${escapeHtml(alert.message)}</td>
+        <td style="padding:10px 12px;font-family:${EMAIL.mono};font-weight:700;white-space:nowrap;">${escapeHtml(alert.metric)}</td>
       </tr>`
       )
       .join("");
@@ -64,34 +57,21 @@ export async function GET(req: NextRequest) {
       ? `[Gapl Weekly Digest] ${activeAlerts.length} Active System Alerts`
       : `[CRITICAL ALERT] ${activeAlerts.length} Danger Alerts Detected on Gapl`;
 
-    const html = `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 650px; margin: 0 auto; padding: 24px; border: 1px solid #e4e4e7; border-radius: 12px; background-color: #ffffff;">
-        <h2 style="color: #111111; margin-top: 0; font-size: 20px; font-weight: 700;">Gapl System Alert Digest</h2>
-        <p style="color: #71717a; font-size: 14px; margin-bottom: 24px;">
-          The following alerts were detected during the automated health check at ${now.toUTCString()}.
-        </p>
-        
-        <table style="width: 100%; border-collapse: collapse; margin-top: 20px; margin-bottom: 24px; text-align: left; font-size: 13px;">
-          <thead>
-            <tr style="background-color: #f4f4f5; border-bottom: 2px solid #e4e4e7;">
-              <th style="padding: 12px; color: #71717a; font-weight: 600;">Severity</th>
-              <th style="padding: 12px; color: #71717a; font-weight: 600;">Alert</th>
-              <th style="padding: 12px; color: #71717a; font-weight: 600;">Details</th>
-              <th style="padding: 12px; color: #71717a; font-weight: 600;">Metric</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${alertsHtmlList}
-          </tbody>
-        </table>
-
-        <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #e4e4e7; text-align: center;">
-          <a href="${alertsDashboardUrl}" style="display: inline-block; padding: 10px 20px; background-color: #111111; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px; transition: background-color 0.15s ease;">
-            Open Alerts Dashboard
-          </a>
-        </div>
-      </div>
-    `;
+    const html = emailLayout(
+      `<h1 style="margin:0 0 8px 0;font-size:22px;line-height:1.25;font-weight:800;letter-spacing:-0.02em;">Alert digest</h1>
+       <p style="margin:0 0 18px 0;color:${EMAIL.muted};font-size:14px;">Detected during the automated health check at ${escapeHtml(now.toUTCString())}.</p>
+       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid ${EMAIL.rule};border-top:2px solid ${EMAIL.ink};background-color:#ffffff;font-size:13px;text-align:left;">
+         <tr>
+           <th style="padding:10px 12px;color:${EMAIL.muted};font-size:11px;text-transform:uppercase;letter-spacing:0.07em;border-bottom:1px solid ${EMAIL.rule};">Severity</th>
+           <th style="padding:10px 12px;color:${EMAIL.muted};font-size:11px;text-transform:uppercase;letter-spacing:0.07em;border-bottom:1px solid ${EMAIL.rule};">Alert</th>
+           <th style="padding:10px 12px;color:${EMAIL.muted};font-size:11px;text-transform:uppercase;letter-spacing:0.07em;border-bottom:1px solid ${EMAIL.rule};">Details</th>
+           <th style="padding:10px 12px;color:${EMAIL.muted};font-size:11px;text-transform:uppercase;letter-spacing:0.07em;border-bottom:1px solid ${EMAIL.rule};">Metric</th>
+         </tr>
+         ${alertsHtmlList}
+       </table>
+       <div style="margin:24px 0 0 0;">${emailButton(alertsDashboardUrl, "Open founder alerts")}</div>`,
+      { preheader: `${activeAlerts.length} active alerts` }
+    );
 
     await sendEmail({
       to: adminEmail,

@@ -155,13 +155,6 @@ function normalizeCreatedAt<T extends Record<string, unknown>>(value: T): T {
   return value;
 }
 
-// ── Roadmaps ──────────────────────────────────────────────────────────────────
-export const saveRoadmap = async (uid: string, roadmap: Record<string, unknown>) => {
-  const db = getClientDb();
-  const roadmapsRef = collection(db, "roadmaps");
-  return addDoc(roadmapsRef, { userId: uid, createdAt: new Date(), ...roadmap });
-};
-
 // ── CV Builder ────────────────────────────────────────────────────────────────
 export interface SavedCV {
   id?: string;

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { getAdminDb, requireUser } from "@/lib/firebase-admin";
 
 export const runtime = "nodejs";
@@ -78,11 +78,22 @@ export async function PATCH(
 
   try {
     const body = await req.json();
-    const { completedTasks, completionPercentage, currentReadiness } = body;
+    const { completedTasks: rawTasks } = body;
 
-    if (!Array.isArray(completedTasks)) {
+    if (!Array.isArray(rawTasks) || rawTasks.length > 500) {
       return NextResponse.json({ error: "completedTasks must be an array of strings." }, { status: 400 });
     }
+
+    // Progress is derived on the server from the report's real task list,
+    // never taken from the client.
+    const reportSnap = await getAdminDb().collection("reports").doc(id).get();
+    const report = reportSnap.exists ? reportSnap.data() ?? {} : null;
+    if (!report || report.userId !== user.uid) {
+      return NextResponse.json({ error: "Report not found." }, { status: 404 });
+    }
+    const roadmapWeeks: { week: number; tasks?: string[] }[] = Array.isArray(report.roadmap) ? report.roadmap : [];
+    const validIds = new Set(roadmapWeeks.flatMap((w) => (w.tasks ?? []).map((t) => `${w.week}-${t}`)));
+    const completedTasks = Array.from(new Set(rawTasks.filter((t): t is string => typeof t === "string" && validIds.has(t))));
 
     const roadmapDocRef = getAdminDb()
       .collection("users")
@@ -95,9 +106,16 @@ export async function PATCH(
     const oldPct = currentData.completionPercentage || 0;
     const sentMilestones = currentData.sentMilestones || [];
 
-    const newPct = typeof completionPercentage === "number" ? completionPercentage : 0;
+    const newPct = validIds.size > 0 ? Math.round((completedTasks.length / validIds.size) * 100) : 0;
+    const startReadiness = typeof report.readiness === "number" ? report.readiness : 65;
+    const targetReadinessVal = currentData.targetReadiness || 88;
+    const currentReadiness = Math.min(
+      targetReadinessVal,
+      Math.round(startReadiness + (newPct / 100) * (targetReadinessVal - startReadiness))
+    );
+
     const updateData: {
-      completedTasks: unknown[];
+      completedTasks: string[];
       completionPercentage: number;
       currentReadiness: number;
       updatedAt: string;
@@ -105,7 +123,7 @@ export async function PATCH(
     } = {
       completedTasks,
       completionPercentage: newPct,
-      currentReadiness: typeof currentReadiness === "number" ? currentReadiness : 65,
+      currentReadiness,
       updatedAt: new Date().toISOString(),
     };
 
@@ -114,25 +132,21 @@ export async function PATCH(
     const hitMilestone = milestones.find((m) => newPct >= m && oldPct < m && !sentMilestones.includes(m));
 
     if (hitMilestone && user.email) {
-      const { sendRoadmapMilestoneEmail } = await import("@/lib/email-service");
-      const readinessVal = typeof currentReadiness === "number" ? currentReadiness : (currentData.currentReadiness || 65);
-      const targetReadinessVal = currentData.targetReadiness || 85;
-
-      sendRoadmapMilestoneEmail(
-        user.uid,
-        user.email,
-        id,
-        hitMilestone,
-        readinessVal,
-        targetReadinessVal
-      ).catch((err) => console.error(`Failed to send milestone ${hitMilestone}% email:`, err));
-
+      const email = user.email;
+      after(async () => {
+        try {
+          const { sendRoadmapMilestoneEmail } = await import("@/lib/email-service");
+          await sendRoadmapMilestoneEmail(user.uid, email, id, hitMilestone, currentReadiness, targetReadinessVal);
+        } catch (err) {
+          console.error(`Failed to send milestone ${hitMilestone}% email:`, err);
+        }
+      });
       updateData.sentMilestones = [...sentMilestones, hitMilestone];
     }
 
-    await roadmapDocRef.update(updateData);
+    await roadmapDocRef.set(updateData, { merge: true });
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, completionPercentage: newPct, currentReadiness });
   } catch (err: unknown) {
     console.error("Error updating roadmap:", err);
     return NextResponse.json({ error: err instanceof Error ? err.message : "Failed to update roadmap." }, { status: 500 });

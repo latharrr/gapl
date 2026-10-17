@@ -129,14 +129,19 @@ export function DashboardSidebar() {
         <SidebarContent />
       </aside>
 
-      {/* Mobile toggle */}
-      <button
-        className="md:hidden fixed top-3 left-3 z-50 p-2 bg-primary-600 rounded-[5px] shadow-md"
-        onClick={() => setMobileOpen(true)}
-        aria-label="Open menu"
-      >
-        <Menu size={18} className="text-white" />
-      </button>
+      {/* Mobile rail bar */}
+      <header className="md:hidden fixed top-0 inset-x-0 z-40 h-14 px-4 flex items-center gap-3 bg-primary-600 border-b-[3px] border-board">
+        <button
+          className="p-1.5 -ml-1.5 rounded-[4px] text-white hover:bg-white/10"
+          onClick={() => setMobileOpen(true)}
+          aria-label="Open menu"
+        >
+          <Menu size={20} />
+        </button>
+        <Link href="/dashboard" aria-label="Gapl dashboard">
+          <Wordmark size="sm" />
+        </Link>
+      </header>
 
       {/* Mobile overlay */}
       <AnimatePresence>

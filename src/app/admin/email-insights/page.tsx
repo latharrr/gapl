@@ -252,7 +252,6 @@ export default function AdminEmailInsightsPage() {
       {/* Weekly AI summary panel */}
       <div className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] p-6 relative overflow-hidden space-y-4">
         {/* Glow */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-primary-50 rounded-full filter blur-3xl -mr-20 -mt-20 pointer-events-none" />
         
         <div className="flex items-center gap-2">
           <Sparkles size={16} className="text-primary-600" />

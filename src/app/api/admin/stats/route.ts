@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { usdToInrRate } from "@/lib/currency";
 import { db, collection, getDocs, doc, getDoc, getCountFromServer, query, where } from "@/lib/server-firestore";
 import { requireAdmin } from "@/lib/firebase-admin";
 
@@ -213,7 +214,10 @@ export async function GET(req: NextRequest) {
     } catch { /* costs settings doc not found — use zero defaults */ }
 
     const storageCost = totalReports * storageCostPerReport;
-    const netProfit = totalRevenue - totalAICost - storageCost - infrastructureCost;
+    // Revenue and the configured cost assumptions are INR; AI cost is USD and is converted.
+    const fx = usdToInrRate();
+    const totalAICostInr = totalAICost * fx;
+    const netProfit = totalRevenue - totalAICostInr - storageCost - infrastructureCost;
     const netMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
 
     const costStats = {
@@ -225,6 +229,8 @@ export async function GET(req: NextRequest) {
       profitability: {
         revenue: totalRevenue,
         aiCost: parseFloat(totalAICost.toFixed(3)),
+        aiCostInr: parseFloat(totalAICostInr.toFixed(2)),
+        usdToInr: fx,
         storageCost: parseFloat(storageCost.toFixed(2)),
         infrastructureCost,
         profit: parseFloat(netProfit.toFixed(2)),
@@ -235,7 +241,7 @@ export async function GET(req: NextRequest) {
           pdfCostPerReport,
           storageCostPerReport,
           hostingCostPerReport,
-          profitPerReport: parseFloat(((totalRevenue / Math.max(1, totalReports)) - (totalAICost / Math.max(1, totalReports)) - pdfCostPerReport - storageCostPerReport - hostingCostPerReport).toFixed(2)),
+          profitPerReport: parseFloat(((totalRevenue / Math.max(1, totalReports)) - (totalAICostInr / Math.max(1, totalReports)) - pdfCostPerReport - storageCostPerReport - hostingCostPerReport).toFixed(2)),
         }
       }
     };
@@ -268,7 +274,8 @@ export async function GET(req: NextRequest) {
           if (p.status !== "captured" || p.refunded) return false;
           const d = p.createdAt?.toDate ? p.createdAt.toDate() : new Date(p.createdAt || 0);
           return d.toDateString() === new Date().toDateString();
-        }).reduce((acc: number, p) => acc + (p.amount || 0), 0) - totalAICostToday).toFixed(2)),
+        }).reduce((acc: number, p) => acc + (p.amount || 0), 0) - totalAICostToday * usdToInrRate()).toFixed(2)),
+        usdToInr: usdToInrRate(),
         conversionRate: parseFloat(conversionRate.toFixed(1)),
         refundRate: parseFloat(refundRate.toFixed(1)),
         processingFailures,

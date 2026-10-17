@@ -114,4 +114,4 @@ export function LoadingChart({ text = "LOADING", className }: { text?: string; c
 }
 
 /* Shared page frame for signed-in app screens (room for the mobile menu button). */
-export const APP_PAGE = "px-4 sm:px-6 md:px-8 pt-16 md:pt-10 pb-12 max-w-5xl mx-auto space-y-5";
+export const APP_PAGE = "px-4 sm:px-6 md:px-8 pt-[5.25rem] md:pt-10 pb-12 max-w-5xl mx-auto space-y-5";

@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
   if (userOrError instanceof NextResponse) return userOrError;
   const user = userOrError;
 
-  if (!takeRateLimit(`cv-builder:${user.uid}`, 6, 10 * 60 * 1000)) {
+  if (!(await takeRateLimit(`cv-builder:${user.uid}`, 6, 10 * 60 * 1000))) {
     return NextResponse.json({ error: "Too many CV builder requests. Please wait a few minutes." }, { status: 429 });
   }
 

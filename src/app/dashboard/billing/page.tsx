@@ -158,7 +158,7 @@ export default function BillingPage() {
           items={[
             { label: "Plan", value: <span className="capitalize">{shownPlan}</span> },
             { label: "Analyses a month", value: limit },
-            { label: "Usage", value: "Resets monthly", note: "Your plan sets your analysis credits" },
+            { label: "Credits reset", value: "1st", note: "of every month" },
           ]}
         />
       </Sheet>

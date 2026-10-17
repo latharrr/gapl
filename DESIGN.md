@@ -439,7 +439,7 @@ These are the reservation-slip stamps that carry the system's meaning.
 ### Navigation
 - **Rail bar:** a fixed navy bar, 56px tall, with a 3px yellow rule beneath. It holds the wordmark at left and Archivo 500 0.875rem links in `primary-100`, which hover to white on a white 10% backing. The active link turns yellow. A yellow small primary button sits at right.
 - **Mobile:** a menu toggle opens a navy panel that drops from 59px (opacity and 6px rise, 180ms, ease-out-expo, Drop shadow) with full-width links and a large yellow button.
-- **Dashboard sidebar:** a 240px navy column with a 3px yellow right rule. Items are 40px rows with a 4px radius. The active item gets a white 12% backing and a yellow icon. A yellow "New analysis" button sits on top. On mobile it becomes a 256px drawer that slides from the left (300ms, ease-out-expo) over a navy 50% scrim.
+- **Dashboard sidebar:** a 240px navy column with a 3px yellow right rule. Items are 40px rows with a 4px radius. The active item gets a white 12% backing and a yellow icon. A yellow "New analysis" button sits on top. On mobile a fixed 56px navy rail bar (menu button and small wordmark, 3px yellow rule) replaces it, and the menu opens a 256px drawer that slides from the left (300ms, ease-out-expo) over a navy 50% scrim.
 - **Analyze route strip:** four steps on a paper bar. Done steps show an ink dot with a tick, the current step a yellow dot with an ink rim, and later steps an outlined dot, joined by a 3px track.
 - **Footer:** a navy ground with a 3px yellow top rule and yellow uppercase column heads.
 
@@ -454,6 +454,23 @@ Each readiness component is a row with its name, a mono `score/100`, a 10px prog
 
 ### Route (signature)
 The roadmap is set as a train schedule. On the landing page, a 3px track runs down LED stops. As the reader scrolls, the amber fill grows (spring: stiffness 140, damping 28, mass 0.4), passed stops light up (300ms colour transition), and a sticky readout states the current stop and status, stepping WL 3 → WL 2 → WL 1 → RAC. In the report, weeks hang off a 2px rule. Week state is a mark: an outlined dot, or a green dot with a tick when complete. Tasks use a 3px-radius checkbox, and the next task carries a yellow `Next` flag stamp.
+
+### Shared app building blocks
+Every signed-in screen is assembled from the same parts in `src/components/ui/Sheet.tsx`, `Table.tsx`, `Choice.tsx` and `src/components/brand/`:
+- **PageHeader:** a Display-scale title (clamp 2rem–3rem), an optional `ink-secondary` description, an optional mono meta line and right-aligned actions.
+- **Sheet:** the Chart Sheet as a component; every grouped block on a page is one.
+- **FigureStrip:** a row of figures across a sheet, each an uppercase label, a Martian Mono number (2xl–3xl) and an optional note, split by 1px rules. It replaces stat-card grids.
+- **EmptyChart / LoadingChart:** empty states lead with an unlit LED line ("NO REPORTS YET") above a title, one sentence and the next action. Loading is an LED pill blinking a status ("LOADING REPORTS"), never a spinner.
+- **Table:** a ruled header in uppercase `ink-muted` and greenbar body rows, with mono for figures.
+- **StepRoute:** the analyze route strip, reused by the CV builder and tailor flows.
+- **DepartureBoard:** full-screen LED ground for long-running work (analysis, CV build, tailoring). Stages read WAIT → NOW → DONE.
+- **OptionList / ChipGroup:** radio rows on a sheet for long options; for short sets, 40px chips with a 1.5px outline that turn ink with yellow text when chosen.
+- **ReadingPage:** long-form pages (about, blog, legal) get a paper title plate over a 1.5px ink rule, then one 68ch column at 1.0625rem / 1.7.
+- **StatusScreen:** 404 and error pages on the LED ground, with an LED line ("404 · NO SUCH STOP"), a Display headline and two ways forward.
+- **Admin control room:** the dashboard rail with a "CONTROL ROOM" mono tag, paper ground and sheets. Revenue is always ₹; AI cost is the only $ figure.
+
+### Email
+All mail goes through `emailLayout()` in `src/lib/email-layout.ts`: a 600px table with a navy header bar, the yellow Gapl plate, a 3px yellow rule, a paper body and a muted footer. The primary call to action is `emailButton()`, a yellow fill with a 2px ink rim and 6px radius. Figures sit in a white table with a 2px ink top rule and Martian Mono numbers; alternating rows take the greenbar tint. Every dynamic value is passed through `escapeHtml()`, and links in user-supplied content must be http(s).
 
 ### Motion
 One curve runs the whole system, `ease-out-expo` (`cubic-bezier(0.16, 1, 0.3, 1)`), with 150ms colour transitions on controls. Step changes in analyze fade with an 8px rise over 250ms. FAQ answers open over 280ms while the plus rotates 45° over 300ms. LED messages roll in 450ms. Progress widths ease over 700ms. The LED blink is a two-step 1.1s hard toggle, a lamp rather than a fade.

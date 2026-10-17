@@ -32,6 +32,7 @@ interface DashboardMetrics {
   refundRate?: number | string;
   reportsCount?: number;
   profitToday?: number | string;
+  usdToInr?: number;
   processingFailures?: number;
 }
 
@@ -186,7 +187,7 @@ export default function AdminDashboardPage() {
         <FigureStrip
           items={[
             { label: "Reports", value: metrics.reportsCount, note: "Analyses generated" },
-            { label: "Profit today", value: metrics.profitToday, note: "Revenue minus token cost" },
+            { label: "Profit today", value: inr(Number(metrics.profitToday ?? 0)), note: `Revenue minus AI cost at ₹${metrics.usdToInr ?? 84}/$` },
             { label: "Failures", value: metrics.processingFailures, note: "Crashed reports", tone: Number(metrics.processingFailures) > 0 ? "text-danger" : "text-success" },
           ]}
         />
