@@ -1,0 +1,131 @@
+{
+  "title": "Choose Gapl's visual world",
+  "question": "The roll assigned the Scoreboard Chase. Keep it, take an alternate, or re-roll.",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "Scoreboard Chase",
+      "kicker": "THE ROLL",
+      "lineage": "Hand-hung stadium scoreboards and Indian TV cricket data graphics (Manhattan, worm, DRS screen)",
+      "thesis": "Your application as a run chase: the verdict on the big screen, the gap as runs required, the roadmap as overs.",
+      "palette": ["#123B2C", "#F4F3EC", "#0D110E", "#F2C230", "#D7322B"],
+      "materials": ["painted scoreboard green", "hung numeral tiles", "broadcast data graphics"],
+      "viewport": "A painted scoreboard fills the first screen. Huge condensed tiles read READINESS 65 · NEEDS 13 · OFF 3 WEEKS, a DRS-style panel shows the Reject verdict with its reason, and a working role + tier picker with Analyze sits in the board's bottom rail.",
+      "risk": "Cricket can tip into costume and puns, so copy stays literal and keeps the product's own words (Shortlist / Maybe / Reject). A student who doesn't follow cricket still has to read it plainly.",
+      "raised": [
+        {"from": "challenger-tensegrity", "raise": "Every number carries a leader line to the reason behind it: each readiness component points at the gap pulling it down."},
+        {"from": "challenger-canopy", "raise": "Verdict states read without color: the word, a pattern band and a position, never red/green alone."},
+        {"from": "challenger-bazaar", "raise": "One giant numeral per viewport. Hierarchy comes from extreme scale contrast, not boxes."},
+        {"from": "challenger-highlife", "raise": "Total color commitment: the green field owns whole sections, with no grey-template sections between them."},
+        {"from": "challenger-specimen", "raise": "One control drives the whole board: picking a tier re-flips every tile live."},
+        {"from": "challenger-cutting-bench", "raise": "Roadmap state is a scorebook mark, not a hue: a tick for done, a dot for untouched, a flag where you stopped."}
+      ]
+    },
+    {
+      "id": "model-pick",
+      "label": "PNR Status",
+      "kicker": "IMPECCABLE’S PICK",
+      "lineage": "Indian Railways reservation charts, PNR enquiry and station LED boards",
+      "thesis": "Readiness as reservation status: waitlisted → RAC → confirmed, and the chart tells you what moves you up.",
+      "palette": ["#1F2A6B", "#F5F1E1", "#E8B92F", "#B3261E", "#141414"],
+      "materials": ["dot-matrix chart paper", "pasted coach chart", "amber LED board"],
+      "viewport": "A coach reservation chart with your row highlighted: the status column shows Reject as WL 12, the reason printed as a remark, and an amber LED strip scrolling the next build.",
+      "risk": "The most instantly legible metaphor for this audience, and also the one most runs would reach for. It also carries waitlist anxiety."
+    },
+    {
+      "id": "challenger-cutting-bench",
+      "label": "Cutting Bench Rail",
+      "verdict": "declined",
+      "lineage": "Film editing bench, select rail and trim bin",
+      "thesis": "Roadmap weeks as frames on a rail, with a flag where you stopped.",
+      "palette": ["#0A0A0A", "#F26A1B", "#FFFFFF"],
+      "materials": ["film grain", "punched frames"],
+      "viewport": "A perforated rail of weeks across an orange field.",
+      "case": "Fits the roadmap, but students don't recognise film editing and the verdict gets lost.",
+      "kept": "State is a mark, not a hue.",
+      "risk": "Reads as a film tool, not a career tool.",
+      "hero": "https://impeccable.style/worlds/cards/operate-a-cutting-bench-select-rail-hero.webp"
+    },
+    {
+      "id": "challenger-specimen",
+      "label": "Variable Type Specimen",
+      "verdict": "declined",
+      "lineage": "Interactive foundry specimens",
+      "thesis": "One slider morphs the whole page.",
+      "palette": ["#FAFAF7", "#111111", "#FF4A1C"],
+      "materials": ["flat paper", "monospace readouts"],
+      "viewport": "A giant numeral that changes as you drag.",
+      "case": "Students don't identify with it, and the verdict becomes a typographic toy.",
+      "kept": "One control drives the whole board.",
+      "risk": "Design-nerd aesthetic.",
+      "hero": "https://impeccable.style/worlds/cards/variable-font-specimen-hero.webp"
+    },
+    {
+      "id": "challenger-tensegrity",
+      "label": "Tensegrity Column",
+      "verdict": "declined",
+      "lineage": "Kinetic sculpture",
+      "thesis": "Scores as forces you can trace.",
+      "palette": ["#1A1A1A", "#D8D4CC", "#C8102E"],
+      "materials": ["carbon rods", "red cord"],
+      "viewport": "A force diagram of readiness.",
+      "case": "Too abstract for a student at 1am, and loses on clarity.",
+      "kept": "Every number is traceable to its cause.",
+      "risk": "Engineering art piece.",
+      "hero": "https://impeccable.style/worlds/cards/kinetic-sculpture-automata-tensegrity-breathing-column-hero.webp"
+    },
+    {
+      "id": "challenger-canopy",
+      "label": "Silk Canopy Chords",
+      "verdict": "declined",
+      "lineage": "Generative colour counterpoint",
+      "thesis": "Overlapping states as colour chords.",
+      "palette": ["#2B3A8C", "#9B2D20", "#F2A900", "#FFFFFF"],
+      "materials": ["translucent silk", "sun-white paving"],
+      "viewport": "Crossing silk lanes over a bright field.",
+      "case": "Beautiful, but says nothing about rejection or projects.",
+      "kept": "States labelled beyond colour.",
+      "risk": "Pure mood.",
+      "hero": "https://impeccable.style/worlds/cards/generative-art-computational-color-chord-counterpoint-hero.webp"
+    },
+    {
+      "id": "challenger-bazaar",
+      "label": "Brodovitch Spread",
+      "verdict": "declined",
+      "lineage": "Harper's Bazaar, 1934–58",
+      "thesis": "Spreads choreographed across a gutter.",
+      "palette": ["#FBFAF7", "#1A1A1A", "#C8102E"],
+      "materials": ["warm paper", "Didot hairlines"],
+      "viewport": "Pose on the left, answer on the right.",
+      "case": "Luxury fashion language is foreign to placement-season students.",
+      "kept": "Extreme scale contrast.",
+      "risk": "Reads as a fashion magazine.",
+      "hero": "https://impeccable.style/worlds/cards/brand-identity-canon-brodovitch-bazaar-spread-hero.webp"
+    },
+    {
+      "id": "challenger-highlife",
+      "label": "Highlife Sleeve",
+      "verdict": "declined",
+      "lineage": "West African highlife record sleeves",
+      "thesis": "Exuberant hand-lettered colour fields.",
+      "palette": ["#F28C28", "#2E7D32", "#D7263D", "#F4EBD9"],
+      "materials": ["painted board", "brush lettering"],
+      "viewport": "Arched hand-brushed name over mango and palm.",
+      "case": "Festive tone fights the honest-verdict voice.",
+      "kept": "Total colour commitment.",
+      "risk": "Celebratory where the product is sober.",
+      "hero": "https://impeccable.style/worlds/cards/highlife-sleeve-hero.webp"
+    }
+  ],
+  "reroll": {"registers": ["safer", "bolder"]},
+  "canon": true,
+  "canonCard": {
+    "label": "The category standard",
+    "thesis": "A clean light SaaS page with a sample report card, executed impeccably.",
+    "palette": ["#FFFFFF", "#111827", "#2563EB"],
+    "materials": ["clean grid", "product UI"],
+    "viewport": "Headline and CTA on the left, a sample report on the right, sections of feature rows below.",
+    "risk": "Indistinguishable from Jobscan / Resume Worded by design."
+  },
+  "steer": true
+}

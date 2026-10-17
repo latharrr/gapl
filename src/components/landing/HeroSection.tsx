@@ -1,220 +1,248 @@
 "use client";
 
-import { useEffect } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ArrowRight, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { VerdictBadge } from "@/components/ui/Badge";
+import { LedBoard } from "@/components/brand/LedBoard";
 import { trackEvent } from "@/lib/analytics";
+import { SAMPLE, waitlistCount } from "@/lib/sample-report";
+import { ROLES, TIERS, analyzeHref } from "@/lib/targets";
+import { cn } from "@/lib/utils";
+
+const WL = waitlistCount(SAMPLE.gaps);
+
+const LED_MESSAGES = [
+  `SAMPLE · ${SAMPLE.role.toUpperCase()} · ${SAMPLE.companyTier.toUpperCase()} · STATUS WL ${WL}`,
+  `NEXT BUILD › ${SAMPLE.route[1].build.toUpperCase()} · 1 WEEK`,
+  `ROUTE › ${SAMPLE.route.length - 1} STOPS · READINESS ${SAMPLE.route[0].readiness} → ${SAMPLE.route[SAMPLE.route.length - 1].readiness}`,
+];
 
 export function HeroSection() {
+  const router = useRouter();
+  const [role, setRole] = useState("");
+  const [tier, setTier] = useState("");
+
   useEffect(() => {
     trackEvent("landing_view");
   }, []);
 
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    trackEvent("landing_enquiry", { role: role || null, tier: tier || null });
+    router.push(analyzeHref(role, tier));
+  };
+
   return (
-    <section className="relative min-h-screen flex items-center bg-[#FAFAFA] overflow-hidden pt-14">
-      {/* Subtle grid pattern */}
-      <div
-        className="absolute inset-0 opacity-[0.03]"
-        style={{
-          backgroundImage: `
-            linear-gradient(rgba(17,17,17,1) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(17,17,17,1) 1px, transparent 1px)
-          `,
-          backgroundSize: "64px 64px",
-        }}
-      />
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-24 lg:py-32 relative z-10 w-full">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-
-          {/* Left: text content */}
-          <div>
-            {/* Announcement badge */}
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#e4e4e7] bg-white shadow-sm mb-8"
-            >
-              <Sparkles size={12} className="text-[#4F46E5]" />
-              <span className="text-xs text-[#3f3f46] font-medium">
-                Evidence-based application readiness review
-              </span>
-            </motion.div>
-
-            {/* Headline */}
-            <motion.h1
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-5xl sm:text-6xl lg:text-[4rem] xl:text-[4.5rem] font-bold text-[#111111] tracking-tight leading-[1.1]"
-            >
-              Know Why You&apos;re Not
-              <br />
-              <span className="text-[#71717a]">Getting Shortlisted.</span>
-            </motion.h1>
-
-            {/* Compressed outcome highlights for students */}
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.35 }}
-              className="mt-8 space-y-4 max-w-xl"
-            >
-              <div className="flex gap-3 items-start">
-                <span className="w-5 h-5 rounded-full bg-[#fef2f2] text-[#dc2626] font-bold text-xs flex items-center justify-center flex-shrink-0 mt-0.5">✕</span>
-                <div>
-                  <h3 className="text-sm font-bold text-[#111111]">Why am I getting rejected?</h3>
-                  <p className="text-xs text-[#71717a] mt-0.5 font-normal leading-relaxed">Simulate a recruiter&apos;s 6-second review. See exactly what flags get your CV thrown out.</p>
-                </div>
-              </div>
-              <div className="flex gap-3 items-start">
-                <span className="w-5 h-5 rounded-full bg-[#fffbeb] text-[#d97706] font-bold text-xs flex items-center justify-center flex-shrink-0 mt-0.5">?</span>
-                <div>
-                  <h3 className="text-sm font-bold text-[#111111]">What am I missing?</h3>
-                  <p className="text-xs text-[#71717a] mt-0.5 font-normal leading-relaxed">Audit your skill match, project depth, and deployment evidence against target company tiers.</p>
-                </div>
-              </div>
-              <div className="flex gap-3 items-start">
-                <span className="w-5 h-5 rounded-full bg-[#f0fdf4] text-[#16a34a] font-bold text-xs flex items-center justify-center flex-shrink-0 mt-0.5">✓</span>
-                <div>
-                  <h3 className="text-sm font-bold text-[#111111]">What should I build?</h3>
-                  <p className="text-xs text-[#71717a] mt-0.5 font-normal leading-relaxed font-normal">Receive a week-by-week roadmap specifying the exact projects and features to close your gaps.</p>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* CTAs */}
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-              className="mt-10 flex flex-col sm:flex-row items-start gap-3"
-            >
-              <Link href="/analyze">
-                <Button size="lg" variant="primary" className="group gap-2">
-                  Analyze My Resume
-                  <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
-                </Button>
-              </Link>
-              <Link href="/demo">
-                <Button size="lg" variant="outline" className="text-[#71717a]">
-                  View Sample Report
-                </Button>
-              </Link>
-            </motion.div>
-
-            {/* Social proof */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.7 }}
-              className="mt-12 flex items-center gap-4"
-            >
-              <div className="flex -space-x-2">
-                {["#4F46E5", "#16A34A", "#F59E0B", "#DC2626"].map((color, i) => (
-                  <div
-                    key={i}
-                    className="w-7 h-7 rounded-full border-2 border-white flex items-center justify-center text-white text-xs font-bold"
-                    style={{ backgroundColor: color }}
-                  >
-                    {["A", "P", "K", "R"][i]}
-                  </div>
-                ))}
-              </div>
-              <div>
-                <p className="text-sm font-medium text-[#111111]">Built for a clearer next step</p>
-                <p className="text-xs text-[#71717a]">Scores are estimates, with the gaps behind them explained.</p>
-              </div>
-            </motion.div>
-          </div>
-
-          {/* Right: result card */}
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-            className="flex justify-center lg:justify-end"
-          >
-            <HeroCard />
-          </motion.div>
-
+    <section className="relative bg-surface-muted pt-[59px]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8 pb-10 sm:pb-14">
+        {/* Station nameboard */}
+        <div className="signboard px-5 pt-6 pb-5 sm:px-10 sm:pt-8 sm:pb-6">
+          <h1 className="display text-[clamp(2.4rem,6.4vw,5.6rem)]">
+            Know why you&apos;re not
+            <br className="hidden sm:block" /> getting shortlisted.
+          </h1>
+          <p className="mt-4 sm:mt-5 flex flex-wrap gap-x-5 gap-y-1 text-[0.8125rem] sm:text-sm font-bold uppercase tracking-[0.06em]">
+            <span>Recruiter verdict</span>
+            <span aria-hidden className="hidden sm:inline">·</span>
+            <span>Skill gaps</span>
+            <span aria-hidden className="hidden sm:inline">·</span>
+            <span>What to build next</span>
+          </p>
         </div>
+
+        {/* PNR enquiry: the working start of an analysis */}
+        <form
+          onSubmit={submit}
+          className="mt-3 rounded-[6px] bg-primary-600 p-3 sm:p-4 grid gap-3 md:grid-cols-[1fr_1fr_auto] md:items-end"
+          aria-label="Check your status"
+        >
+          <EnquirySelect
+            id="enq-role"
+            label="Applying for"
+            value={role}
+            onChange={setRole}
+            placeholder="Choose a role"
+            options={ROLES.map((r) => ({ value: r, label: r }))}
+          />
+          <EnquirySelect
+            id="enq-tier"
+            label="Company tier"
+            value={tier}
+            onChange={setTier}
+            placeholder="Choose a tier"
+            options={TIERS.map((t) => ({ value: t.label, label: `${t.label} — ${t.description}` }))}
+          />
+          <Button type="submit" size="lg" className="w-full md:w-auto">
+            Check my status
+            <ArrowRight size={17} strokeWidth={2.5} />
+          </Button>
+        </form>
+        <p className="mt-2.5 px-1 text-[0.8125rem] text-ink-muted">
+          First analysis free · PDF or pasted text · Scores are AI estimates, and every one comes with its reasons.
+        </p>
+
+        {/* Reservation chart */}
+        <ReservationChart role={role} tier={tier} />
+
+        <LedBoard
+          tag="GAPL"
+          messages={LED_MESSAGES}
+          className="mt-3 h-11 px-4 text-[0.95rem] sm:text-[1.05rem]"
+        />
       </div>
     </section>
   );
 }
 
-function HeroCard() {
+function EnquirySelect({
+  id,
+  label,
+  value,
+  onChange,
+  placeholder,
+  options,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+  options: { value: string; label: string }[];
+}) {
   return (
-    <div className="bg-white rounded-2xl shadow-xl border border-[#e4e4e7] p-6 space-y-5 w-full max-w-sm">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-xs text-[#71717a] font-medium">SDE Intern · Product Startup</p>
-          <h3 className="text-sm font-semibold text-[#111111] mt-0.5">Analysis Report</h3>
-        </div>
-        <span className="px-2.5 py-1 rounded-full bg-[#fef2f2] text-[#dc2626] text-xs font-semibold border border-[#fecaca]">
-          Reject
-        </span>
+    <div>
+      <label htmlFor={id} className="block mb-1.5 text-xs font-bold uppercase tracking-[0.07em] text-board">
+        {label}
+      </label>
+      <div className="relative">
+        <select
+          id={id}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className={cn(
+            "w-full h-12 appearance-none rounded-[5px] border-2 border-transparent bg-surface-DEFAULT pl-3 pr-10 text-[0.9375rem] font-medium",
+            "focus:outline-none focus:border-board",
+            value ? "text-ink" : "text-ink-muted"
+          )}
+        >
+          <option value="">{placeholder}</option>
+          {options.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+        <ChevronDown size={18} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted" />
       </div>
+    </div>
+  );
+}
 
-      {/* Score row */}
-      <div className="grid grid-cols-3 gap-3">
-        {[
-          { label: "ATS Score", value: "68", suffix: "%" },
-          { label: "Readiness", value: "65", suffix: "%" },
-          { label: "Confidence", value: "72", suffix: "%" },
-        ].map(({ label, value, suffix }) => (
-          <div key={label} className="text-center p-3 bg-[#f4f4f5] rounded-xl">
-            <p className="text-xl font-bold text-[#111111]">
-              {value}<span className="text-xs font-normal text-[#71717a]">{suffix}</span>
-            </p>
-            <p className="text-[0.625rem] text-[#71717a] mt-0.5">{label}</p>
-          </div>
-        ))}
-      </div>
+const COLS = "md:grid-cols-[3rem_1.2fr_1.1fr_4rem_5.5rem_9.5rem_2.4fr]";
 
-      {/* Verdict */}
-      <div className="p-3 bg-[#fef2f2] rounded-xl border border-[#fecaca]">
-        <p className="text-xs font-medium text-[#dc2626] mb-1">Why you were rejected</p>
-        <p className="text-xs text-[#3f3f46] leading-relaxed">
-          Zero deployed projects. Recruiters need evidence of real-world impact, not just coursework.
+function ReservationChart({ role, tier }: { role: string; tier: string }) {
+  const ready = Boolean(role && tier);
+
+  return (
+    <div className="chart-sheet mt-6 rounded-[6px] overflow-hidden">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-4 sm:px-5 py-3 border-b-[1.5px] border-ink">
+        <h2 className="text-sm font-[800] uppercase tracking-[0.06em]">Reservation chart</h2>
+        <p className="chart-data text-[0.6875rem] text-ink-muted">
+          Row 1 is a sample report · Row 2 is yours, once you upload
         </p>
       </div>
 
-      {/* Top gaps */}
-      <div className="space-y-2">
-        <p className="text-xs font-medium text-[#111111]">Critical gaps to close</p>
-        {[
-          { skill: "Backend APIs", pct: "20%" },
-          { skill: "Deployment Evidence", pct: "10%" },
-          { skill: "System Design", pct: "15%" },
-        ].map(({ skill, pct }) => (
-          <div key={skill} className="flex items-center justify-between">
-            <span className="text-xs text-[#3f3f46]">{skill}</span>
-            <div className="w-24 h-1.5 bg-[#e4e4e7] rounded-full overflow-hidden">
-              <div className="h-full bg-[#dc2626] rounded-full" style={{ width: pct }} />
-            </div>
-          </div>
-        ))}
+      <div
+        aria-hidden
+        className={cn(
+          "hidden md:grid gap-4 px-5 py-2 border-b border-border-DEFAULT text-[0.6875rem] font-bold uppercase tracking-[0.07em] text-ink-muted",
+          COLS
+        )}
+      >
+        <span>No.</span>
+        <span>Applying for</span>
+        <span>Tier</span>
+        <span className="text-right">ATS</span>
+        <span className="text-right">Readiness</span>
+        <span>Status</span>
+        <span>Remarks</span>
       </div>
 
-      {/* Recommended project */}
-      <div className="pt-3 border-t border-[#e4e4e7]">
-        <p className="text-[0.625rem] text-[#a1a1aa] uppercase tracking-wider font-medium mb-1.5">Build Next</p>
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 bg-[#eef2ff] rounded-lg flex items-center justify-center flex-shrink-0">
-            <span className="text-[#4F46E5] text-xs">↗</span>
+      <div className="chart-rows">
+        {/* Sample row */}
+        <div className="px-4 sm:px-5 py-3.5">
+          <div className={cn("grid gap-x-4 gap-y-2 grid-cols-2 md:items-center", COLS)}>
+            <span className="chart-data hidden md:block text-sm text-ink-muted">01</span>
+            <span className="col-span-2 md:col-span-1 font-bold">
+              {SAMPLE.role}
+              <span className="ml-2 align-middle chart-data text-[0.625rem] font-semibold uppercase text-ink-muted border border-border-strong rounded-[2px] px-1 py-px">
+                Sample
+              </span>
+            </span>
+            <span className="col-span-2 md:col-span-1 text-sm text-ink-secondary">{SAMPLE.companyTier}</span>
+            <Num label="ATS" value={SAMPLE.atsScore} />
+            <Num label="Readiness" value={SAMPLE.readiness} />
+            <span className="col-span-2 md:col-span-1">
+              <VerdictBadge verdict={SAMPLE.verdict} waitlist={WL} />
+            </span>
+            <span className="col-span-2 md:col-span-1 text-sm font-medium text-ink">{SAMPLE.topGap}.</span>
           </div>
-          <div>
-            <p className="text-xs font-semibold text-[#111111]">Expense Tracking SaaS</p>
-            <p className="text-[0.625rem] text-[#71717a]">3 weeks · Readiness: 65% → 78%</p>
+          <dl className={cn("mt-2 grid gap-1 md:grid-cols-[3rem_1fr] md:gap-x-4 chart-data text-[0.75rem] text-ink-secondary")}>
+            <dt className="sr-only">Strongest signal</dt>
+            <dd className="md:col-start-2">
+              <span className="text-ink-muted">+ Strongest signal:</span> {SAMPLE.strongestSignal}
+            </dd>
+            <dt className="sr-only">What would change the decision</dt>
+            <dd className="md:col-start-2">
+              <span className="text-ink-muted">→ Would change it:</span> {SAMPLE.whatWouldChangeDecision}
+            </dd>
+          </dl>
+        </div>
+
+        {/* Your row */}
+        <div className="px-4 sm:px-5 py-3.5">
+          <div className={cn("grid gap-x-4 gap-y-2 grid-cols-2 md:items-center", COLS)}>
+            <span className="chart-data hidden md:block text-sm text-ink-muted">02</span>
+            <span className={cn("col-span-2 md:col-span-1 font-bold", !role && "text-ink-faint")}>
+              {role || "Your role"}
+              <span className="ml-2 align-middle chart-data text-[0.625rem] font-semibold uppercase text-primary-600 border border-primary-400 rounded-[2px] px-1 py-px">
+                You
+              </span>
+            </span>
+            <span className={cn("col-span-2 md:col-span-1 text-sm", tier ? "text-ink-secondary" : "text-ink-faint")}>
+              {tier || "Your tier"}
+            </span>
+            <Num label="ATS" value={null} />
+            <Num label="Readiness" value={null} />
+            <span className="col-span-2 md:col-span-1">
+              <span className="stamp text-xs text-ink-muted border-dashed">Not charted</span>
+            </span>
+            <span className="col-span-2 md:col-span-1 text-sm text-ink-secondary">
+              {ready ? (
+                <Link href={analyzeHref(role, tier)} className="font-semibold text-primary-600 underline hover:text-primary-700">
+                  Ready to chart. Upload your resume →
+                </Link>
+              ) : (
+                "Pick a role and tier above, then upload your resume to chart this row."
+              )}
+            </span>
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+function Num({ label, value }: { label: string; value: number | null }) {
+  return (
+    <span className="flex items-baseline gap-2 md:block md:text-right">
+      <span className="md:sr-only text-[0.6875rem] font-bold uppercase tracking-[0.07em] text-ink-muted">{label}</span>
+      <span className={cn("chart-data text-lg font-bold", value === null && "text-ink-faint")}>
+        {value === null ? "—" : value}
+      </span>
+    </span>
   );
 }

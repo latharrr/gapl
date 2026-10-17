@@ -1,117 +1,82 @@
-"use client";
-
-import { motion } from "framer-motion";
+import Link from "next/link";
+import { Check, Minus } from "lucide-react";
 import { PRICING_PLANS } from "@/lib/mock-data";
 import { Button } from "@/components/ui/Button";
-import { Check } from "lucide-react";
-import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-export function PricingSection() {
+// Pricing set as a fare chart: one row per plan, fares in rupees, the recommended row marked.
+export function PricingSection({ heading = true }: { heading?: boolean }) {
   return (
-    <section id="pricing" className="py-24 bg-[#FAFAFA]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        {/* Header */}
-        <div className="text-center max-w-xl mx-auto mb-14">
-          <motion.p
-            initial={{ opacity: 0, y: 8 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-xs font-semibold text-primary-600 uppercase tracking-widest mb-3"
-          >
-            Pricing
-          </motion.p>
-          <motion.h2
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="text-3xl sm:text-4xl font-bold text-ink tracking-tight"
-          >
-            Straightforward pricing.
-            <br />
-            No surprises.
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-            className="mt-3 text-sm text-ink-muted"
-          >
-            Start free. Upgrade when you need depth.
-          </motion.p>
-        </div>
+    <section id="pricing" className="bg-surface-muted scroll-mt-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
+        {heading && (
+          <div className="max-w-2xl">
+            <h2 className="display text-[clamp(2rem,4.2vw,3.5rem)]">Fare chart.</h2>
+            <p className="mt-4 text-lg text-ink-secondary">
+              Start free. Pay once when you need more analyses. No subscriptions, no card for the free tier.
+            </p>
+          </div>
+        )}
 
-        {/* Cards */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {PRICING_PLANS.map((plan, i) => (
-            <motion.div
-              key={plan.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.08 }}
-              className={cn(
-                "relative rounded-2xl p-6 flex flex-col",
-                plan.highlighted
-                  ? "bg-[#111111] text-white border border-[#111111] shadow-lg"
-                  : "bg-white border border-border-DEFAULT"
-              )}
-            >
-              {plan.highlighted && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="px-3 py-1 bg-primary-600 text-white text-xs font-semibold rounded-full">
-                    Most Popular
-                  </span>
-                </div>
-              )}
+        <div className={cn("chart-sheet rounded-[6px] overflow-hidden", heading && "mt-10")}>
+          <div
+            aria-hidden
+            className="hidden lg:grid grid-cols-[12rem_minmax(0,1fr)_9rem_11rem] gap-6 px-6 py-2.5 border-b-[1.5px] border-ink text-[0.6875rem] font-bold uppercase tracking-[0.07em] text-ink-muted"
+          >
+            <span>Plan</span>
+            <span>Includes</span>
+            <span className="text-right">Fare</span>
+            <span />
+          </div>
 
-              <div className="mb-6">
-                <h3 className={cn("text-sm font-semibold mb-1", plan.highlighted ? "text-white" : "text-ink")}>
-                  {plan.name}
-                </h3>
-                <p className={cn("text-xs mb-4", plan.highlighted ? "text-zinc-400" : "text-ink-muted")}>
-                  {plan.description}
-                </p>
-                <div className="flex items-end gap-1">
-                  <span className={cn("text-3xl font-bold tracking-tight", plan.highlighted ? "text-white" : "text-ink")}>
-                    {plan.price === 0 ? "Free" : `₹${plan.price}`}
-                  </span>
-                  {plan.price > 0 && (
-                    <span className={cn("text-xs mb-1", plan.highlighted ? "text-zinc-400" : "text-ink-muted")}>
-                      {plan.period}
-                    </span>
+          <ul className="chart-rows">
+            {PRICING_PLANS.map((plan) => (
+              <li
+                key={plan.name}
+                className={cn(
+                  "relative grid gap-x-6 gap-y-4 px-5 sm:px-6 py-6 lg:grid-cols-[12rem_minmax(0,1fr)_9rem_11rem] lg:items-center",
+                  plan.highlighted && "!bg-board/25 outline-2 outline-ink -outline-offset-2"
+                )}
+              >
+                <div>
+                  <h3 className="text-xl font-[800] tracking-[-0.015em]">{plan.name}</h3>
+                  <p className="mt-1 text-sm text-ink-muted">{plan.description}</p>
+                  {plan.highlighted && (
+                    <span className="stamp mt-2 text-[0.625rem] text-ink bg-board">Recommended</span>
                   )}
                 </div>
-              </div>
 
-              <ul className="space-y-2.5 mb-8 flex-1">
-                {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-2">
-                    <Check
-                      size={14}
-                      className={cn("mt-0.5 flex-shrink-0", plan.highlighted ? "text-primary-400" : "text-success")}
-                    />
-                    <span className={cn("text-xs leading-relaxed", plan.highlighted ? "text-zinc-300" : "text-ink-secondary")}>
-                      {feature}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+                <ul className="grid gap-x-6 gap-y-1.5 sm:grid-cols-2">
+                  {plan.features.map((feature) => {
+                    const negative = feature.toLowerCase().startsWith("no ");
+                    return (
+                      <li key={feature} className="flex items-start gap-2 text-[0.9375rem] text-ink-secondary">
+                        {negative ? (
+                          <Minus size={16} className="mt-0.5 shrink-0 text-ink-faint" />
+                        ) : (
+                          <Check size={16} strokeWidth={2.5} className="mt-0.5 shrink-0 text-success" />
+                        )}
+                        <span className={cn(negative && "text-ink-muted")}>{feature}</span>
+                      </li>
+                    );
+                  })}
+                </ul>
 
-              <Link href={plan.price === 0 ? "/auth/signup" : "/pricing"}>
-                <Button
-                  variant={plan.highlighted ? "secondary" : "outline"}
-                  size="md"
-                  className={cn("w-full", !plan.highlighted && "border-border-DEFAULT")}
-                >
-                  {plan.cta}
-                </Button>
-              </Link>
-            </motion.div>
-          ))}
+                <p className="lg:text-right">
+                  <span className="chart-data text-3xl font-bold">{plan.price === 0 ? "₹0" : `₹${plan.price}`}</span>
+                  <span className="block text-xs text-ink-muted">{plan.price === 0 ? "forever" : plan.period}</span>
+                </p>
+
+                <Link href={plan.price === 0 ? "/auth/signup" : "/dashboard/billing"} className="lg:justify-self-end w-full lg:w-auto">
+                  <Button variant={plan.highlighted ? "primary" : "outline"} size="lg" className="w-full lg:w-40">
+                    {plan.cta}
+                  </Button>
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
+        <p className="mt-3 text-sm text-ink-muted">Prices in INR. Paid plans are one-time payments through Razorpay.</p>
       </div>
     </section>
   );

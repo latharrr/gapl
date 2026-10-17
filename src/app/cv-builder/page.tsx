@@ -13,7 +13,7 @@ import { saveCV } from "@/lib/firebase";
 import { authFetch } from "@/lib/auth-fetch";
 import {
   Upload, FileText, ChevronRight, AlertCircle,
-  Download, ArrowLeft, Sparkles, Target, ArrowUp, Check, CloudCheck, Mail,
+  Download, ArrowLeft, PenLine, Target, ArrowUp, Check, CloudCheck, Mail,
 } from "lucide-react";
 
 const ROLES = ["SDE Intern", "SDE Full Time", "Frontend Engineer", "Backend Engineer",
@@ -46,13 +46,13 @@ function StepDot({ n, current, label }: { n: number; current: number; label: str
       <div className={cn(
         "w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all",
         done ? "bg-[#111] border-[#111] text-white"
-          : active ? "border-[#111] text-[#111] bg-white"
-          : "border-[#d4d4d8] text-[#a1a1aa] bg-white"
+          : active ? "border-[#111] text-[#111] bg-surface-DEFAULT"
+          : "border-border-strong text-ink-faint bg-surface-DEFAULT"
       )}>
         {done ? <Check size={12} /> : n}
       </div>
       <span className={cn("text-[10px] font-medium hidden sm:block",
-        active ? "text-[#111]" : "text-[#a1a1aa]")}>{label}</span>
+        active ? "text-[#111]" : "text-ink-faint")}>{label}</span>
     </div>
   );
 }
@@ -221,16 +221,16 @@ export default function CVBuilderPage() {
     return (
       <>
         <Navbar />
-        <div className="min-h-screen pt-14 bg-[#FAFAFA] flex items-center justify-center">
+        <div className="min-h-screen pt-14 bg-surface-muted flex items-center justify-center">
           <div className="text-center max-w-sm px-6">
             <div className="relative w-16 h-16 mx-auto mb-8">
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                className="absolute inset-0 rounded-full border-2 border-[#4F46E5]/20 border-t-[#4F46E5]"
+                className="absolute inset-0 rounded-full border-2 border-primary-600/20 border-t-primary-600"
               />
               <div className="absolute inset-0 flex items-center justify-center">
-                <Target size={22} className="text-[#4F46E5]" />
+                <Target size={22} className="text-primary-600" />
               </div>
             </div>
             <h2 className="text-lg font-bold text-[#111] mb-2">Building your ATS-ready CV</h2>
@@ -240,7 +240,7 @@ export default function CVBuilderPage() {
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
-                className="text-sm text-[#71717a]"
+                className="text-sm text-ink-muted"
               >
                 {STAGES[loadingStage]}
               </motion.p>
@@ -248,7 +248,7 @@ export default function CVBuilderPage() {
             <div className="flex justify-center gap-1.5 mt-6">
               {STAGES.map((_, i) => (
                 <div key={i} className={cn("h-1 rounded-full transition-all duration-500",
-                  i <= loadingStage ? "w-6 bg-[#4F46E5]" : "w-2 bg-[#e4e4e7]")} />
+                  i <= loadingStage ? "w-6 bg-primary-600" : "w-2 bg-border-DEFAULT")} />
               ))}
             </div>
           </div>
@@ -263,25 +263,25 @@ export default function CVBuilderPage() {
     return (
       <>
         <Navbar />
-        <main className="pt-14 bg-[#FAFAFA] min-h-screen">
+        <main className="pt-14 bg-surface-muted min-h-screen">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 space-y-6">
 
             {/* Header */}
             <div className="flex items-start justify-between gap-4 flex-wrap">
               <div>
                 <div className="flex items-center gap-3 mb-3 print:hidden">
-                  <button onClick={() => setStep(2)} className="inline-flex items-center gap-1.5 text-xs text-[#71717a] hover:text-[#111] transition-colors">
+                  <button onClick={() => setStep(2)} className="inline-flex items-center gap-1.5 text-xs text-ink-muted hover:text-[#111] transition-colors">
                     <ArrowLeft size={12} /> Rebuild
                   </button>
-                  <span className="text-[#d4d4d8] text-xs">|</span>
-                  <Link href="/dashboard" className="text-xs text-[#71717a] hover:text-[#111] transition-colors">
+                  <span className="text-border-strong text-xs">|</span>
+                  <Link href="/dashboard" className="text-xs text-ink-muted hover:text-[#111] transition-colors">
                     Dashboard
                   </Link>
                 </div>
                 <h1 className="text-xl font-bold text-[#111]">Your Improved CV</h1>
-                <p className="text-xs text-[#71717a] mt-0.5">{finalRole} · {companyType}</p>
+                <p className="text-xs text-ink-muted mt-0.5">{finalRole} · {companyType}</p>
                 {savedId && (
-                  <p className="text-xs text-[#16a34a] mt-1 flex items-center gap-1">
+                  <p className="text-xs text-success mt-1 flex items-center gap-1">
                     <CloudCheck size={11} /> Saved to your account
                   </p>
                 )}
@@ -305,33 +305,33 @@ export default function CVBuilderPage() {
             {/* Score banner */}
             <div className="grid grid-cols-4 gap-3">
               {[
-                { label: "ATS Before", value: `${result.originalAtsScore}%`, color: "text-[#dc2626]" },
-                { label: "ATS After", value: `${result.atsScore}%`, color: "text-[#16a34a]" },
-                { label: "Improvement", value: `+${improvement}%`, color: "text-[#4F46E5]" },
+                { label: "ATS Before", value: `${result.originalAtsScore}%`, color: "text-danger" },
+                { label: "ATS After", value: `${result.atsScore}%`, color: "text-success" },
+                { label: "Improvement", value: `+${improvement}%`, color: "text-primary-600" },
                 { label: "Bullets Rewritten", value: result.bulletsImproved, color: "text-[#111]" },
               ].map(({ label, value, color }) => (
-                <div key={label} className="bg-white border border-[#e4e4e7] rounded-xl p-3 text-center">
-                  <p className="text-[10px] text-[#71717a] mb-1">{label}</p>
+                <div key={label} className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] p-3 text-center">
+                  <p className="text-[10px] text-ink-muted mb-1">{label}</p>
                   <span className={`text-xl font-bold ${color}`}>{value}</span>
                 </div>
               ))}
             </div>
 
             {/* Top win */}
-            <div className="flex items-start gap-3 p-4 bg-[#eef2ff] rounded-xl border border-[#e0e7ff]">
-              <Sparkles size={14} className="text-[#4F46E5] mt-0.5 flex-shrink-0" />
+            <div className="flex items-start gap-3 p-4 bg-primary-50 rounded-[6px] border border-primary-100">
+              <PenLine size={14} className="text-primary-600 mt-0.5 flex-shrink-0" />
               <div>
-                <p className="text-xs font-semibold text-[#4338ca] mb-0.5">Biggest win</p>
-                <p className="text-sm text-[#3f3f46]">{result.topWin}</p>
+                <p className="text-xs font-semibold text-primary-700 mb-0.5">Biggest win</p>
+                <p className="text-sm text-ink-secondary">{result.topWin}</p>
               </div>
             </div>
 
             <div className="grid lg:grid-cols-3 gap-6">
               {/* Resume preview */}
-              <div className="lg:col-span-2 bg-white border border-[#e4e4e7] rounded-2xl overflow-hidden shadow-sm">
-                <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#e4e4e7]">
+              <div className="lg:col-span-2 bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] overflow-hidden shadow-sm">
+                <div className="flex items-center justify-between px-5 py-3.5 border-b border-border-DEFAULT">
                   <p className="text-xs font-semibold text-[#111]">Resume Preview</p>
-                  <button onClick={downloadPDF} className="text-xs text-[#71717a] hover:text-[#111] flex items-center gap-1 transition-colors">
+                  <button onClick={downloadPDF} className="text-xs text-ink-muted hover:text-[#111] flex items-center gap-1 transition-colors">
                     <Download size={12} /> Download PDF
                   </button>
                 </div>
@@ -343,11 +343,11 @@ export default function CVBuilderPage() {
               {/* Sidebar */}
               <div className="space-y-4">
                 {/* Keywords */}
-                <div className="bg-white border border-[#e4e4e7] rounded-2xl p-5">
+                <div className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] p-5">
                   <p className="text-xs font-semibold text-[#111] mb-3">Keywords injected ({result.keywordsInjected?.length})</p>
                   <div className="flex flex-wrap gap-1.5">
                     {result.keywordsInjected?.map((kw) => (
-                      <span key={kw} className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#f0fdf4] border border-[#bbf7d0] rounded-full text-xs text-[#16a34a] font-medium">
+                      <span key={kw} className="inline-flex items-center gap-1 px-2 py-0.5 bg-success-bg border border-success-border rounded-full text-xs text-success font-medium">
                         <ArrowUp size={8} />{kw}
                       </span>
                     ))}
@@ -355,23 +355,25 @@ export default function CVBuilderPage() {
                 </div>
 
                 {/* ATS tips */}
-                <div className="bg-[#111] rounded-2xl p-5">
+                <div className="bg-[#111] rounded-[6px] p-5">
                   <p className="text-xs font-semibold text-white mb-3">ATS Score: {result.atsScore}%</p>
-                  <div className="h-2 bg-white/10 rounded-full overflow-hidden mb-4">
+                  <div className="h-2 bg-surface-DEFAULT/10 rounded-full overflow-hidden mb-4">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${result.atsScore}%` }}
                       transition={{ duration: 1, ease: "easeOut" }}
-                      className="h-full rounded-full bg-[#4F46E5]"
+                      className="h-full rounded-full bg-primary-600"
                     />
                   </div>
                   {[
-                    "Action verbs on every bullet ✓",
-                    "Quantified metrics injected ✓",
-                    "ATS-standard section headings ✓",
-                    "Keyword density optimised ✓",
+                    "Action verbs on every bullet",
+                    "Quantified metrics injected",
+                    "ATS-standard section headings",
+                    "Keyword density optimised",
                   ].map((tip) => (
-                    <p key={tip} className="text-xs text-[#71717a] mb-1.5">{tip}</p>
+                    <p key={tip} className="flex items-center gap-2 text-xs text-ink-muted mb-1.5">
+                      <Check size={13} strokeWidth={3} className="text-success shrink-0" /> {tip}
+                    </p>
                   ))}
                 </div>
 
@@ -428,17 +430,17 @@ export default function CVBuilderPage() {
   return (
     <>
       <Navbar />
-      <main className="pt-14 bg-[#FAFAFA] min-h-screen">
+      <main className="pt-14 bg-surface-muted min-h-screen">
         <div className="max-w-xl mx-auto px-4 py-12">
 
           {/* Step indicator */}
           <div className="flex items-center justify-center gap-3 mb-10">
             <StepDot n={1} current={step} label="Target" />
-            <div className="w-12 h-px bg-[#e4e4e7]" />
+            <div className="w-12 h-px bg-border-DEFAULT" />
             <StepDot n={2} current={step} label="Resume" />
-            <div className="w-12 h-px bg-[#e4e4e7]" />
+            <div className="w-12 h-px bg-border-DEFAULT" />
             <StepDot n={3} current={step} label="Build" />
-            <div className="w-12 h-px bg-[#e4e4e7]" />
+            <div className="w-12 h-px bg-border-DEFAULT" />
             <StepDot n={4} current={step} label="Result" />
           </div>
 
@@ -446,11 +448,11 @@ export default function CVBuilderPage() {
             {/* ── Step 1: Target ────────────────────────────────────────────── */}
             {step === 1 && (
               <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                <Link href="/dashboard" className="inline-flex items-center gap-1.5 text-xs text-[#71717a] hover:text-[#111] mb-6 transition-colors">
+                <Link href="/dashboard" className="inline-flex items-center gap-1.5 text-xs text-ink-muted hover:text-[#111] mb-6 transition-colors">
                   <ArrowLeft size={12} /> Back to Dashboard
                 </Link>
                 <h1 className="text-2xl font-bold text-[#111] mb-1">What are you targeting?</h1>
-                <p className="text-sm text-[#71717a] mb-8">Tell us your goal — we'll build your CV around it.</p>
+                <p className="text-sm text-ink-muted mb-8">Tell us your goal — we'll build your CV around it.</p>
 
                 <div className="space-y-5">
                   {/* Role */}
@@ -459,21 +461,21 @@ export default function CVBuilderPage() {
                     <div className="grid grid-cols-2 gap-2 mb-2">
                       {ROLES.map((r) => (
                         <button key={r} onClick={() => setRole(r)}
-                          className={cn("px-3 py-2 rounded-lg border text-xs font-medium text-left transition-all",
-                            role === r ? "bg-[#111] text-white border-[#111]" : "bg-white border-[#e4e4e7] text-[#444] hover:border-[#111]")}>
+                          className={cn("px-3 py-2 rounded-[5px] border text-xs font-medium text-left transition-all",
+                            role === r ? "bg-[#111] text-white border-[#111]" : "bg-surface-DEFAULT border-border-DEFAULT text-[#444] hover:border-[#111]")}>
                           {r}
                         </button>
                       ))}
                       <button onClick={() => setRole("Other")}
-                        className={cn("px-3 py-2 rounded-lg border text-xs font-medium text-left transition-all",
-                          role === "Other" ? "bg-[#111] text-white border-[#111]" : "bg-white border-[#e4e4e7] text-[#444] hover:border-[#111]")}>
+                        className={cn("px-3 py-2 rounded-[5px] border text-xs font-medium text-left transition-all",
+                          role === "Other" ? "bg-[#111] text-white border-[#111]" : "bg-surface-DEFAULT border-border-DEFAULT text-[#444] hover:border-[#111]")}>
                         Other…
                       </button>
                     </div>
                     {role === "Other" && (
                       <input value={customRole} onChange={(e) => setCustomRole(e.target.value)}
                         placeholder="e.g. Embedded Systems Engineer"
-                        className="w-full px-3 py-2 text-sm border border-[#e4e4e7] rounded-lg focus:outline-none focus:border-[#111]" />
+                        className="w-full px-3 py-2 text-sm border border-border-DEFAULT rounded-[5px] focus:outline-none focus:border-[#111]" />
                     )}
                   </div>
 
@@ -484,7 +486,7 @@ export default function CVBuilderPage() {
                       {SENIORITY.map((s) => (
                         <button key={s} onClick={() => setSeniority(s)}
                           className={cn("px-3 py-1.5 rounded-full border text-xs font-medium transition-all",
-                            seniority === s ? "bg-[#111] text-white border-[#111]" : "bg-white border-[#e4e4e7] text-[#444] hover:border-[#111]")}>
+                            seniority === s ? "bg-[#111] text-white border-[#111]" : "bg-surface-DEFAULT border-border-DEFAULT text-[#444] hover:border-[#111]")}>
                           {s}
                         </button>
                       ))}
@@ -497,8 +499,8 @@ export default function CVBuilderPage() {
                     <div className="space-y-2">
                       {COMPANY_TYPES.map((c) => (
                         <button key={c.value} onClick={() => setCompanyType(c.value)}
-                          className={cn("w-full px-4 py-3 rounded-xl border text-sm font-medium text-left transition-all",
-                            companyType === c.value ? "bg-[#111] text-white border-[#111]" : "bg-white border-[#e4e4e7] text-[#444] hover:border-[#111]")}>
+                          className={cn("w-full px-4 py-3 rounded-[6px] border text-sm font-medium text-left transition-all",
+                            companyType === c.value ? "bg-[#111] text-white border-[#111]" : "bg-surface-DEFAULT border-border-DEFAULT text-[#444] hover:border-[#111]")}>
                           {c.label}
                         </button>
                       ))}
@@ -507,19 +509,19 @@ export default function CVBuilderPage() {
 
                   {/* Optional company name */}
                   <div>
-                    <label className="text-xs font-semibold text-[#111] mb-2 block">Specific Company <span className="text-[#a1a1aa] font-normal">(optional)</span></label>
+                    <label className="text-xs font-semibold text-[#111] mb-2 block">Specific Company <span className="text-ink-faint font-normal">(optional)</span></label>
                     <input value={companyName} onChange={(e) => setCompanyName(e.target.value)}
                       placeholder="e.g. Zepto, Razorpay, Google"
-                      className="w-full px-3 py-2 text-sm border border-[#e4e4e7] rounded-lg focus:outline-none focus:border-[#111]" />
+                      className="w-full px-3 py-2 text-sm border border-border-DEFAULT rounded-[5px] focus:outline-none focus:border-[#111]" />
                   </div>
 
                   {/* Optional JD */}
                   <div>
-                    <label className="text-xs font-semibold text-[#111] mb-2 block">Job Description <span className="text-[#a1a1aa] font-normal">(optional but recommended)</span></label>
+                    <label className="text-xs font-semibold text-[#111] mb-2 block">Job Description <span className="text-ink-faint font-normal">(optional but recommended)</span></label>
                     <textarea value={jdText} onChange={(e) => setJdText(e.target.value)}
                       placeholder="Paste the job description for hyper-targeted keywords…"
                       rows={4}
-                      className="w-full px-3 py-2 text-sm border border-[#e4e4e7] rounded-xl focus:outline-none focus:border-[#111] resize-none" />
+                      className="w-full px-3 py-2 text-sm border border-border-DEFAULT rounded-[6px] focus:outline-none focus:border-[#111] resize-none" />
                   </div>
 
                   <Button size="lg" variant="primary" className="w-full gap-2" disabled={!step1Valid} onClick={() => setStep(2)}>
@@ -532,29 +534,29 @@ export default function CVBuilderPage() {
             {/* ── Step 2: Resume ────────────────────────────────────────────── */}
             {step === 2 && (
               <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                <button onClick={() => setStep(1)} className="inline-flex items-center gap-1.5 text-xs text-[#71717a] hover:text-[#111] mb-6 transition-colors">
+                <button onClick={() => setStep(1)} className="inline-flex items-center gap-1.5 text-xs text-ink-muted hover:text-[#111] mb-6 transition-colors">
                   <ArrowLeft size={12} /> Back
                 </button>
                 <h1 className="text-2xl font-bold text-[#111] mb-1">Upload your resume</h1>
-                <p className="text-sm text-[#71717a] mb-2">
+                <p className="text-sm text-ink-muted mb-2">
                   Targeting <strong className="text-[#111]">{finalRole}</strong> · <strong className="text-[#111]">{companyType}</strong>
                   {companyName && <> · <strong className="text-[#111]">{companyName}</strong></>}
                 </p>
-                <p className="text-xs text-[#4F46E5] font-medium mb-8">Goal: stronger, evidence-based ATS fit</p>
+                <p className="text-xs text-primary-600 font-medium mb-8">Goal: stronger, evidence-based ATS fit</p>
 
                 {error && (
-                  <div className="flex items-start gap-2 p-3 bg-[#fef2f2] border border-[#fecaca] rounded-xl mb-4">
-                    <AlertCircle size={14} className="text-[#dc2626] mt-0.5 flex-shrink-0" />
-                    <p className="text-xs text-[#dc2626]">{error}</p>
+                  <div className="flex items-start gap-2 p-3 bg-danger-bg border border-danger-border rounded-[6px] mb-4">
+                    <AlertCircle size={14} className="text-danger mt-0.5 flex-shrink-0" />
+                    <p className="text-xs text-danger">{error}</p>
                   </div>
                 )}
 
                 {/* Toggle */}
-                <div className="flex gap-1 bg-[#f4f4f5] rounded-xl p-1 mb-4">
+                <div className="flex gap-1 bg-surface-subtle rounded-[6px] p-1 mb-4">
                   {(["upload", "paste"] as const).map((m) => (
                     <button key={m} onClick={() => setInputMode(m)}
-                      className={cn("flex-1 py-2 rounded-lg text-xs font-medium transition-all capitalize",
-                        inputMode === m ? "bg-white text-[#111] shadow-sm" : "text-[#71717a]")}>
+                      className={cn("flex-1 py-2 rounded-[5px] text-xs font-medium transition-all capitalize",
+                        inputMode === m ? "bg-surface-DEFAULT text-[#111] shadow-sm" : "text-ink-muted")}>
                       {m === "upload" ? "Upload File" : "Paste Text"}
                     </button>
                   ))}
@@ -563,43 +565,43 @@ export default function CVBuilderPage() {
                 {inputMode === "upload" ? (
                   <div>
                     <div {...getRootProps()} className={cn(
-                      "border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all",
-                      isDragActive ? "border-[#4F46E5] bg-[#eef2ff]" : resumeFile ? "border-[#16a34a] bg-[#f0fdf4]" : "border-[#e4e4e7] hover:border-[#111] bg-white"
+                      "border-2 border-dashed rounded-[6px] p-10 text-center cursor-pointer transition-all",
+                      isDragActive ? "border-primary-600 bg-primary-50" : resumeFile ? "border-success bg-success-bg" : "border-border-DEFAULT hover:border-[#111] bg-surface-DEFAULT"
                     )}>
                       <input {...getInputProps()} />
                       {resumeFile ? (
                         <>
-                          <FileText size={28} className="text-[#16a34a] mx-auto mb-3" />
+                          <FileText size={28} className="text-success mx-auto mb-3" />
                           <p className="text-sm font-semibold text-[#111]">{resumeFile.name}</p>
-                          <p className="text-xs text-[#71717a] mt-1">Click to replace</p>
+                          <p className="text-xs text-ink-muted mt-1">Click to replace</p>
                         </>
                       ) : (
                         <>
-                          <Upload size={28} className="text-[#a1a1aa] mx-auto mb-3" />
+                          <Upload size={28} className="text-ink-faint mx-auto mb-3" />
                           <p className="text-sm font-medium text-[#111]">Drop your CV here</p>
-                          <p className="text-xs text-[#71717a] mt-1">PDF or TXT · max 5 MB</p>
+                          <p className="text-xs text-ink-muted mt-1">PDF or TXT · max 5 MB</p>
                         </>
                       )}
                     </div>
-                    {fileError && <p className="text-xs text-[#dc2626] mt-2">{fileError}</p>}
+                    {fileError && <p className="text-xs text-danger mt-2">{fileError}</p>}
                   </div>
                 ) : (
-                  <div className="bg-white border border-[#e4e4e7] rounded-2xl p-1">
+                  <div className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] p-1">
                     <div className="px-4 pt-3 pb-1">
                       <p className="text-xs font-medium text-[#111] mb-1">Paste your resume text</p>
                     </div>
                     <textarea value={resumeText} onChange={(e) => setResumeText(e.target.value)}
                       placeholder="Paste your full resume content here…"
                       rows={16}
-                      className="w-full px-4 py-2 text-sm text-[#111] placeholder:text-[#a1a1aa] focus:outline-none resize-none" />
+                      className="w-full px-4 py-2 text-sm text-[#111] placeholder:text-ink-faint focus:outline-none resize-none" />
                   </div>
                 )}
 
                 <div className="mt-6">
                   <Button size="lg" variant="primary" className="w-full gap-2" disabled={!step2Valid} onClick={build}>
-                    <Sparkles size={16} /> Build ATS-ready CV
+                    <PenLine size={16} /> Build ATS-ready CV
                   </Button>
-                  <p className="text-center text-xs text-[#a1a1aa] mt-3">~20 seconds · AI-powered · No Overleaf needed</p>
+                  <p className="text-center text-xs text-ink-faint mt-3">~20 seconds · AI-powered · No Overleaf needed</p>
                 </div>
               </motion.div>
             )}

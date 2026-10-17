@@ -1,11 +1,27 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Archivo, Martian_Mono, Doto } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 
-const inter = Inter({
+// Archivo: signage + UI voice. Martian Mono: chart data only. Doto: LED boards only.
+const archivo = Archivo({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-archivo",
+  axes: ["wdth"],
+  display: "swap",
+});
+
+const martian = Martian_Mono({
+  subsets: ["latin"],
+  variable: "--font-martian",
+  axes: ["wdth"],
+  display: "swap",
+});
+
+const doto = Doto({
+  subsets: ["latin"],
+  variable: "--font-doto",
+  weight: ["700", "900"],
   display: "swap",
 });
 
@@ -23,14 +39,22 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  themeColor: "#1D2B6B",
+};
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={inter.variable} suppressHydrationWarning>
-      <body className="bg-[#FAFAFA] text-[#111111] antialiased">
+    <html
+      lang="en"
+      className={`${archivo.variable} ${martian.variable} ${doto.variable}`}
+      suppressHydrationWarning
+    >
+      <body className="bg-surface-muted text-ink antialiased">
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

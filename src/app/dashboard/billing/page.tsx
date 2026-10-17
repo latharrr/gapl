@@ -146,19 +146,19 @@ export default function BillingPage() {
       {/* Success banner */}
       {successPlan && (
         <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-3 p-4 bg-[#f0fdf4] border border-[#bbf7d0] rounded-xl">
-          <CheckCircle2 size={16} className="text-[#16a34a] flex-shrink-0" />
+          className="flex items-center gap-3 p-4 bg-success-bg border border-success-border rounded-[6px]">
+          <CheckCircle2 size={16} className="text-success flex-shrink-0" />
           <div>
-            <p className="text-sm font-semibold text-[#16a34a]">Payment successful!</p>
-            <p className="text-xs text-[#15803d] mt-0.5">You&apos;re now on the <strong>{successPlan}</strong> plan.</p>
+            <p className="text-sm font-semibold text-success">Payment successful!</p>
+            <p className="text-xs text-success mt-0.5">You&apos;re now on the <strong>{successPlan}</strong> plan.</p>
           </div>
         </motion.div>
       )}
 
       {/* Error */}
       {error && (
-        <div className="p-3 bg-[#fef2f2] border border-[#fecaca] rounded-xl">
-          <p className="text-xs text-[#dc2626]">{error}</p>
+        <div className="p-3 bg-danger-bg border border-danger-border rounded-[6px]">
+          <p className="text-xs text-danger">{error}</p>
         </div>
       )}
 
@@ -176,7 +176,7 @@ export default function BillingPage() {
                 Usage resets monthly. Your plan controls the available analysis credits.
               </p>
             </div>
-            <div className="p-3 bg-surface-subtle rounded-xl border border-border-DEFAULT">
+            <div className="p-3 bg-surface-subtle rounded-[6px] border border-border-DEFAULT">
               <Zap size={20} className="text-ink-muted" />
             </div>
           </div>
@@ -198,8 +198,8 @@ export default function BillingPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.12 + i * 0.08 }}
                   className={cn(
-                    "rounded-2xl p-5 border flex flex-col",
-                    plan.highlighted ? "bg-[#111111] border-[#111111]" : "bg-white border-border-DEFAULT"
+                    "rounded-[6px] p-5 border flex flex-col",
+                    plan.highlighted ? "bg-ink border-ink" : "bg-surface-DEFAULT border-border-DEFAULT"
                   )}
                 >
                   {plan.highlighted && (
@@ -208,20 +208,20 @@ export default function BillingPage() {
                   <h3 className={cn("text-sm font-semibold mb-0.5", plan.highlighted ? "text-white" : "text-ink")}>
                     {plan.name}
                   </h3>
-                  <p className={cn("text-xs mb-3", plan.highlighted ? "text-zinc-400" : "text-ink-muted")}>
+                  <p className={cn("text-xs mb-3", plan.highlighted ? "text-ink-faint" : "text-ink-muted")}>
                     {plan.description}
                   </p>
                   <div className="flex items-end gap-1 mb-4">
                     <span className={cn("text-2xl font-bold", plan.highlighted ? "text-white" : "text-ink")}>
                       ₹{plan.price}
                     </span>
-                    <span className={cn("text-xs mb-0.5", plan.highlighted ? "text-zinc-400" : "text-ink-muted")}> one-time</span>
+                    <span className={cn("text-xs mb-0.5", plan.highlighted ? "text-ink-faint" : "text-ink-muted")}> one-time</span>
                   </div>
                   <ul className="space-y-2 mb-5 flex-1">
                     {plan.features.map((f) => (
                       <li key={f} className="flex items-start gap-2">
-                        <Check size={12} className={cn("mt-0.5 flex-shrink-0", plan.highlighted ? "text-zinc-400" : "text-success")} />
-                        <span className={cn("text-xs", plan.highlighted ? "text-zinc-300" : "text-ink-secondary")}>{f}</span>
+                        <Check size={12} className={cn("mt-0.5 flex-shrink-0", plan.highlighted ? "text-ink-faint" : "text-success")} />
+                        <span className={cn("text-xs", plan.highlighted ? "text-border-strong" : "text-ink-secondary")}>{f}</span>
                       </li>
                     ))}
                   </ul>
@@ -250,8 +250,8 @@ export default function BillingPage() {
           </p>
         </div>
       ) : (
-        <div className="p-8 text-center bg-white border border-border-DEFAULT rounded-2xl shadow-xs">
-          <CheckCircle2 className="mx-auto text-[#16a34a] mb-3 animate-bounce" size={32} />
+        <div className="p-8 text-center bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] shadow-xs">
+          <CheckCircle2 className="mx-auto text-success mb-3 animate-bounce" size={32} />
           <h3 className="text-sm font-semibold text-ink">You are on the highest tier plan</h3>
           <p className="text-xs text-ink-muted mt-1 leading-relaxed max-w-sm mx-auto">
             Thank you for supporting Gapl! You have full access to all analyses, roadmaps, and optimization features.

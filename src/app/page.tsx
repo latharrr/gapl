@@ -7,6 +7,8 @@ import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { PricingSection } from "@/components/landing/PricingSection";
 import { FAQ } from "@/components/landing/FAQ";
 import { CTASection } from "@/components/landing/CTASection";
+import { ReportRemarks } from "@/components/landing/ReportRemarks";
+import { RouteSection } from "@/components/landing/RouteSection";
 
 export const metadata: Metadata = {
   title: "Gapl — Application Readiness Engine for Job Seekers",
@@ -41,6 +43,8 @@ export default function HomePage() {
       <Navbar />
       <HeroSection />
       <HowItWorks />
+      <ReportRemarks />
+      <RouteSection />
       <FeaturesSection />
       <PricingSection />
       <FAQ />

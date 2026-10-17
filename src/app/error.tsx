@@ -15,9 +15,9 @@ export default function ErrorBoundary({ error, reset }: ErrorProps) {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] p-6 text-center space-y-6">
-      <div className="w-16 h-16 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center justify-center">
+      <div className="w-16 h-16 bg-danger/10 border border-danger/20 rounded-[6px] flex items-center justify-center">
         <svg
-          className="w-8 h-8 text-red-500"
+          className="w-8 h-8 text-danger"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -32,8 +32,8 @@ export default function ErrorBoundary({ error, reset }: ErrorProps) {
       </div>
 
       <div className="max-w-md space-y-2">
-        <h2 className="text-xl font-bold text-[#111111]">Something went wrong</h2>
-        <p className="text-sm text-[#71717a] leading-relaxed">
+        <h2 className="text-xl font-bold text-ink">Something went wrong</h2>
+        <p className="text-sm text-ink-muted leading-relaxed">
           An unexpected error occurred while loading this page. Please try again.
         </p>
       </div>
@@ -42,7 +42,7 @@ export default function ErrorBoundary({ error, reset }: ErrorProps) {
         <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
           Reload Page
         </Button>
-        <Button variant="primary" size="sm" className="bg-[#111111]" onClick={() => reset()}>
+        <Button variant="primary" size="sm" className="bg-ink" onClick={() => reset()}>
           Try again
         </Button>
       </div>

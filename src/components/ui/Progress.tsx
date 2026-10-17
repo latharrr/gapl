@@ -25,8 +25,8 @@ export function Progress({
 
   const sizes = {
     xs: "h-1",
-    sm: "h-1.5",
-    md: "h-2.5",
+    sm: "h-2",
+    md: "h-3",
   };
 
   const colors = {
@@ -38,7 +38,7 @@ export function Progress({
 
   return (
     <div
-      className={cn("w-full bg-border-DEFAULT rounded-full overflow-hidden", sizes[size], className)}
+      className={cn("w-full bg-surface-subtle rounded-[2px] overflow-hidden", sizes[size], className)}
       role="progressbar"
       aria-valuenow={value}
       aria-valuemin={0}
@@ -46,9 +46,9 @@ export function Progress({
     >
       <div
         className={cn(
-          "h-full rounded-full",
+          "h-full rounded-[2px]",
           colors[color],
-          animated && "transition-all duration-700 ease-out",
+          animated && "transition-[width] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]",
           barClassName
         )}
         style={{ width: `${percentage}%` }}

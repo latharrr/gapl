@@ -12,26 +12,27 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = "primary", size = "md", loading, disabled, children, ...props }, ref) => {
     const base =
-      "inline-flex items-center justify-center gap-2 font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none select-none";
+      "inline-flex items-center justify-center gap-2 font-semibold tracking-[-0.005em] transition-[background-color,border-color,color,box-shadow,transform] duration-150 ease-out focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 active:translate-y-px disabled:opacity-45 disabled:pointer-events-none select-none";
 
+    // primary = station-board yellow (the action); secondary = rail navy (structure)
     const variants = {
       primary:
-        "bg-[#111111] text-white hover:bg-zinc-800 active:bg-zinc-900 shadow-xs",
+        "bg-board text-board-ink border-2 border-board-ink hover:bg-board-deep hover:shadow-md shadow-sm",
       secondary:
-        "bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-700 shadow-xs",
+        "bg-primary-600 text-primary-foreground border-2 border-primary-600 hover:bg-primary-700 hover:border-primary-700",
       outline:
-        "border border-border-DEFAULT bg-white text-ink hover:bg-surface-subtle active:bg-surface-subtle",
+        "border-[1.5px] border-border-strong bg-surface-DEFAULT text-ink hover:border-ink hover:bg-surface-DEFAULT",
       ghost:
-        "text-ink-secondary hover:bg-surface-subtle hover:text-ink active:bg-surface-subtle",
+        "text-ink-secondary hover:bg-surface-subtle hover:text-ink",
       danger:
-        "bg-danger text-white hover:bg-red-700 active:bg-red-800 shadow-xs",
+        "bg-danger text-white border-2 border-danger hover:bg-[#8f1b15] hover:border-[#8f1b15]",
     };
 
     const sizes = {
-      sm: "h-8 px-3 text-xs rounded-md",
-      md: "h-9 px-4 text-sm rounded-lg",
-      lg: "h-11 px-6 text-sm rounded-lg",
-      icon: "h-9 w-9 rounded-lg",
+      sm: "h-8 px-3 text-[0.8125rem] rounded-[4px]",
+      md: "h-10 px-4 text-sm rounded-[5px]",
+      lg: "h-12 px-6 text-[0.9375rem] rounded-[6px]",
+      icon: "h-10 w-10 rounded-[5px]",
     };
 
     return (
