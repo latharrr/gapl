@@ -4,6 +4,13 @@ import { sendEmail } from "@/lib/resend";
 
 export const runtime = "nodejs";
 
+interface ReportCareerGap {
+  skill?: string;
+  priority?: string;
+  gapName?: string;
+  recommendedProject?: string;
+}
+
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -54,7 +61,7 @@ export async function POST(
           Identified Skill Deficits & Projects
         </h3>
         <ul style="padding-left: 20px; margin: 0;">
-          ${careerGaps.map((gap: any) => `
+          ${careerGaps.map((gap: ReportCareerGap) => `
             <li style="margin-bottom: 16px;">
               <strong style="font-size: 13px; color: #111;">${gap.skill}</strong> 
               <span style="font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; background-color: #fef3c7; color: #d97706; margin-left: 6px;">
@@ -130,8 +137,8 @@ export async function POST(
     const remaining = MAX_SENDS - newCount;
 
     return NextResponse.json({ success: true, remaining, total: MAX_SENDS, sent: newCount });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Failed to email report:", err);
-    return NextResponse.json({ error: err.message || "Failed to send email." }, { status: 500 });
+    return NextResponse.json({ error: err instanceof Error ? err.message : "Failed to send email." }, { status: 500 });
   }
 }

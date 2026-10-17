@@ -4,11 +4,28 @@ import { Webhook } from "svix";
 
 export const runtime = "nodejs";
 
+// Resend webhook event payload (svix-verified). `data` is always present on
+// Resend email events; everything else is optional to tolerate unknown events.
+interface ResendWebhookData {
+  email_id?: string;
+  id?: string;
+  subject?: string;
+  to?: string | string[];
+  click?: unknown;
+}
+
+interface ResendWebhookPayload {
+  id?: string;
+  type: string;
+  created_at?: string;
+  data: ResendWebhookData;
+}
+
 export async function POST(req: NextRequest) {
   const secret = process.env.RESEND_WEBHOOK_SECRET;
   const payloadText = await req.text();
 
-  let payload: any;
+  let payload: ResendWebhookPayload;
   
   // 1. Signature Verification
   if (secret) {
@@ -26,9 +43,9 @@ export async function POST(req: NextRequest) {
         "svix-id": svixId,
         "svix-timestamp": svixTimestamp,
         "svix-signature": svixSignature,
-      });
-    } catch (err: any) {
-      console.error("Webhook signature verification failed:", err.message);
+      }) as ResendWebhookPayload;
+    } catch (err: unknown) {
+      console.error("Webhook signature verification failed:", err instanceof Error ? err.message : err);
       return NextResponse.json({ error: "Webhook verification failed." }, { status: 400 });
     }
   } else {
@@ -128,7 +145,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 3. Update Email Message Document
-    const updatePayload: Record<string, any> = {
+    const updatePayload: Record<string, string> = {
       status: newStatus,
       updatedAt: timestamp,
     };
@@ -169,8 +186,8 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ success: true });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Error processing Resend Webhook:", err);
-    return NextResponse.json({ error: err.message || "Failed to process webhook." }, { status: 500 });
+    return NextResponse.json({ error: err instanceof Error ? err.message : "Failed to process webhook." }, { status: 500 });
   }
 }

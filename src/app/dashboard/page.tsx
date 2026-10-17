@@ -13,28 +13,37 @@ import { waitlistCount } from "@/lib/sample-report";
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const [reports, setReports] = useState<AnalysisResult[]>([]);
-  const [loading, setLoading] = useState(true);
+
+  // Logged-out reports come straight from sessionStorage — derived during render, no effect.
+  const [reports, setReports] = useState<AnalysisResult[]>(() => {
+    if (user) return [];
+    try {
+      const stored = sessionStorage.getItem("gapl_last_report");
+      return stored ? [JSON.parse(stored)] : [];
+    } catch {
+      return [];
+    }
+  });
+  const [loading, setLoading] = useState(() => !!user);
 
   useEffect(() => {
-    if (!user) {
-      const stored = sessionStorage.getItem("gapl_last_report");
-      if (stored) {
-        try {
-          setReports([JSON.parse(stored)]);
-        } catch { /* ignore */ }
+    if (!user) return;
+    let cancelled = false;
+    const run = async () => {
+      setLoading(true);
+      try {
+        const data = await getUserReports(user.uid);
+        if (!cancelled) setReports(data as unknown as AnalysisResult[]);
+      } catch (err) {
+        console.error("Error loading dashboard reports:", err);
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    getUserReports(user.uid)
-      .then((data) => {
-        setReports(data as unknown as AnalysisResult[]);
-      })
-      .catch((err) => console.error("Error loading dashboard reports:", err))
-      .finally(() => setLoading(false));
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
   }, [user]);
 
   if (loading) {

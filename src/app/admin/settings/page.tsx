@@ -3,24 +3,17 @@
 import { LoadingChart } from "@/components/ui/Sheet";
 
 import { useEffect, useState } from "react";
-import { useAuth } from "@/context/AuthContext";
 import { Card } from "@/components/ui/Card";
 import { adminFetch } from "@/lib/admin-fetch";
 import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
 import {
-  Settings,
-  Shield,
   Save,
   CheckCircle,
   ToggleLeft,
   ToggleRight,
-  HelpCircle,
-  Loader2,
 } from "lucide-react";
 
 export default function AdminSettingsPage() {
-  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState("");
@@ -89,9 +82,10 @@ export default function AdminSettingsPage() {
       const json = await res.json();
       if (!res.ok) throw new Error(json.error);
       setSuccess(json.message || "Settings saved successfully!");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setSuccess(`Error: ${err.message || "Failed to save settings"}`);
+      const message = err instanceof Error ? err.message : undefined;
+      setSuccess(`Error: ${message || "Failed to save settings"}`);
     } finally {
       setSaving(false);
     }
@@ -180,7 +174,7 @@ export default function AdminSettingsPage() {
                 </span>
               </div>
               <span className="text-[0.6875rem] text-ink-muted mt-1.5 block">
-                Minimum ATS score required to trigger a "Shortlist" verdict in reports.
+                Minimum ATS score required to trigger a &quot;Shortlist&quot; verdict in reports.
               </span>
             </div>
           </Card>

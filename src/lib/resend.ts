@@ -37,7 +37,7 @@ Tags: ${JSON.stringify(tags || [])}
     }
 
     return { success: true, id: response.data?.id, isMock: false };
-  } catch (err: any) {
+  } catch (err) {
     console.error("Failed to send email via Resend:", err);
     throw err;
   }

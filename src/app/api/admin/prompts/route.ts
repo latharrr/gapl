@@ -21,8 +21,9 @@ export async function GET(req: NextRequest) {
     const history = historySnap.docs.map((d) => ({ id: d.id, ...d.data() }));
 
     return NextResponse.json({ prompts, history });
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || "Internal server error" }, { status: 500 });
+  } catch (err) {
+    const message = err instanceof Error && err.message ? err.message : "Internal server error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
@@ -36,7 +37,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized role for prompt modification." }, { status: 403 });
     }
 
-    const { action, promptId, content, version, targetVersion } = await req.json();
+    const { action, promptId, content, targetVersion } = await req.json();
 
     if (action === "update") {
       const promptRef = doc(db, "prompts", promptId);
@@ -138,7 +139,8 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || "Internal server error" }, { status: 500 });
+  } catch (err) {
+    const message = err instanceof Error && err.message ? err.message : "Internal server error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

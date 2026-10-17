@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { type AnalysisResult } from "@/types/analysis";
 import { Navbar } from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/Button";
@@ -183,20 +183,21 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 export default function TailorPage() {
   const printRef = useRef<HTMLDivElement>(null);
 
-  const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
+  // The last report is read straight from sessionStorage — derived during render, no effect.
+  const [analysis] = useState<AnalysisResult | null>(() => {
+    try {
+      const stored = sessionStorage.getItem("gapl_last_report");
+      return stored ? (JSON.parse(stored) as AnalysisResult) : null;
+    } catch {
+      return null;
+    }
+  });
   const [resumeText, setResumeText] = useState("");
   const [result, setResult] = useState<TailoredResume | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [step, setStep] = useState<"paste" | "loading" | "result">("paste");
   const [tailorStage, setTailorStage] = useState(0);
-
-  useEffect(() => {
-    const stored = sessionStorage.getItem("gapl_last_report");
-    if (stored) {
-      try { setAnalysis(JSON.parse(stored)); } catch { /* ignore */ }
-    }
-  }, []);
 
   const runTailor = async () => {
     setStep("loading");

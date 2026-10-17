@@ -43,8 +43,9 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ success: true, textLength: content.length });
-  } catch (err: any) {
+  } catch (err) {
     console.error("Resume validation error:", err);
-    return NextResponse.json({ error: err.message || "Failed to validate resume." }, { status: 500 });
+    const message = err instanceof Error && err.message ? err.message : "Failed to validate resume.";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

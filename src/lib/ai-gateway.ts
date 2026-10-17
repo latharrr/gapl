@@ -1,5 +1,5 @@
 import { db, doc, getDoc, updateDoc, setDoc, collection, addDoc } from "./server-firestore";
-import { groq, ANALYSIS_MODEL } from "./groq";
+import { getGroq, ANALYSIS_MODEL } from "./groq";
 
 // Cost configuration for different providers/models
 const TOKEN_PRICING: Record<string, { input: number; output: number }> = {
@@ -17,7 +17,7 @@ export interface GatewayOptions {
   userId?: string;
   correlationId?: string;
   temperature?: number;
-  zodSchema?: any; // optional schema validation
+  zodSchema?: { parse: (data: unknown) => unknown }; // optional schema validation
   isJson?: boolean; // set false for raw plain text responses
 }
 
@@ -160,7 +160,7 @@ export async function generateAICall(
   task: string,
   prompt: string,
   options: GatewayOptions = {}
-): Promise<{ text: string; parsed?: any; traceId: string }> {
+): Promise<{ text: string; parsed?: unknown; traceId: string }> {
   const traceId = `trace-${Math.random().toString(36).substring(2, 15)}`;
   const correlationId = options.correlationId || `corr-${Math.random().toString(36).substring(2, 15)}`;
   const startTime = Date.now();
@@ -187,7 +187,7 @@ export async function generateAICall(
 
   let attempt = 0;
   const maxAttempts = 3;
-  let lastError: any = null;
+  let lastError: unknown = null;
   let rawResponse = "";
 
   while (attempt < maxAttempts) {
@@ -250,7 +250,7 @@ export async function generateAICall(
         // Default fallback to Groq SDK
         // Force use of a supported Groq model (like openai/gpt-oss-120b) if the currentModel is not a Groq model
         const groqModel = currentModel.includes("gpt-oss") ? currentModel : ANALYSIS_MODEL;
-        const completion = await groq.chat.completions.create({
+        const completion = await getGroq().chat.completions.create({
           model: groqModel,
           messages: [{ role: "user", content: prompt }],
           temperature,
@@ -268,7 +268,7 @@ export async function generateAICall(
       const latency = Date.now() - attemptStartTime;
 
       // Zod/Schema Validation check
-      let parsedJson: any = null;
+      let parsedJson: unknown = null;
       if (options.isJson !== false) {
         const jsonMatch = rawResponse.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
@@ -277,7 +277,7 @@ export async function generateAICall(
             if (options.zodSchema) {
               options.zodSchema.parse(parsedJson); 
             }
-          } catch (e) {
+          } catch {
             throw new Error("JSON response failed schema validation check.");
           }
         } else {
@@ -330,12 +330,12 @@ export async function generateAICall(
 
       return { text: rawResponse, parsed: parsedJson, traceId };
 
-    } catch (err: any) {
+    } catch (err) {
       lastError = err;
       const latency = Date.now() - attemptStartTime;
       await updateProviderHealth(currentProvider, false, latency);
 
-      console.warn(`Gateway Attempt ${attempt} via ${currentProvider} failed: ${err.message}`);
+      console.warn(`Gateway Attempt ${attempt} via ${currentProvider} failed: ${err instanceof Error ? err.message : String(err)}`);
     }
   }
 
@@ -354,7 +354,7 @@ export async function generateAICall(
     latency: errorLatency,
     status: "error",
     ...buildContentLog(prompt, ""),
-    error: lastError?.message || "Execution collapsed",
+    error: lastError instanceof Error ? lastError.message : "Execution collapsed",
   });
 
   throw lastError || new Error("AI gateway call failed on all providers.");
@@ -366,7 +366,26 @@ function buildContentLog(prompt: string, response: string) {
   return { ...metadata, prompt: "[redacted]", response: "[redacted]" };
 }
 
-async function logAICallToDB(log: any) {
+interface AICallLog {
+  traceId: string;
+  correlationId: string;
+  userId: string;
+  task: string;
+  provider: string;
+  model: string;
+  tokensInput: number;
+  tokensOutput: number;
+  cost: number;
+  latency: number;
+  status: "success" | "error";
+  promptChars: number;
+  responseChars: number;
+  prompt: string;
+  response: string;
+  error?: string;
+}
+
+async function logAICallToDB(log: AICallLog) {
   try {
     const logsRef = collection(db, "ai_calls");
     await addDoc(logsRef, {

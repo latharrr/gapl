@@ -11,19 +11,71 @@ import {
   Sparkles,
   Award,
   AlertTriangle,
-  Loader2,
   RefreshCw,
   Mail,
   Zap,
   TrendingUp,
-  TrendingDown,
   UserCheck,
   UserMinus,
 } from "lucide-react";
 
+interface InsightSubject {
+  subject: string;
+  campaign: string;
+  rate: string | number;
+}
+
+interface InsightRevenue {
+  revenue: string | number;
+  campaign: string;
+}
+
+interface InsightRoadmap {
+  campaign: string;
+  ctr: string | number;
+}
+
+interface InsightOpen {
+  campaign: string;
+  rate: string | number;
+}
+
+interface EmailQAndA {
+  bestSubject?: InsightSubject | null;
+  bestRevenue?: InsightRevenue | null;
+  bestRoadmap?: InsightRoadmap | null;
+  highestOpen?: InsightOpen | null;
+}
+
+interface EngagedUser {
+  userId: string;
+  email?: string;
+  score?: number | string;
+  opens?: number;
+  clicks?: number;
+}
+
+interface EmailInsightsData {
+  qAndA?: EmailQAndA;
+  highlyEngaged?: EngagedUser[];
+  likelyToChurn?: EngagedUser[];
+  aiSummary?: string;
+}
+
+interface EmailInsightsResponse extends EmailInsightsData {
+  error?: string;
+}
+
+async function loadEmailInsights(): Promise<EmailInsightsResponse> {
+  const res = await adminFetch("/api/admin/email-insights");
+  const json: EmailInsightsResponse = await res.json();
+  if (!res.ok) throw new Error(json.error || "Failed to load email insights");
+  return json;
+}
+
 export default function AdminEmailInsightsPage() {
   const { user } = useAuth();
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<EmailInsightsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [refreshing, setRefreshing] = useState(false);
@@ -33,12 +85,9 @@ export default function AdminEmailInsightsPage() {
     if (!isSilent) setLoading(true);
     setError("");
     try {
-      const res = await adminFetch("/api/admin/email-insights");
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Failed to load email insights");
-      setData(json);
-    } catch (err: any) {
-      setError(err.message);
+      setData(await loadEmailInsights());
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -46,7 +95,27 @@ export default function AdminEmailInsightsPage() {
   };
 
   useEffect(() => {
-    fetchInsights();
+    let cancelled = false;
+    const run = async () => {
+      if (!user) return;
+      setLoading(true);
+      setError("");
+      try {
+        const result = await loadEmailInsights();
+        if (!cancelled) setData(result);
+      } catch (err: unknown) {
+        if (!cancelled) setError(err instanceof Error ? err.message : String(err));
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+          setRefreshing(false);
+        }
+      }
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
   }, [user]);
 
   const handleRefresh = () => {
@@ -75,7 +144,7 @@ export default function AdminEmailInsightsPage() {
     );
   }
 
-  const { qAndA = {}, highlyEngaged = [], likelyToChurn = [], aiSummary = "" } = data || {};
+  const { qAndA = {}, highlyEngaged = [], likelyToChurn = [], aiSummary = "" } = data;
 
   return (
     <div className="space-y-8">
@@ -111,7 +180,7 @@ export default function AdminEmailInsightsPage() {
           <span className="text-[0.6875rem] uppercase font-extrabold text-ink-muted tracking-wider block">Best Subject Line</span>
           {qAndA.bestSubject ? (
             <>
-              <div className="text-xs font-semibold text-ink truncate">"{qAndA.bestSubject.subject}"</div>
+              <div className="text-xs font-semibold text-ink truncate">&quot;{qAndA.bestSubject.subject}&quot;</div>
               <div className="text-[0.6875rem] text-ink-muted mt-1">
                 Campaign: <span className="font-bold text-ink capitalize">{qAndA.bestSubject.campaign.replace(/_/g, " ")}</span>
               </div>
@@ -220,7 +289,7 @@ export default function AdminEmailInsightsPage() {
                     </td>
                   </tr>
                 ) : (
-                  highlyEngaged.map((user: any) => (
+                  highlyEngaged.map((user: EngagedUser) => (
                     <tr key={user.userId} className="hover:bg-surface-muted transition-colors">
                       <td className="px-4 py-3">
                         <div className="font-semibold text-ink truncate max-w-[180px]">{user.email}</div>
@@ -263,7 +332,7 @@ export default function AdminEmailInsightsPage() {
                     </td>
                   </tr>
                 ) : (
-                  likelyToChurn.map((user: any) => (
+                  likelyToChurn.map((user: EngagedUser) => (
                     <tr key={user.userId} className="hover:bg-surface-muted transition-colors">
                       <td className="px-4 py-3">
                         <div className="font-semibold text-ink truncate max-w-[180px]">{user.email}</div>

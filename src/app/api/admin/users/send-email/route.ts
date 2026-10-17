@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminDb, requireAdmin } from "@/lib/firebase-admin";
 import { sendEmail } from "@/lib/resend";
-import { groq } from "@/lib/groq";
+import { getGroq } from "@/lib/groq";
 
 export const runtime = "nodejs";
 
@@ -18,8 +18,9 @@ export async function GET(req: NextRequest) {
 
     // Return empty count — admin sends are unlimited
     return NextResponse.json({ adminEmailCount: 0, limit: null, unlimited: true });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err) {
+    const message = err instanceof Error && err.message ? err.message : "Internal server error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
@@ -48,7 +49,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Message is required for rewrite." }, { status: 400 });
       }
 
-      const completion = await groq.chat.completions.create({
+      const completion = await getGroq().chat.completions.create({
         model: "llama3-8b-8192",
         messages: [
           {
@@ -125,9 +126,10 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ error: "Invalid action. Use 'rewrite' or 'send'." }, { status: 400 });
-  } catch (err: any) {
+  } catch (err) {
     console.error("[admin/send-email]", err);
-    return NextResponse.json({ error: err.message || "Failed to process request." }, { status: 500 });
+    const message = err instanceof Error && err.message ? err.message : "Failed to process request.";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 

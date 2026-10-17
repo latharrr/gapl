@@ -8,20 +8,50 @@ import { adminFetch } from "@/lib/admin-fetch";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import {
-  HeartPulse,
   AlertTriangle,
   CheckCircle,
-  XCircle,
-  Loader2,
   RefreshCw,
   Info,
   Server,
   ShieldAlert,
 } from "lucide-react";
 
+interface EmailHealthOverview {
+  bounceRate: number;
+  complaintRate: number;
+  openRate: number;
+}
+
+interface EmailHealthMessage {
+  id: string;
+  email?: string;
+  userId?: string;
+  campaignId: string;
+  status: string;
+  error?: string;
+  updatedAt?: string;
+  sentAt?: string;
+}
+
+interface EmailHealthData {
+  overview: EmailHealthOverview;
+  messages: EmailHealthMessage[];
+}
+
+interface EmailHealthResponse extends EmailHealthData {
+  error?: string;
+}
+
+async function loadEmailHealth(): Promise<EmailHealthResponse> {
+  const res = await adminFetch("/api/admin/emails");
+  const json: EmailHealthResponse = await res.json();
+  if (!res.ok) throw new Error(json.error || "Failed to load email health metrics");
+  return json;
+}
+
 export default function AdminEmailHealthPage() {
   const { user } = useAuth();
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<EmailHealthResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [refreshing, setRefreshing] = useState(false);
@@ -31,12 +61,9 @@ export default function AdminEmailHealthPage() {
     if (!isSilent) setLoading(true);
     setError("");
     try {
-      const res = await adminFetch("/api/admin/emails");
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Failed to load email health metrics");
-      setData(json);
-    } catch (err: any) {
-      setError(err.message);
+      setData(await loadEmailHealth());
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -44,7 +71,27 @@ export default function AdminEmailHealthPage() {
   };
 
   useEffect(() => {
-    fetchHealthData();
+    let cancelled = false;
+    const run = async () => {
+      if (!user) return;
+      setLoading(true);
+      setError("");
+      try {
+        const result = await loadEmailHealth();
+        if (!cancelled) setData(result);
+      } catch (err: unknown) {
+        if (!cancelled) setError(err instanceof Error ? err.message : String(err));
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+          setRefreshing(false);
+        }
+      }
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
   }, [user]);
 
   const handleRefresh = () => {
@@ -73,10 +120,10 @@ export default function AdminEmailHealthPage() {
     );
   }
 
-  const { overview = {}, messages = [] } = data || {};
+  const { overview, messages } = data;
 
   // Filter issues (failed, bounced, complained)
-  const healthIssues = messages.filter((m: any) =>
+  const healthIssues = messages.filter((m: EmailHealthMessage) =>
     ["failed", "bounced", "complained"].includes(m.status)
   );
 
@@ -242,7 +289,7 @@ export default function AdminEmailHealthPage() {
                   </td>
                 </tr>
               ) : (
-                healthIssues.map((issue: any) => (
+                healthIssues.map((issue: EmailHealthMessage) => (
                   <tr key={issue.id} className="hover:bg-surface-muted transition-colors">
                     <td className="px-6 py-4">
                       <div className="font-semibold text-ink">{issue.email}</div>
@@ -258,7 +305,7 @@ export default function AdminEmailHealthPage() {
                       {issue.error || "Bounced back by recipient mail server or mailbox full."}
                     </td>
                     <td className="px-6 py-4 text-right text-ink-muted">
-                      {new Date(issue.updatedAt || issue.sentAt).toLocaleString()}
+                      {new Date(issue.updatedAt || issue.sentAt || "").toLocaleString()}
                     </td>
                   </tr>
                 ))

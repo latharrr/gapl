@@ -6,52 +6,69 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Card } from "@/components/ui/Card";
 import { adminFetch } from "@/lib/admin-fetch";
-import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
 import {
-  Cpu,
-  Coins,
   AlertTriangle,
   Search,
-  Filter,
   CheckCircle,
   Eye,
-  Loader2,
 } from "lucide-react";
+
+interface AICall {
+  id: string;
+  timestamp: string;
+  model?: string;
+  userId?: string;
+  cost?: number;
+  tokensInput?: number;
+  tokensOutput?: number;
+  latency: number;
+  status: string;
+  prompt?: string;
+  response?: string;
+  error?: string;
+}
+
+interface AICallsResponse {
+  calls?: AICall[];
+  error?: string;
+}
 
 export default function AdminAICallsPage() {
   const { user } = useAuth();
-  const [calls, setCalls] = useState<any[]>([]);
+  const [calls, setCalls] = useState<AICall[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [selectedCall, setSelectedCall] = useState<any | null>(null);
-
-  const fetchCalls = async () => {
-    if (!user) return;
-    setLoading(true);
-    setError("");
-    try {
-      const res = await adminFetch("/api/admin/ai-calls");
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to load AI logs");
-      
-      // Sort chronologically by timestamp
-      const sorted = (data.calls || []).sort(
-        (a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-      );
-      setCalls(sorted);
-    } catch (e: any) {
-      setError(e.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [selectedCall, setSelectedCall] = useState<AICall | null>(null);
 
   useEffect(() => {
-    fetchCalls();
+    let cancelled = false;
+    const run = async () => {
+      if (!user) return;
+      setLoading(true);
+      setError("");
+      try {
+        const res = await adminFetch("/api/admin/ai-calls");
+        const data: AICallsResponse = await res.json();
+        if (!res.ok) throw new Error(data.error || "Failed to load AI logs");
+
+        // Sort chronologically by timestamp
+        const sorted = (data.calls || []).sort(
+          (a: AICall, b: AICall) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        );
+        if (!cancelled) setCalls(sorted);
+      } catch (e: unknown) {
+        if (!cancelled) setError(e instanceof Error ? e.message : String(e));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
   }, [user]);
 
   // Aggregate stats

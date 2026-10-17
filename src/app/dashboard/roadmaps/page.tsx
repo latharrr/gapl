@@ -12,30 +12,41 @@ import { getUserReports } from "@/lib/firebase";
 
 export default function RoadmapsPage() {
   const { user } = useAuth();
-  const [result, setResult] = useState<AnalysisResult | null>(null);
+
+  // Logged-out result comes straight from sessionStorage — derived during render, no effect.
+  const [result, setResult] = useState<AnalysisResult | null>(() => {
+    if (user) return null;
+    try {
+      const stored = sessionStorage.getItem("gapl_last_report");
+      return stored ? (JSON.parse(stored) as AnalysisResult) : null;
+    } catch {
+      return null;
+    }
+  });
   const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
   const [expandedWeek, setExpandedWeek] = useState<number | null>(1);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !!user);
 
   useEffect(() => {
-    if (!user) {
-      const stored = sessionStorage.getItem("gapl_last_report");
-      if (stored) {
-        try { setResult(JSON.parse(stored)); } catch { /* ignore */ }
-      }
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    getUserReports(user.uid)
-      .then((reports) => {
-        if (reports.length > 0) {
+    if (!user) return;
+    let cancelled = false;
+    const run = async () => {
+      setLoading(true);
+      try {
+        const reports = await getUserReports(user.uid);
+        if (!cancelled && reports.length > 0) {
           setResult(reports[0] as unknown as AnalysisResult);
         }
-      })
-      .catch((e) => console.error("Error loading roadmap:", e))
-      .finally(() => setLoading(false));
+      } catch (err) {
+        console.error("Error loading roadmap:", err);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
   }, [user]);
 
   const toggleTask = (taskId: string) => {

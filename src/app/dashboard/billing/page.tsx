@@ -6,7 +6,6 @@ import { PLAN_LIMITS } from "@/lib/plans";
 import { Button } from "@/components/ui/Button";
 import { Sheet, PageHeader, FigureStrip, APP_PAGE } from "@/components/ui/Sheet";
 import { Check, CheckCircle2, AlertCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import { authFetch } from "@/lib/auth-fetch";
 

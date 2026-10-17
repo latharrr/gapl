@@ -47,7 +47,6 @@ export async function GET(req: NextRequest) {
     let totalRevenue = 0;
     const campaignRevenue: Record<string, number> = {};
     const campaignReports: Record<string, number> = {};
-    const campaignRoadmaps: Record<string, number> = {};
     const campaignPayments: Record<string, number> = {};
 
     payments.forEach((p) => {
@@ -161,8 +160,9 @@ export async function GET(req: NextRequest) {
       campaigns: campaignsStats,
       messages: formattedMessages,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Failed to load admin emails metrics:", err);
-    return NextResponse.json({ error: err.message || "Failed to load stats." }, { status: 500 });
+    const message = err instanceof Error ? err.message : undefined;
+    return NextResponse.json({ error: message || "Failed to load stats." }, { status: 500 });
   }
 }

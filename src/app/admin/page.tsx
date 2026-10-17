@@ -21,9 +21,66 @@ import {
   CartesianGrid,
 } from "recharts";
 
+interface DashboardMetrics {
+  totalUsers?: number;
+  activeUsers?: number;
+  newUsersToday?: number;
+  conversionRate?: number | string;
+  totalRevenue?: number;
+  mrr?: number;
+  aiCostToday?: number;
+  refundRate?: number | string;
+  reportsCount?: number;
+  profitToday?: number | string;
+  processingFailures?: number;
+}
+
+interface GrowthPoint {
+  date: string;
+  users: number;
+}
+
+interface RevenuePoint {
+  date: string;
+  revenue: number;
+}
+
+interface CostPoint {
+  date: string;
+  cost: number;
+}
+
+interface FunnelPoint {
+  name: string;
+  value: number;
+}
+
+interface DashboardCharts {
+  usersGrowth?: GrowthPoint[];
+  revenueGrowth?: RevenuePoint[];
+  aiCostTrend?: CostPoint[];
+  conversionFunnel?: FunnelPoint[];
+}
+
+interface DashboardStats {
+  metrics?: DashboardMetrics;
+  charts?: DashboardCharts;
+}
+
+interface DashboardResponse extends DashboardStats {
+  error?: string;
+}
+
+async function loadDashboardStats(): Promise<DashboardResponse> {
+  const res = await adminFetch("/api/admin/stats");
+  const data: DashboardResponse = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to load admin stats");
+  return data;
+}
+
 export default function AdminDashboardPage() {
   const { user } = useAuth();
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -32,19 +89,33 @@ export default function AdminDashboardPage() {
     setLoading(true);
     setError("");
     try {
-      const res = await adminFetch("/api/admin/stats");
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to load admin stats");
-      setStats(data);
-    } catch (e: any) {
-      setError(e.message);
+      setStats(await loadDashboardStats());
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : String(e));
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchStats();
+    let cancelled = false;
+    const run = async () => {
+      if (!user) return;
+      setLoading(true);
+      setError("");
+      try {
+        const result = await loadDashboardStats();
+        if (!cancelled) setStats(result);
+      } catch (e: unknown) {
+        if (!cancelled) setError(e instanceof Error ? e.message : String(e));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
   }, [user]);
 
   if (loading) {
@@ -72,8 +143,8 @@ export default function AdminDashboardPage() {
     );
   }
 
-  const { metrics, charts } = stats;
-  const inr = (n: number) => `₹${Number(n || 0).toLocaleString("en-IN")}`;
+  const { metrics = {}, charts = {} } = stats;
+  const inr = (n: number | undefined) => `₹${Number(n || 0).toLocaleString("en-IN")}`;
   const axis = { stroke: "#a9a89a", fontSize: 11, tickLine: false, tick: { fill: "#595c69", fontFamily: "var(--font-martian)" } };
   const tip = { contentStyle: { background: "#1d2b6b", border: "none", borderRadius: 4, color: "#fcfcf7", fontSize: 12 }, labelStyle: { color: "#f5c518" }, itemStyle: { color: "#fcfcf7" } };
 

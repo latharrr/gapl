@@ -154,22 +154,27 @@ async function dispatchEmail({
     });
 
     return messageId;
-  } catch (err: any) {
+  } catch (err) {
     await messageRef.update({
       status: "failed",
-      error: err.message || "Sending failed",
+      error: err instanceof Error ? err.message : "Sending failed",
     });
     throw err;
   }
 }
 
 // ── Welcome Email ─────────────────────────────────────────────────────────────
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] as string);
+}
+
 export async function sendWelcomeEmail(userId: string, email: string, name: string) {
+  const safeName = escapeHtml(String(name || "there").slice(0, 80));
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.in";
   
   const bodyHtml = `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #111111;">
-      <h2>Welcome to Gapl, ${name}!</h2>
+      <h2>Welcome to Gapl, ${safeName}!</h2>
       <p>Thanks for joining our community.</p>
       <p>To accelerate your job search, upload your resume and target job description to discover:</p>
       <ul>

@@ -141,7 +141,10 @@ export async function POST(req: NextRequest) {
           console.warn("unpdf extraction failed, trying pdf-parse fallback...", pdfErr);
           try {
             const pdf = await import("pdf-parse");
-            const parser = ((pdf as any).default || pdf) as any;
+            // pdf-parse may expose its parser as the module itself or as .default
+            type PdfParseFn = (data: Buffer) => Promise<{ text?: string }>;
+            const pdfModule = pdf as unknown as { default?: PdfParseFn } & PdfParseFn;
+            const parser: PdfParseFn = pdfModule.default ?? pdfModule;
             const data = await parser(buffer);
             resumeText = data.text || "";
           } catch (pdfErr2) {

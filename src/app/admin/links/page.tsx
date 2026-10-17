@@ -9,22 +9,69 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
 import {
-  Link as LinkIcon,
   Plus,
-  MousePointer,
-  Sparkles,
   Copy,
-  ExternalLink,
   Loader2,
   RefreshCw,
   AlertTriangle,
-  CheckCircle,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
+interface FirestoreTimestamp {
+  toDate: () => Date;
+}
+
+interface ShortLink {
+  id: string;
+  name?: string;
+  targetUrl?: string;
+  campaignId?: string;
+  clickCount?: number;
+  uniqueClicks?: number;
+  createdAt?: string | FirestoreTimestamp | null;
+}
+
+interface LinkCampaign {
+  id: string;
+  name?: string;
+  linksCount?: number;
+  clicks?: number;
+  unique?: number;
+}
+
+interface LinkMetrics {
+  totalClicks?: number;
+  totalUniqueClicks?: number;
+}
+
+interface LinksData {
+  links?: ShortLink[];
+  metrics?: LinkMetrics;
+  campaigns?: LinkCampaign[];
+}
+
+interface LinksResponse extends LinksData {
+  error?: string;
+}
+
+async function loadLinks(): Promise<LinksResponse> {
+  const res = await adminFetch("/api/admin/links");
+  const json: LinksResponse = await res.json();
+  if (!res.ok) throw new Error(json.error || "Failed to load shortlinks");
+  return json;
+}
+
+function formatShortLinkDate(createdAt: ShortLink["createdAt"]): string {
+  if (typeof createdAt === "string") return new Date(createdAt).toLocaleDateString();
+  if (createdAt && typeof createdAt.toDate === "function") {
+    return createdAt.toDate().toLocaleDateString();
+  }
+  return "N/A";
+}
+
 export default function AdminLinksPage() {
   const { user } = useAuth();
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<LinksResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [refreshing, setRefreshing] = useState(false);
@@ -41,12 +88,9 @@ export default function AdminLinksPage() {
     if (!isSilent) setLoading(true);
     setError("");
     try {
-      const res = await adminFetch("/api/admin/links");
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Failed to load shortlinks");
-      setData(json);
-    } catch (err: any) {
-      setError(err.message);
+      setData(await loadLinks());
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -54,7 +98,27 @@ export default function AdminLinksPage() {
   };
 
   useEffect(() => {
-    fetchLinks();
+    let cancelled = false;
+    const run = async () => {
+      if (!user) return;
+      setLoading(true);
+      setError("");
+      try {
+        const result = await loadLinks();
+        if (!cancelled) setData(result);
+      } catch (err: unknown) {
+        if (!cancelled) setError(err instanceof Error ? err.message : String(err));
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+          setRefreshing(false);
+        }
+      }
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
   }, [user]);
 
   const handleRefresh = () => {
@@ -89,8 +153,8 @@ export default function AdminLinksPage() {
       setCampaignId("");
       setCustomSlug("");
       fetchLinks(true);
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : String(err));
     } finally {
       setCreating(false);
     }
@@ -124,7 +188,7 @@ export default function AdminLinksPage() {
     );
   }
 
-  const { links = [], metrics = {}, campaigns = [] } = data || {};
+  const { links = [], metrics = {}, campaigns = [] } = data;
 
   return (
     <div className="space-y-8">
@@ -225,7 +289,7 @@ export default function AdminLinksPage() {
               <div className="flex items-baseline gap-2 mt-2">
                 <span className="text-2xl font-extrabold text-ink text-success">{metrics.totalUniqueClicks}</span>
                 <span className="text-xs text-ink-muted">
-                  {metrics.totalClicks > 0 ? ((metrics.totalUniqueClicks / metrics.totalClicks) * 100).toFixed(0) : 0}% unique
+                  {metrics.totalClicks ? ((metrics.totalUniqueClicks ?? 0) / metrics.totalClicks * 100).toFixed(0) : 0}% unique
                 </span>
               </div>
             </div>
@@ -238,7 +302,7 @@ export default function AdminLinksPage() {
               {campaigns.length === 0 ? (
                 <div className="text-xs text-ink-muted col-span-2">No campaigns loaded.</div>
               ) : (
-                campaigns.map((c: any) => (
+                campaigns.map((c: LinkCampaign) => (
                   <div key={c.id} className="bg-surface-muted border border-border-DEFAULT rounded-[5px] p-3 flex justify-between items-center">
                     <div>
                       <div className="text-xs font-bold text-ink capitalize">{c.name}</div>
@@ -281,7 +345,7 @@ export default function AdminLinksPage() {
                   </td>
                 </tr>
               ) : (
-                links.map((link: any) => {
+                links.map((link: ShortLink) => {
                   const trackingDomain = process.env.NEXT_PUBLIC_TRACKING_DOMAIN || "links.gapl.in";
                   const shortUrl = `https://${trackingDomain}/${link.id}`;
                   return (
@@ -310,11 +374,7 @@ export default function AdminLinksPage() {
                       <td className="px-6 py-4 text-center font-bold text-ink">{link.clickCount}</td>
                       <td className="px-6 py-4 text-center font-bold text-success">{link.uniqueClicks}</td>
                       <td className="px-6 py-4 text-right text-ink-muted">
-                        {link.createdAt
-                          ? typeof link.createdAt.toDate === "function"
-                            ? link.createdAt.toDate().toLocaleDateString()
-                            : new Date(link.createdAt).toLocaleDateString()
-                          : "N/A"}
+                        {formatShortLinkDate(link.createdAt)}
                       </td>
                     </tr>
                   );

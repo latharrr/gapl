@@ -29,7 +29,7 @@ graph TD
   Resend_API -->|Sends Email| User
   
   User -->|Clicks Shortlink| Links_Domain
-  Links_Domain -->|Next.js Edge Middleware| Middleware_Rewrite{"src/middleware.ts"}
+  Links_Domain -->|Next.js Proxy| Proxy_Rewrite{"src/proxy.ts"}
   Middleware_Rewrite -->|Internal Redirect| Redirect_API["/api/t/id"]
   Redirect_API -->|Increment Click Counts & Log Telemetry| Trackable_Links
   Redirect_API -->|Set Browser Context Tracking Cookie| User
@@ -80,7 +80,7 @@ To protect domain reputation and maximize deliverability, the app decouples trac
 
 ### 1. Shortlink Rewriting & Edge Middleware
 * **Decoupled DNS Setup**: Subdomain `links.deepanshulathar.dev` has a `CNAME` pointing to `cname.vercel-dns.com` in your DNS registrar.
-* **Next.js Middleware Redirection**: [middleware.ts](file:///g:/gapl/src/middleware.ts) intercepts requests to any host starting with `links.` and rewrites the request internally to `/api/t/[id]`, preventing page reloads or client-side latency.
+* **Next.js Proxy Redirection**: `src/proxy.ts` (the `proxy` file convention, renamed from middleware in Next.js 16) intercepts requests to any host starting with `links.` and rewrites the request internally to `/api/t/[id]`, preventing page reloads or client-side latency.
 * **User Telemetry Tracking**: On redirect, the system logs the recipient's geographic country, browser type, operating system, and IP address, and places a long-lived browser tracking cookie to monitor returning traffic.
 * **30-Day Last-Touch Attribution**: On critical actions (e.g. paying, creating a report), the system queries the candidate's clicks in the past 30 days and stamps the matching `campaignId` and `emailId` on the document for revenue attribution.
 

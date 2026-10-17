@@ -4,6 +4,32 @@ import { sendEmail } from "@/lib/resend";
 
 export const runtime = "nodejs";
 
+// Shape of the AI-generated CV JSON (see the schema in cv-builder/route.ts).
+interface CvExperienceItem {
+  role: string;
+  duration: string;
+  company: string;
+  location: string;
+  bullets: string[];
+}
+
+interface CvSkillItem {
+  category: string;
+  items: string;
+}
+
+interface CvProjectItem {
+  name: string;
+  description: string;
+}
+
+interface CvEducationItem {
+  degree: string;
+  year: string;
+  institution: string;
+  coursework?: string;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const userOrError = await requireUser(req);
@@ -41,7 +67,7 @@ export async function POST(req: NextRequest) {
         ${cv.experience && cv.experience.length > 0 ? `
           <div style="margin-bottom: 16px;">
             <h3 style="font-size: 11pt; font-weight: bold; border-bottom: 1px solid #111111; text-transform: uppercase; margin: 0 0 6px 0; padding-bottom: 2px; letter-spacing: 0.05em;">Experience</h3>
-            ${cv.experience.map((exp: any) => `
+            ${cv.experience.map((exp: CvExperienceItem) => `
               <div style="margin-bottom: 10px; font-size: 10pt;">
                 <div style="display: flex; justify-content: space-between; font-weight: bold;">
                   <span>${exp.role}</span>
@@ -67,7 +93,7 @@ export async function POST(req: NextRequest) {
             <h3 style="font-size: 11pt; font-weight: bold; border-bottom: 1px solid #111111; text-transform: uppercase; margin: 0 0 6px 0; padding-bottom: 2px; letter-spacing: 0.05em;">Skills</h3>
             <table style="width: 100%; font-size: 10pt; border-collapse: collapse;">
               <tbody>
-                ${cv.skills.map((skill: any) => `
+                ${cv.skills.map((skill: CvSkillItem) => `
                   <tr>
                     <td style="font-weight: bold; padding-bottom: 4px; vertical-align: top; width: 140px;">${skill.category}</td>
                     <td style="padding-bottom: 4px; color: #222222;">${skill.items}</td>
@@ -83,7 +109,7 @@ export async function POST(req: NextRequest) {
           <div style="margin-bottom: 16px;">
             <h3 style="font-size: 11pt; font-weight: bold; border-bottom: 1px solid #111111; text-transform: uppercase; margin: 0 0 6px 0; padding-bottom: 2px; letter-spacing: 0.05em;">Projects</h3>
             <ul style="margin: 0; padding: 0; list-style: none;">
-              ${cv.projects.map((proj: any) => `
+              ${cv.projects.map((proj: CvProjectItem) => `
                 <li style="margin-bottom: 6px; font-size: 10pt; text-align: justify;">
                   <strong style="font-weight: bold;">${proj.name}</strong> &ndash; 
                   <span style="color: #222222;">${proj.description}</span>
@@ -97,7 +123,7 @@ export async function POST(req: NextRequest) {
         ${cv.education && cv.education.length > 0 ? `
           <div style="margin-bottom: 16px;">
             <h3 style="font-size: 11pt; font-weight: bold; border-bottom: 1px solid #111111; text-transform: uppercase; margin: 0 0 6px 0; padding-bottom: 2px; letter-spacing: 0.05em;">Education</h3>
-            ${cv.education.map((ed: any) => `
+            ${cv.education.map((ed: CvEducationItem) => `
               <div style="margin-bottom: 8px; font-size: 10pt;">
                 <div style="display: flex; justify-content: space-between; font-weight: bold;">
                   <span>${ed.degree}</span>
@@ -177,8 +203,8 @@ export async function POST(req: NextRequest) {
     const remaining = MAX_SENDS - newCount;
 
     return NextResponse.json({ success: true, remaining, total: MAX_SENDS, sent: newCount });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Failed to email CV:", err);
-    return NextResponse.json({ error: err.message || "Failed to send email." }, { status: 500 });
+    return NextResponse.json({ error: err instanceof Error ? err.message : "Failed to send email." }, { status: 500 });
   }
 }

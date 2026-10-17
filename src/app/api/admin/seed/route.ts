@@ -132,8 +132,9 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ success: true, message: "Database seeded successfully!" });
-  } catch (err: any) {
+  } catch (err) {
     console.error("Seeding failed:", err);
-    return NextResponse.json({ error: err?.message || "Seeding failed." }, { status: 500 });
+    const message = err instanceof Error && err.message ? err.message : "Seeding failed.";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

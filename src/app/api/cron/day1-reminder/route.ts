@@ -1,13 +1,36 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isAuthorizedCron } from "@/lib/cron-auth";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { sendDay1ReminderEmail } from "@/lib/email-service";
 
 export const runtime = "nodejs";
 
+interface Day1CareerGap {
+  gapName?: string;
+  recommendedProject?: string;
+}
+
+interface Day1ReportDoc {
+  id: string;
+  userId?: string;
+  createdAtIso?: string;
+  createdAt?: unknown;
+  careerGaps?: Day1CareerGap[];
+}
+
+// Firestore stores createdAt either as an ISO string or as a Timestamp-like
+// object with a toDate() method. Preserve the original truthiness semantics.
+function firestoreTimestampToDate(value: unknown): Date | null {
+  if (!value) return null;
+  if (typeof value === "object" && typeof (value as { toDate?: unknown }).toDate === "function") {
+    return (value as { toDate: () => Date }).toDate();
+  }
+  return new Date(value as string | number | Date);
+}
+
 export async function GET(req: NextRequest) {
   // Cron authorization check for production
-  const authHeader = req.headers.get("authorization");
-  if (process.env.NODE_ENV === "production" && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!isAuthorizedCron(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -22,16 +45,10 @@ export async function GET(req: NextRequest) {
     const reports = reportsSnap.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
-    })) as any[];
+    })) as Day1ReportDoc[];
 
     const candidateReports = reports.filter((r) => {
-      const created = r.createdAtIso
-        ? new Date(r.createdAtIso)
-        : r.createdAt
-        ? typeof r.createdAt.toDate === "function"
-          ? r.createdAt.toDate()
-          : new Date(r.createdAt)
-        : null;
+      const created = r.createdAtIso ? new Date(r.createdAtIso) : firestoreTimestampToDate(r.createdAt);
       return created && created >= fortyEightHoursAgo && created <= twentyFourHoursAgo;
     });
 
@@ -83,8 +100,8 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.json({ success: true, processed: candidateReports.length, sent: sentCount });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Day 1 Reminder Cron failed:", err);
-    return NextResponse.json({ error: err.message || "Cron failed" }, { status: 500 });
+    return NextResponse.json({ error: err instanceof Error ? err.message : "Cron failed" }, { status: 500 });
   }
 }

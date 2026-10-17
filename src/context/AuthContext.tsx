@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { type User } from "firebase/auth";
-import { auth, onAuthChange, createUserDocument, db } from "@/lib/firebase";
+import { onAuthChange, createUserDocument, getClientDb } from "@/lib/firebase";
 import { doc, onSnapshot } from "firebase/firestore";
 
 interface AuthUser extends User {
@@ -53,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         // Set up real-time listener for the user document
-        const userRef = doc(db, "users", firebaseUser.uid);
+        const userRef = doc(getClientDb(), "users", firebaseUser.uid);
         unsubscribeDoc = onSnapshot(
           userRef,
           (snapshot) => {

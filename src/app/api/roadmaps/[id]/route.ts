@@ -3,6 +3,10 @@ import { getAdminDb, requireUser } from "@/lib/firebase-admin";
 
 export const runtime = "nodejs";
 
+interface RoadmapCareerGap {
+  expectedReadinessAfter?: number;
+}
+
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -41,7 +45,7 @@ export async function GET(
   // Initialize roadmap document
   const careerGaps = report.careerGaps || [];
   const targetReadiness = careerGaps.length > 0
-    ? Math.max(...careerGaps.map((g: any) => g.expectedReadinessAfter || 85), report.readiness || 85)
+    ? Math.max(...careerGaps.map((g: RoadmapCareerGap) => g.expectedReadinessAfter || 85), report.readiness || 85)
     : Math.max(report.readiness || 85, 85);
 
   const initialRoadmap = {
@@ -92,7 +96,13 @@ export async function PATCH(
     const sentMilestones = currentData.sentMilestones || [];
 
     const newPct = typeof completionPercentage === "number" ? completionPercentage : 0;
-    const updateData: Record<string, any> = {
+    const updateData: {
+      completedTasks: unknown[];
+      completionPercentage: number;
+      currentReadiness: number;
+      updatedAt: string;
+      sentMilestones?: number[];
+    } = {
       completedTasks,
       completionPercentage: newPct,
       currentReadiness: typeof currentReadiness === "number" ? currentReadiness : 65,
@@ -123,8 +133,8 @@ export async function PATCH(
     await roadmapDocRef.update(updateData);
 
     return NextResponse.json({ success: true });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Error updating roadmap:", err);
-    return NextResponse.json({ error: err.message || "Failed to update roadmap." }, { status: 500 });
+    return NextResponse.json({ error: err instanceof Error ? err.message : "Failed to update roadmap." }, { status: 500 });
   }
 }

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { FieldValue } from "firebase-admin/firestore";
 
@@ -69,58 +69,61 @@ export async function GET(
 
     const timestamp = new Date().toISOString();
 
-    // 3. Perform Firestore Transactions Asynchronously (Avoid blocking redirect latency)
-    // Update tracking stats
-    docRef.update({
-      clickCount: FieldValue.increment(1),
-      uniqueClicks: isUnique ? FieldValue.increment(1) : FieldValue.increment(0),
-      firstClickedAt: data.firstClickedAt || timestamp,
-      lastClickedAt: timestamp,
-    }).catch(console.error);
-
-    // If linked to an email, update the corresponding message doc
-    if (emailId && emailId !== "custom_email" && emailId !== "none") {
-      const msgRef = db.collection("email_messages").doc(emailId);
-      msgRef.get().then((msgSnap) => {
-        if (msgSnap.exists) {
-          msgRef.update({
-            status: "clicked",
-            clickedAt: timestamp,
-            firstVisitAt: msgSnap.data()?.firstVisitAt || timestamp,
-          }).catch(console.error);
-        }
-      }).catch(console.error);
-    }
-
-    // Add to email_events log
+    // 3. Record the click after the redirect is sent. after() keeps the
+    // serverless function alive until these writes settle, so they aren't dropped.
+    const ip = req.headers.get("x-forwarded-for") || "unknown";
     const eventType = isUnique ? "email_clicked" : "link_revisited";
-    const eventRef = db.collection("email_events").doc();
-    eventRef.set({
-      id: eventRef.id,
-      emailId,
-      userId,
-      type: eventType,
-      timestamp,
-      metadata: {
-        ip: req.headers.get("x-forwarded-for") || "unknown",
-        userAgent: ua,
-        device,
-        browser,
-        os,
-        country,
-        referrer,
-      },
-    }).catch(console.error);
+    after(async () => {
+      const writes: Promise<unknown>[] = [
+        docRef.update({
+          clickCount: FieldValue.increment(1),
+          uniqueClicks: isUnique ? FieldValue.increment(1) : FieldValue.increment(0),
+          firstClickedAt: data.firstClickedAt || timestamp,
+          lastClickedAt: timestamp,
+        }),
+        (async () => {
+          const eventRef = db.collection("email_events").doc();
+          await eventRef.set({
+            id: eventRef.id,
+            emailId,
+            userId,
+            type: eventType,
+            timestamp,
+            metadata: { ip, userAgent: ua, device, browser, os, country, referrer },
+          });
+        })(),
+        db.collection("analytics_events").add({
+          event: eventType,
+          linkId: id,
+          campaignId,
+          emailId,
+          userId,
+          timestamp,
+        }),
+      ];
 
-    // Also add to global analytics_events log for funnel metrics
-    db.collection("analytics_events").add({
-      event: eventType,
-      linkId: id,
-      campaignId,
-      emailId,
-      userId,
-      timestamp,
-    }).catch(console.error);
+      // If linked to an email, update the corresponding message doc
+      if (emailId && emailId !== "custom_email" && emailId !== "none") {
+        writes.push(
+          (async () => {
+            const msgRef = db.collection("email_messages").doc(emailId);
+            const msgSnap = await msgRef.get();
+            if (msgSnap.exists) {
+              await msgRef.update({
+                status: "clicked",
+                clickedAt: timestamp,
+                firstVisitAt: msgSnap.data()?.firstVisitAt || timestamp,
+              });
+            }
+          })()
+        );
+      }
+
+      const results = await Promise.allSettled(writes);
+      results.forEach((r) => {
+        if (r.status === "rejected") console.error("Click tracking write failed:", r.reason);
+      });
+    });
 
     // 4. Set Cookie and Redirect
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.in";

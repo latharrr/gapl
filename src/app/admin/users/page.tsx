@@ -4,10 +4,8 @@ import { LoadingChart } from "@/components/ui/Sheet";
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { Card } from "@/components/ui/Card";
 import { adminFetch } from "@/lib/admin-fetch";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
 import {
   Search,
@@ -21,9 +19,33 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
+interface AdminUserDoc {
+  uid: string;
+  displayName?: string;
+  email?: string;
+  role?: string;
+  plan?: string;
+  analysisCount?: number;
+  suspended?: boolean;
+}
+
+interface TimelineItem {
+  type: string;
+  title: string;
+  description: string;
+  timestamp: string;
+  meta?: string;
+}
+
+type HandleUserAction = (
+  action: string,
+  targetUid: string,
+  extraData?: Record<string, string | boolean>
+) => Promise<void>;
+
 export default function AdminUsersPage() {
   const { user, userDoc } = useAuth();
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<AdminUserDoc[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   
@@ -33,7 +55,7 @@ export default function AdminUsersPage() {
   const [planFilter, setPlanFilter] = useState("all");
 
   // Selected User for edit dialog
-  const [selectedUser, setSelectedUser] = useState<any | null>(null);
+  const [selectedUser, setSelectedUser] = useState<AdminUserDoc | null>(null);
   const [updatingUser, setUpdatingUser] = useState(false);
   const [actionError, setActionError] = useState("");
 
@@ -48,18 +70,37 @@ export default function AdminUsersPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to load users");
       setUsers(data.users || []);
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : String(e));
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchUsers();
+    let cancelled = false;
+    const run = async () => {
+      if (!user) return;
+      setLoading(true);
+      setError("");
+      try {
+        const res = await adminFetch("/api/admin/users");
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Failed to load users");
+        if (!cancelled) setUsers(data.users || []);
+      } catch (e: unknown) {
+        if (!cancelled) setError(e instanceof Error ? e.message : String(e));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
   }, [user]);
 
-  const handleAction = async (action: string, targetUid: string, extraData?: any) => {
+  const handleAction: HandleUserAction = async (action, targetUid, extraData) => {
     if (!user) return;
     setUpdatingUser(true);
     setActionError("");
@@ -81,8 +122,8 @@ export default function AdminUsersPage() {
       // Update state locally
       await fetchUsers();
       setSelectedUser(null);
-    } catch (e: any) {
-      setActionError(e.message);
+    } catch (e: unknown) {
+      setActionError(e instanceof Error ? e.message : String(e));
     } finally {
       setUpdatingUser(false);
     }
@@ -282,14 +323,14 @@ function UserDetailDrawer({
   handleAction,
   onClose,
 }: {
-  selectedUser: any;
+  selectedUser: AdminUserDoc;
   isSuperAdmin: boolean;
   updatingUser: boolean;
   actionError: string;
-  handleAction: any;
+  handleAction: HandleUserAction;
   onClose: () => void;
 }) {
-  const [timeline, setTimeline] = useState<any[]>([]);
+  const [timeline, setTimeline] = useState<TimelineItem[]>([]);
   const [loadingTimeline, setLoadingTimeline] = useState(true);
 
   // Send Email state
@@ -300,7 +341,6 @@ function UserDetailDrawer({
   const [emailError, setEmailError] = useState("");
   const [emailSentCount, setEmailSentCount] = useState<number | null>(null);
   const [justSent, setJustSent] = useState(false);
-  const EMAIL_LIMIT = 5;
 
   useEffect(() => {
     const fetchTimeline = async () => {
@@ -330,10 +370,13 @@ function UserDetailDrawer({
     fetchEmailCount();
 
     // Reset email form when user changes
-    setEmailSubject("");
-    setEmailMessage("");
-    setEmailError("");
-    setJustSent(false);
+    const resetEmailForm = async () => {
+      setEmailSubject("");
+      setEmailMessage("");
+      setEmailError("");
+      setJustSent(false);
+    };
+    resetEmailForm();
   }, [selectedUser]);
 
   const handleRewriteEmail = async () => {
@@ -349,8 +392,8 @@ function UserDetailDrawer({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Rewrite failed");
       setEmailMessage(data.rewritten);
-    } catch (e: any) {
-      setEmailError(e.message);
+    } catch (e: unknown) {
+      setEmailError(e instanceof Error ? e.message : String(e));
     } finally {
       setRewritingEmail(false);
     }
@@ -379,8 +422,8 @@ function UserDetailDrawer({
       if (!res.ok) throw new Error(data.error || "Failed to send email");
       setEmailSentCount(data.adminEmailCount ?? (emailSentCount ?? 0) + 1);
       setJustSent(true);
-    } catch (e: any) {
-      setEmailError(e.message);
+    } catch (e: unknown) {
+      setEmailError(e instanceof Error ? e.message : String(e));
     } finally {
       setSendingEmail(false);
     }
