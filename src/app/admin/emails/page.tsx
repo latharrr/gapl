@@ -8,7 +8,6 @@ import { adminFetch } from "@/lib/admin-fetch";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import {
-  Mail,
   Send,
   CheckCircle,
   Eye,
@@ -23,9 +22,70 @@ import {
   Zap,
 } from "lucide-react";
 
+interface EmailOverview {
+  sent?: number;
+  delivered?: number;
+  deliveryRate?: number;
+  opened?: number;
+  openRate?: number;
+  clicked?: number;
+  ctr?: number;
+  bounced?: number;
+  bounceRate?: number;
+  revenueGenerated?: number;
+}
+
+interface EmailFunnelStep {
+  name: string;
+  value: number;
+}
+
+interface EmailCampaign {
+  id: string;
+  name?: string;
+  subject?: string;
+  sent?: number;
+  openRate?: number | string;
+  ctr?: number | string;
+  reports?: number;
+  payments?: number;
+  revenue?: number;
+}
+
+interface EmailMessage {
+  id: string;
+  email?: string;
+  userId?: string;
+  campaignId: string;
+  status: string;
+  score?: number;
+  scoreLabel?: string;
+  hasConverted?: boolean;
+  updatedAt?: string;
+  sentAt?: string;
+}
+
+interface EmailsData {
+  overview?: EmailOverview;
+  funnel?: EmailFunnelStep[];
+  campaigns?: EmailCampaign[];
+  messages?: EmailMessage[];
+}
+
+interface EmailsResponse extends EmailsData {
+  error?: string;
+}
+
+async function loadEmailMetrics(): Promise<EmailsResponse> {
+  const res = await adminFetch("/api/admin/emails");
+  const json: EmailsResponse = await res.json();
+  if (!res.ok) throw new Error(json.error || "Failed to load metrics");
+  return json;
+}
+
 export default function AdminEmailsPage() {
   const { user } = useAuth();
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<EmailsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [refreshing, setRefreshing] = useState(false);
@@ -52,8 +112,8 @@ export default function AdminEmailsPage() {
       if (!res.ok) throw new Error(json.error || "Failed to rewrite message");
       setEmailMessage(json.rewritten);
       setSendSuccessMsg("");
-    } catch (err: any) {
-      setSendError(err.message);
+    } catch (err: unknown) {
+      setSendError(err instanceof Error ? err.message : String(err));
     } finally {
       setAiRewriting(false);
     }
@@ -88,8 +148,8 @@ export default function AdminEmailsPage() {
       
       // Auto refresh the logs list to show the new manual email dispatch
       fetchMetrics(true);
-    } catch (err: any) {
-      setSendError(err.message);
+    } catch (err: unknown) {
+      setSendError(err instanceof Error ? err.message : String(err));
     } finally {
       setSendingEmail(false);
     }
@@ -100,12 +160,9 @@ export default function AdminEmailsPage() {
     if (!isSilent) setLoading(true);
     setError("");
     try {
-      const res = await adminFetch("/api/admin/emails");
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Failed to load metrics");
-      setData(json);
-    } catch (err: any) {
-      setError(err.message);
+      setData(await loadEmailMetrics());
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -113,7 +170,27 @@ export default function AdminEmailsPage() {
   };
 
   useEffect(() => {
-    fetchMetrics();
+    let cancelled = false;
+    const run = async () => {
+      if (!user) return;
+      setLoading(true);
+      setError("");
+      try {
+        const result = await loadEmailMetrics();
+        if (!cancelled) setData(result);
+      } catch (err: unknown) {
+        if (!cancelled) setError(err instanceof Error ? err.message : String(err));
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+          setRefreshing(false);
+        }
+      }
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
   }, [user]);
 
   const handleRefresh = () => {
@@ -144,7 +221,7 @@ export default function AdminEmailsPage() {
     );
   }
 
-  const { overview = {}, funnel = [], campaigns = [], messages = [] } = data || {};
+  const { overview = {}, funnel = [], campaigns = [], messages = [] } = data;
 
   const cardStats = [
     { label: "Emails Sent", value: overview.sent, sub: "Total dispatches", icon: Send, color: "text-primary-600" },
@@ -345,7 +422,7 @@ export default function AdminEmailsPage() {
           <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">Attributed Conversion Funnel</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-7 gap-4 items-center">
-          {funnel.map((step: any, index: number) => {
+          {funnel.map((step: EmailFunnelStep, index: number) => {
             const nextStep = funnel[index + 1];
             const pct = nextStep && step.value > 0 ? ((nextStep.value / step.value) * 100).toFixed(0) : null;
             return (
@@ -393,7 +470,7 @@ export default function AdminEmailsPage() {
                   </td>
                 </tr>
               ) : (
-                campaigns.map((camp: any) => (
+                campaigns.map((camp: EmailCampaign) => (
                   <tr key={camp.id} className="hover:bg-surface-muted transition-colors">
                     <td className="px-6 py-4">
                       <div className="font-semibold text-ink">{camp.name}</div>
@@ -443,8 +520,8 @@ export default function AdminEmailsPage() {
                   </td>
                 </tr>
               ) : (
-                messages.map((msg: any) => {
-                  const statusColors: any = {
+                messages.map((msg: EmailMessage) => {
+                  const statusColors: Record<string, "default" | "success" | "warning" | "danger" | "primary" | "outline"> = {
                     failed: "danger",
                     bounced: "danger",
                     complained: "danger",
@@ -470,7 +547,7 @@ export default function AdminEmailsPage() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-1.5">
-                          <span className={`text-xs font-bold ${msg.score >= 100 ? "text-primary-600" : msg.score >= 50 ? "text-success" : msg.score >= 20 ? "text-warning" : "text-ink-muted"}`}>
+                          <span className={`text-xs font-bold ${(msg.score ?? 0) >= 100 ? "text-primary-600" : (msg.score ?? 0) >= 50 ? "text-success" : (msg.score ?? 0) >= 20 ? "text-warning" : "text-ink-muted"}`}>
                             {msg.score}
                           </span>
                           <span className="text-[0.6875rem] text-ink-muted">({msg.scoreLabel})</span>
@@ -478,7 +555,7 @@ export default function AdminEmailsPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4 text-ink-muted">
-                        {msg.updatedAt ? new Date(msg.updatedAt).toLocaleString() : new Date(msg.sentAt).toLocaleString()}
+                        {msg.updatedAt ? new Date(msg.updatedAt).toLocaleString() : new Date(msg.sentAt ?? "").toLocaleString()}
                       </td>
                     </tr>
                   );

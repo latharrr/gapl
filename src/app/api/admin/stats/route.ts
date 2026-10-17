@@ -13,13 +13,8 @@ export async function GET(req: NextRequest) {
     // 1. Server-Side Aggregations (Cheap & Scalable!)
     const totalUsersCountSnap = await getCountFromServer(collection(db, "users"));
     const totalReportsCountSnap = await getCountFromServer(collection(db, "reports"));
-    const totalPaymentsCountSnap = await getCountFromServer(collection(db, "payments"));
-    const totalAICallsCountSnap = await getCountFromServer(collection(db, "ai_calls"));
-
     const totalUsers = totalUsersCountSnap.data().count;
     const totalReports = totalReportsCountSnap.data().count;
-    const totalPayments = totalPaymentsCountSnap.data().count;
-    const totalAICallsCount = totalAICallsCountSnap.data().count;
 
     // Fetch health status
     const healthSnap = await getDocs(collection(db, "provider_health"));
@@ -41,14 +36,14 @@ export async function GET(req: NextRequest) {
       getDocs(reportsQuery),
       getDocs(paymentsQuery),
       getDocs(aiCallsQuery),
-      getDocs(eventsQuery).catch(() => ({ docs: [] }) as any),
+      getDocs(eventsQuery).catch((): { docs: never[] } => ({ docs: [] })),
     ]);
 
-    const users = usersSnap.docs.map((d: any) => d.data() ?? {});
-    const reports = reportsSnap.docs.map((d: any) => d.data() ?? {});
-    const payments = paymentsSnap.docs.map((d: any) => d.data() ?? {});
-    const aiCalls = aiCallsSnap.docs.map((d: any) => d.data() ?? {});
-    const events = eventsSnap.docs ? eventsSnap.docs.map((d: any) => d.data() ?? {}) : [];
+    const users = usersSnap.docs.map((d) => d.data() ?? {});
+    const reports = reportsSnap.docs.map((d) => d.data() ?? {});
+    const payments = paymentsSnap.docs.map((d) => d.data() ?? {});
+    const aiCalls = aiCallsSnap.docs.map((d) => d.data() ?? {});
+    const events = eventsSnap.docs ? eventsSnap.docs.map((d) => d.data() ?? {}) : [];
 
     // 2. Calculations
     const activeUsers = users.filter((u) => u.suspended !== true).length + (totalUsers - users.length); // approximate active users based on recent delta
@@ -60,7 +55,6 @@ export async function GET(req: NextRequest) {
 
     // Payments calculations
     let totalRevenue = 0;
-    let failedPayments = 0;
     let refunds = 0;
     const planCounts: Record<string, number> = { free: 0, basic: 0, pro: 0, premium: 0 };
 
@@ -71,8 +65,6 @@ export async function GET(req: NextRequest) {
         } else {
           totalRevenue += p.amount;
         }
-      } else if (p.status === "failed") {
-        failedPayments++;
       }
     });
 
@@ -86,21 +78,15 @@ export async function GET(req: NextRequest) {
 
     // AI Costs
     let totalAICostToday = 0;
-    let totalRecentAICalls = aiCalls.length;
-    let failedAICalls = 0;
 
     aiCalls.forEach((call) => {
       const isToday = new Date(call.timestamp).toDateString() === new Date().toDateString();
       if (isToday) {
         totalAICostToday += call.cost || 0;
       }
-      if (call.status === "error") {
-        failedAICalls++;
-      }
     });
 
     // Error calculations
-    const promptFailureRate = totalRecentAICalls > 0 ? (failedAICalls / totalRecentAICalls) * 100 : 0;
     // Count actual processing errors (crashed/failed reports), NOT recruiter Reject verdicts
     const processingFailures = reports.filter((r) => r.status === "error" || r.status === "failed").length;
     const refundRate = totalRevenue > 0 ? (refunds / (totalRevenue + refunds)) * 100 : 0;
@@ -139,24 +125,24 @@ export async function GET(req: NextRequest) {
     const aiCostTrend = Object.entries(dailyAICost).map(([date, cost]) => ({ date, cost: parseFloat(cost.toFixed(3)) }));
 
     // Funnel Conversions (real activation events data)
-    const landingSessions = new Set(events.filter((e: any) => e.event === "landing_view").map((e: any) => e.sessionId || e.userId));
-    const signupUsers = new Set(events.filter((e: any) => e.event === "signup").map((e: any) => e.userId || e.sessionId));
-    const uploadUsers = new Set(events.filter((e: any) => e.event === "resume_uploaded").map((e: any) => e.userId || e.sessionId));
-    const jdSkippedUsers = new Set(events.filter((e: any) => e.event === "jd_skipped").map((e: any) => e.userId || e.sessionId));
-    const reportUsers = new Set(events.filter((e: any) => e.event === "analysis_completed").map((e: any) => e.userId || e.sessionId));
-    const failedUsers = new Set(events.filter((e: any) => e.event === "analysis_failed").map((e: any) => e.userId || e.sessionId));
-    const paymentUsers = new Set(events.filter((e: any) => e.event === "payment_success").map((e: any) => e.userId || e.sessionId));
+    const landingSessions = new Set(events.filter((e) => e.event === "landing_view").map((e) => e.sessionId || e.userId));
+    const signupUsers = new Set(events.filter((e) => e.event === "signup").map((e) => e.userId || e.sessionId));
+    const uploadUsers = new Set(events.filter((e) => e.event === "resume_uploaded").map((e) => e.userId || e.sessionId));
+    const jdSkippedUsers = new Set(events.filter((e) => e.event === "jd_skipped").map((e) => e.userId || e.sessionId));
+    const reportUsers = new Set(events.filter((e) => e.event === "analysis_completed").map((e) => e.userId || e.sessionId));
+    const failedUsers = new Set(events.filter((e) => e.event === "analysis_failed").map((e) => e.userId || e.sessionId));
+    const paymentUsers = new Set(events.filter((e) => e.event === "payment_success").map((e) => e.userId || e.sessionId));
 
     // Return users: active on more than 1 distinct calendar day
     const userActivityDays: Record<string, Set<string>> = {};
-    events.forEach((e: any) => {
+    events.forEach((e) => {
       const id = e.userId !== "anonymous" ? e.userId : e.sessionId;
       if (!id || id === "unknown") return;
       if (!userActivityDays[id]) userActivityDays[id] = new Set();
       const dateStr = e.timestamp ? new Date(e.timestamp).toDateString() : new Date().toDateString();
       userActivityDays[id].add(dateStr);
     });
-    const returnUsers = Object.entries(userActivityDays).filter(([_, days]) => days.size >= 2).map(([id]) => id);
+    const returnUsers = Object.entries(userActivityDays).filter(([, days]) => days.size >= 2).map(([id]) => id);
 
     const conversionFunnel = [
       { name: "Landing View", value: landingSessions.size },
@@ -224,7 +210,7 @@ export async function GET(req: NextRequest) {
         storageCostPerReport = costsData?.storageCostPerReport || 0;
         hostingCostPerReport = costsData?.hostingCostPerReport || 0;
       }
-    } catch (_) { /* costs settings doc not found — use zero defaults */ }
+    } catch { /* costs settings doc not found — use zero defaults */ }
 
     const storageCost = totalReports * storageCostPerReport;
     const netProfit = totalRevenue - totalAICost - storageCost - infrastructureCost;
@@ -257,7 +243,8 @@ export async function GET(req: NextRequest) {
     // Skill gaps aggregated from real reports (last 30 days)
     const skillGapMap: Record<string, number> = {};
     reports.forEach((r) => {
-      const gaps = r.missingSkills || r.careerGaps?.map((g: any) => g.skill) || [];
+      const careerGaps = r.careerGaps as Array<{ skill: string }> | undefined;
+      const gaps: string[] = r.missingSkills || careerGaps?.map((g) => g.skill) || [];
       gaps.forEach((s: string) => {
         skillGapMap[s] = (skillGapMap[s] || 0) + 1;
       });
@@ -281,7 +268,7 @@ export async function GET(req: NextRequest) {
           if (p.status !== "captured" || p.refunded) return false;
           const d = p.createdAt?.toDate ? p.createdAt.toDate() : new Date(p.createdAt || 0);
           return d.toDateString() === new Date().toDateString();
-        }).reduce((acc: number, p: any) => acc + (p.amount || 0), 0) - totalAICostToday).toFixed(2)),
+        }).reduce((acc: number, p) => acc + (p.amount || 0), 0) - totalAICostToday).toFixed(2)),
         conversionRate: parseFloat(conversionRate.toFixed(1)),
         refundRate: parseFloat(refundRate.toFixed(1)),
         processingFailures,
@@ -296,7 +283,8 @@ export async function GET(req: NextRequest) {
       providerHealth,
       costStats,
     });
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || "Internal server error" }, { status: 500 });
+  } catch (err) {
+    const message = err instanceof Error && err.message ? err.message : "Internal server error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

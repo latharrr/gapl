@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -20,8 +20,12 @@ export function Navbar() {
   const pathname = usePathname();
   const { user, loading } = useAuth();
 
-  // Close mobile menu on route change
-  useEffect(() => setMobileOpen(false), [pathname]);
+  // Close mobile menu on route change — adjust state during render, no effect.
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname);
+    setMobileOpen(false);
+  }
 
   return (
     <>

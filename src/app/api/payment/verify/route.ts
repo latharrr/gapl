@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
         user.email,
         paymentId,
         verifiedPlan,
-        PLAN_PRICES_INR[verifiedPlan as any] || 0
+        PLAN_PRICES_INR[verifiedPlan] || 0
       ).catch((err) => console.error("Failed to send Payment Success email:", err));
     }
 

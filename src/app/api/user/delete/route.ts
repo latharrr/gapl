@@ -20,10 +20,10 @@ export async function DELETE(req: NextRequest) {
       deleted: true,
       collections: collectionsDeleted,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Failed to delete user account for", user.uid, err);
     return NextResponse.json(
-      { error: err?.message || "Failed to delete account." },
+      { error: err instanceof Error ? err.message : "Failed to delete account." },
       { status: 500 }
     );
   }

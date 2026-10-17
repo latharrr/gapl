@@ -27,10 +27,11 @@ ${message}`;
     });
 
     return NextResponse.json({ rewritten: aiRes.text.trim() });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("AI Rewrite Failed:", err);
+    const message = err instanceof Error ? err.message : undefined;
     return NextResponse.json(
-      { error: err.message || "Failed to rewrite message with AI." },
+      { error: message || "Failed to rewrite message with AI." },
       { status: 500 }
     );
   }

@@ -11,7 +11,6 @@ import { PLAN_LIMITS } from "@/lib/plans";
 import { useAuth } from "@/context/AuthContext";
 import { authFetch } from "@/lib/auth-fetch";
 import {
-  Check,
   Upload,
   FileText,
   ChevronRight,
@@ -25,20 +24,6 @@ import { StepRoute } from "@/components/brand/StepRoute";
 import { DepartureBoard } from "@/components/brand/DepartureBoard";
 import { OptionList } from "@/components/ui/Choice";
 import { ROLES, TIERS } from "@/lib/targets";
-
-// ── Client-side resume content check (mirrors backend heuristic) ──────────────
-const RESUME_SIGNALS = [
-  "experience", "education", "skills", "projects", "work experience",
-  "internship", "objective", "summary", "achievements", "certifications",
-  "curriculum vitae", "resume", "cgpa", "gpa", "b.tech", "b.e.", "b.sc",
-  "m.tech", "bachelor", "master", "degree", "university", "college",
-  "linkedin", "github",
-];
-
-function looksLikeResume(text: string): boolean {
-  const lower = text.toLowerCase();
-  return RESUME_SIGNALS.filter((s) => lower.includes(s)).length >= 3;
-}
 
 function currentUsageMonth(): string {
   const now = new Date();

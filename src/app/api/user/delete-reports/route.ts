@@ -17,10 +17,10 @@ export async function DELETE(req: NextRequest) {
       deleted: true,
       collections: collectionsDeleted,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Failed to delete user reports for", user.uid, err);
     return NextResponse.json(
-      { error: err?.message || "Failed to delete reports." },
+      { error: err instanceof Error ? err.message : "Failed to delete reports." },
       { status: 500 }
     );
   }

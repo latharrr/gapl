@@ -4,47 +4,58 @@ import { LoadingChart } from "@/components/ui/Sheet";
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { Card } from "@/components/ui/Card";
 import { adminFetch } from "@/lib/admin-fetch";
-import { Badge } from "@/components/ui/Badge";
 import {
-  History,
   Search,
-  Shield,
-  Loader2,
-  Calendar,
-  Info,
 } from "lucide-react";
+
+interface AuditLog {
+  id: string;
+  timestamp: string;
+  adminEmail?: string;
+  adminRole?: string;
+  action?: string;
+  targetUser?: string;
+  details?: string;
+}
+
+interface AuditLogsResponse {
+  logs?: AuditLog[];
+  error?: string;
+}
 
 export default function AdminAuditPage() {
   const { user } = useAuth();
-  const [logs, setLogs] = useState<any[]>([]);
+  const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
 
-  const fetchLogs = async () => {
-    if (!user) return;
-    setLoading(true);
-    setError("");
-    try {
-      const res = await adminFetch("/api/admin/audit-logs");
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to load audit logs");
-      
-      const sorted = (data.logs || []).sort(
-        (a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-      );
-      setLogs(sorted);
-    } catch (e: any) {
-      setError(e.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchLogs();
+    let cancelled = false;
+    const run = async () => {
+      if (!user) return;
+      setLoading(true);
+      setError("");
+      try {
+        const res = await adminFetch("/api/admin/audit-logs");
+        const data: AuditLogsResponse = await res.json();
+        if (!res.ok) throw new Error(data.error || "Failed to load audit logs");
+
+        const sorted = (data.logs || []).sort(
+          (a: AuditLog, b: AuditLog) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        );
+        if (!cancelled) setLogs(sorted);
+      } catch (e: unknown) {
+        if (!cancelled) setError(e instanceof Error ? e.message : String(e));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
   }, [user]);
 
   const filteredLogs = logs.filter((l) => {

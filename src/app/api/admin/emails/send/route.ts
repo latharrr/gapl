@@ -101,10 +101,11 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ success: true, messageId });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Admin send email failed:", err);
+    const message = err instanceof Error ? err.message : undefined;
     return NextResponse.json(
-      { error: err.message || "Failed to send email." },
+      { error: message || "Failed to send email." },
       { status: 500 }
     );
   }

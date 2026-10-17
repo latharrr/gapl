@@ -24,8 +24,8 @@ export default function SettingsPage() {
       await updateUserProfile(name.trim());
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
-    } catch (e: any) {
-      setError(e?.message || "Failed to update profile changes.");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to update profile changes.");
     } finally {
       setSaving(false);
     }
@@ -54,8 +54,8 @@ export default function SettingsPage() {
       setReportsSuccess(true);
       setShowDeleteReportsConfirm(false);
       setTimeout(() => setReportsSuccess(false), 4000);
-    } catch (e: any) {
-      setError(e?.message || "Failed to delete reports.");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to delete reports.");
     } finally {
       setDeletingReports(false);
     }
@@ -75,8 +75,8 @@ export default function SettingsPage() {
       }
       await logOut();
       window.location.href = "/";
-    } catch (e: any) {
-      setError(e?.message || "Failed to delete account.");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to delete account.");
     } finally {
       setDeletingAccount(false);
     }

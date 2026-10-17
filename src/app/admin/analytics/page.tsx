@@ -7,41 +7,100 @@ import { useAuth } from "@/context/AuthContext";
 import { Card } from "@/components/ui/Card";
 import { adminFetch } from "@/lib/admin-fetch";
 import { Progress } from "@/components/ui/Progress";
-import { Badge } from "@/components/ui/Badge";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
-import {
-  TrendingUp,
-  Award,
-  Users,
-  Compass,
-  Loader2,
-  CheckCircle,
-} from "lucide-react";
+
+interface FunnelStep {
+  name: string;
+  value: number;
+}
+
+interface SkillGap {
+  skill: string;
+  count: number;
+}
+
+interface UnitEconomics {
+  revenuePerReport?: number | string;
+  aiCostPerReport?: number | string;
+  pdfCostPerReport?: number | string;
+  storageCostPerReport?: number | string;
+  hostingCostPerReport?: number | string;
+  profitPerReport?: number | string;
+}
+
+interface Profitability {
+  revenue: number;
+  aiCost: number;
+  storageCost: number;
+  infrastructureCost: number;
+  profit: number;
+  margin: number;
+  unitEconomics?: UnitEconomics;
+}
+
+interface CostTaskEntry {
+  name: string;
+  cost: number;
+}
+
+interface CostUserEntry {
+  email: string;
+  cost: number;
+}
+
+interface CostPromptEntry {
+  task: string;
+  cost: number;
+}
+
+interface CostStats {
+  profitability?: Profitability;
+  costByTask?: CostTaskEntry[];
+  topExpensiveUsers?: CostUserEntry[];
+  topExpensivePrompts?: CostPromptEntry[];
+}
+
+interface AnalyticsCharts {
+  conversionFunnel?: FunnelStep[];
+  commonSkillGaps?: SkillGap[];
+}
+
+interface AnalyticsStats {
+  charts: AnalyticsCharts;
+  costStats?: CostStats;
+}
+
+interface AnalyticsResponse extends AnalyticsStats {
+  error?: string;
+}
 
 export default function AdminAnalyticsPage() {
   const { user } = useAuth();
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<AnalyticsStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const fetchStats = async () => {
-    if (!user) return;
-    setLoading(true);
-    setError("");
-    try {
-      const res = await adminFetch("/api/admin/stats");
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to load analytics");
-      setStats(data);
-    } catch (e: any) {
-      setError(e.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchStats();
+    let cancelled = false;
+    const run = async () => {
+      if (!user) return;
+      setLoading(true);
+      setError("");
+      try {
+        const res = await adminFetch("/api/admin/stats");
+        const data: AnalyticsResponse = await res.json();
+        if (!res.ok) throw new Error(data.error || "Failed to load analytics");
+        if (!cancelled) setStats(data);
+      } catch (e: unknown) {
+        if (!cancelled) setError(e instanceof Error ? e.message : String(e));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
   }, [user]);
 
   if (loading) {
@@ -157,7 +216,7 @@ export default function AdminAnalyticsPage() {
             <p className="text-[0.6875rem] text-ink-muted">Weekly aggregate onboarding milestones</p>
           </div>
           <div className="space-y-4">
-            {charts?.conversionFunnel?.map((f: any, idx: number, arr: any[]) => {
+            {charts?.conversionFunnel?.map((f: FunnelStep, idx: number, arr: FunnelStep[]) => {
               const baseValue = arr[0]?.value || 1;
               const pct = baseValue > 0 ? Math.round((f.value / baseValue) * 100) : 0;
               return (
@@ -227,7 +286,7 @@ export default function AdminAnalyticsPage() {
             <p className="text-[0.6875rem] text-ink-muted">Total gateway API costs incurred by user profiles</p>
           </div>
           <div className="space-y-2.5 max-h-72 overflow-y-auto">
-            {costStats?.topExpensiveUsers?.map((u: any, idx: number) => (
+            {costStats?.topExpensiveUsers?.map((u: CostUserEntry, idx: number) => (
               <div key={idx} className="flex justify-between items-center text-xs p-2.5 bg-surface-muted border border-border-DEFAULT rounded-[6px]">
                 <span className="text-ink-muted font-mono truncate max-w-[200px]">{u.email}</span>
                 <span className="font-mono text-danger font-bold">${u.cost}</span>
@@ -243,7 +302,7 @@ export default function AdminAnalyticsPage() {
             <p className="text-[0.6875rem] text-ink-muted">Ranking tasks consuming the largest token budgets</p>
           </div>
           <div className="space-y-2.5 max-h-72 overflow-y-auto">
-            {costStats?.topExpensivePrompts?.map((p: any, idx: number) => (
+            {costStats?.topExpensivePrompts?.map((p: CostPromptEntry, idx: number) => (
               <div key={idx} className="flex justify-between items-center text-xs p-2.5 bg-surface-muted border border-border-DEFAULT rounded-[6px]">
                 <span className="text-ink font-semibold capitalize">{p.task.replace("-", " ")}</span>
                 <span className="font-mono text-danger font-bold">${p.cost}</span>

@@ -9,16 +9,21 @@ import { adminFetch } from "@/lib/admin-fetch";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import {
-  Activity,
-  CheckCircle,
-  AlertTriangle,
-  RotateCcw,
-  Loader2,
-  Database,
-  Cloud,
   Cpu,
-  Server,
 } from "lucide-react";
+
+interface ProviderHealth {
+  provider?: string;
+  uptime: number | null;
+  requests: number;
+  totalLatency: number;
+}
+
+async function loadProviderHealth(): Promise<ProviderHealth[] | null> {
+  const res = await adminFetch("/api/admin/stats");
+  const data: { providerHealth?: ProviderHealth[] } = res.ok ? await res.json() : null;
+  return data?.providerHealth ?? null;
+}
 
 const PROVIDERS_LIST = [
   { key: "groq", name: "Groq API" },
@@ -34,17 +39,16 @@ export default function AdminHealthPage() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [pinging, setPinging] = useState(false);
-  const [healthData, setHealthData] = useState<any[]>([]);
+  const [healthData, setHealthData] = useState<ProviderHealth[]>([]);
 
   const fetchHealth = async () => {
     if (!user) return;
     try {
-      const res = await adminFetch("/api/admin/stats");
-      const data = await res.ok ? await res.json() : null;
-      if (data && data.providerHealth) {
-        setHealthData(data.providerHealth);
+      const providers = await loadProviderHealth();
+      if (providers) {
+        setHealthData(providers);
       }
-    } catch (e) {
+    } catch (e: unknown) {
       console.error(e);
     } finally {
       setLoading(false);
@@ -52,7 +56,24 @@ export default function AdminHealthPage() {
   };
 
   useEffect(() => {
-    fetchHealth();
+    let cancelled = false;
+    const run = async () => {
+      if (!user) return;
+      try {
+        const providers = await loadProviderHealth();
+        if (!cancelled && providers) {
+          setHealthData(providers);
+        }
+      } catch (e: unknown) {
+        console.error(e);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
   }, [user]);
 
   const handlePingServices = async () => {

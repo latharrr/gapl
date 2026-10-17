@@ -58,9 +58,10 @@ export async function GET(req: NextRequest) {
       worstLinks,
       campaigns,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Failed to load admin links metrics:", err);
-    return NextResponse.json({ error: err.message || "Failed to load links." }, { status: 500 });
+    const message = err instanceof Error ? err.message : undefined;
+    return NextResponse.json({ error: message || "Failed to load links." }, { status: 500 });
   }
 }
 
@@ -78,7 +79,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Clean custom slug if provided
-    let cleanedSlug = customSlug ? String(customSlug).trim().toLowerCase().replace(/[^a-z0-9-_]/g, "") : undefined;
+    const cleanedSlug = customSlug ? String(customSlug).trim().toLowerCase().replace(/[^a-z0-9-_]/g, "") : undefined;
     if (cleanedSlug && (cleanedSlug.length < 3 || cleanedSlug.length > 30)) {
       return NextResponse.json({ error: "Custom slug must be between 3 and 30 characters." }, { status: 400 });
     }
@@ -93,8 +94,9 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ success: true, shortlink, id: cleanedSlug || shortlink.split("/").pop() });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Failed to create manual trackable link:", err);
-    return NextResponse.json({ error: err.message || "Failed to generate link." }, { status: 500 });
+    const message = err instanceof Error ? err.message : undefined;
+    return NextResponse.json({ error: message || "Failed to generate link." }, { status: 500 });
   }
 }

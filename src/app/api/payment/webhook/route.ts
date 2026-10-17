@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
             email,
             paymentId,
             plan,
-            PLAN_PRICES_INR[plan as any] || 0
+            PLAN_PRICES_INR[plan] || 0
           ).catch(console.error);
         }
       }

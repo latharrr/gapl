@@ -7,24 +7,33 @@ import { useAuth } from "@/context/AuthContext";
 import { Card } from "@/components/ui/Card";
 import { adminFetch } from "@/lib/admin-fetch";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
 import {
   Search,
-  Filter,
   Trash2,
-  AlertTriangle,
-  Loader2,
-  FileText,
-  Briefcase,
-  Layers,
   ChevronRight,
-  TrendingUp,
 } from "lucide-react";
+
+interface RecruiterVerdict {
+  verdict?: string;
+  confidence?: number;
+  reason?: string;
+}
+
+interface AdminReport {
+  id: string;
+  role?: string;
+  companyTier?: string;
+  atsScore?: number;
+  readiness?: number;
+  recruiterVerdict?: RecruiterVerdict;
+  missingSkills?: string[];
+  strongSkills?: string[];
+}
 
 export default function AdminReportsPage() {
   const { user, userDoc } = useAuth();
-  const [reports, setReports] = useState<any[]>([]);
+  const [reports, setReports] = useState<AdminReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -32,29 +41,32 @@ export default function AdminReportsPage() {
   const [verdictFilter, setVerdictFilter] = useState("all");
   const [tierFilter, setTierFilter] = useState("all");
 
-  const [selectedReport, setSelectedReport] = useState<any | null>(null);
+  const [selectedReport, setSelectedReport] = useState<AdminReport | null>(null);
   const [deletingId, setDeletingId] = useState("");
 
   const isSuperAdmin = userDoc?.role === "super_admin";
 
-  const fetchReports = async () => {
-    if (!user) return;
-    setLoading(true);
-    setError("");
-    try {
-      const res = await adminFetch("/api/admin/reports");
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to load reports");
-      setReports(data.reports || []);
-    } catch (e: any) {
-      setError(e.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchReports();
+    let cancelled = false;
+    const run = async () => {
+      if (!user) return;
+      setLoading(true);
+      setError("");
+      try {
+        const res = await adminFetch("/api/admin/reports");
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Failed to load reports");
+        if (!cancelled) setReports(data.reports || []);
+      } catch (e: unknown) {
+        if (!cancelled) setError(e instanceof Error ? e.message : String(e));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
   }, [user]);
 
   const handleDeleteReport = async (reportId: string) => {
@@ -76,8 +88,8 @@ export default function AdminReportsPage() {
       // Update local state
       setReports((prev) => prev.filter((r) => r.id !== reportId));
       if (selectedReport?.id === reportId) setSelectedReport(null);
-    } catch (e: any) {
-      alert(e.message);
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : String(e));
     } finally {
       setDeletingId("");
     }

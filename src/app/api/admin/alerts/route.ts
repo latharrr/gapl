@@ -25,8 +25,9 @@ export async function GET(req: NextRequest) {
         paymentsCount,
       },
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Failed to fetch alerts:", err);
-    return NextResponse.json({ error: err.message || "Failed to load alerts." }, { status: 500 });
+    const message = err instanceof Error ? err.message : undefined;
+    return NextResponse.json({ error: message || "Failed to load alerts." }, { status: 500 });
   }
 }

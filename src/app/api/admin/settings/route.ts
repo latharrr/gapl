@@ -27,8 +27,9 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.json({ settings: snap.data() });
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || "Internal server error" }, { status: 500 });
+  } catch (err) {
+    const message = err instanceof Error && err.message ? err.message : "Internal server error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
@@ -79,7 +80,8 @@ export async function POST(req: NextRequest) {
     await setDoc(routeRef, payload, { merge: true });
 
     return NextResponse.json({ success: true, message: "Settings saved successfully." });
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || "Internal server error" }, { status: 500 });
+  } catch (err) {
+    const message = err instanceof Error && err.message ? err.message : "Internal server error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

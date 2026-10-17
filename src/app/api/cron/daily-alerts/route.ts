@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isAuthorizedCron } from "@/lib/cron-auth";
 import { getAdminDb } from "@/lib/firebase-admin";
-import { computeAlerts, Alert } from "@/lib/alerts-calculator";
+import { computeAlerts } from "@/lib/alerts-calculator";
 import { sendEmail } from "@/lib/resend";
 
 export const runtime = "nodejs";
 
 export async function GET(req: NextRequest) {
   // Cron authorization check for production environment
-  const authHeader = req.headers.get("authorization");
-  if (process.env.NODE_ENV === "production" && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!isAuthorizedCron(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -104,10 +104,10 @@ export async function GET(req: NextRequest) {
       alertsCount: activeAlerts.length,
       isWeeklyDigest: isWeeklyDigestDay,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Cron alerts failure:", err);
     return NextResponse.json(
-      { error: err?.message || "Internal server error" },
+      { error: err instanceof Error ? err.message : "Internal server error" },
       { status: 500 }
     );
   }

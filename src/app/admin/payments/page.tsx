@@ -7,24 +7,42 @@ import { useAuth } from "@/context/AuthContext";
 import { Card } from "@/components/ui/Card";
 import { adminFetch } from "@/lib/admin-fetch";
 import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
 import {
-  Coins,
-  CreditCard,
-  AlertTriangle,
   RotateCcw,
   CheckCircle,
   XCircle,
-  Loader2,
   Lock,
 } from "lucide-react";
 
+interface Payment {
+  paymentId: string;
+  userId?: string;
+  plan?: string;
+  amount?: number;
+  status?: string;
+  refunded?: boolean;
+  createdAt: string;
+}
+
+interface PaymentsResponse {
+  payments?: Payment[];
+  error?: string;
+}
+
+async function loadPayments(): Promise<PaymentsResponse> {
+  const res = await adminFetch("/api/admin/payments");
+  const data: PaymentsResponse = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to load payment logs");
+  return data;
+}
+
 export default function AdminPaymentsPage() {
   const { user, userDoc } = useAuth();
-  const [payments, setPayments] = useState<any[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [processingId, setProcessingId] = useState("");
+  const [now] = useState(() => Date.now());
 
   const isSuperAdmin = userDoc?.role === "super_admin";
 
@@ -33,24 +51,44 @@ export default function AdminPaymentsPage() {
     setLoading(true);
     setError("");
     try {
-      const res = await adminFetch("/api/admin/payments");
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to load payment logs");
-      
+      const data = await loadPayments();
+
       // Sort chronologically
       const sorted = (data.payments || []).sort(
-        (a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        (a: Payment, b: Payment) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
       setPayments(sorted);
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : String(e));
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchPayments();
+    let cancelled = false;
+    const run = async () => {
+      if (!user) return;
+      setLoading(true);
+      setError("");
+      try {
+        const data = await loadPayments();
+
+        // Sort chronologically
+        const sorted = (data.payments || []).sort(
+          (a: Payment, b: Payment) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        if (!cancelled) setPayments(sorted);
+      } catch (e: unknown) {
+        if (!cancelled) setError(e instanceof Error ? e.message : String(e));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
   }, [user]);
 
   const handleRefund = async (paymentId: string) => {
@@ -71,8 +109,8 @@ export default function AdminPaymentsPage() {
       
       // Refresh logs
       await fetchPayments();
-    } catch (e: any) {
-      alert(e.message);
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : String(e));
     } finally {
       setProcessingId("");
     }
@@ -189,7 +227,7 @@ export default function AdminPaymentsPage() {
                       )}
                     </td>
                     <td className="px-5 py-4 text-ink-muted text-[0.6875rem]">
-                      {new Date(p.createdAt || Date.now()).toLocaleString()}
+                      {new Date(p.createdAt ?? now).toLocaleString()}
                     </td>
                     <td className="px-5 py-4 text-right">
                       {isCaptured && !isRefunded && (

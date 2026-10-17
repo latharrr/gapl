@@ -20,7 +20,6 @@ import {
   Menu,
   X,
   Plus,
-  ChevronDown,
   Wand2,
   FileCheck2,
 } from "lucide-react";
@@ -47,7 +46,6 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
   };
 
   const name = user?.displayName || "User";
-  const email = user?.email || "";
   const plan = (userDoc?.plan as string) || "free";
 
   return (

@@ -70,9 +70,9 @@ export default function CVBuilderPage() {
             : `CV emailed! You've used all ${total} sends — resets in 8 hours`
         );
       });
-    } catch (err: any) {
+    } catch (err) {
       import("react-hot-toast").then(({ default: toast }) => {
-        toast.error(err.message || "Failed to send email");
+        toast.error(err instanceof Error ? err.message : "Failed to send email");
       });
     } finally {
       setEmailing(false);

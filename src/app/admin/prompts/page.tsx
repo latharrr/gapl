@@ -2,7 +2,7 @@
 
 import { LoadingChart } from "@/components/ui/Sheet";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Card } from "@/components/ui/Card";
 import { adminFetch } from "@/lib/admin-fetch";
@@ -10,26 +10,58 @@ import { authFetch } from "@/lib/auth-fetch";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import {
-  Sparkles,
-  History,
   Play,
   RotateCcw,
   CheckCircle,
-  AlertTriangle,
-  Loader2,
   Save,
 } from "lucide-react";
 
+interface PromptTemplate {
+  id: string;
+  name?: string;
+  version: number;
+  content?: string;
+  lastUpdated: string;
+}
+
+interface PromptHistoryEntry {
+  id: string;
+  promptId: string;
+  version: number;
+  content?: string;
+  savedAt: string;
+  savedBy?: string;
+}
+
+interface PromptsResponse {
+  prompts?: PromptTemplate[];
+  history?: PromptHistoryEntry[];
+  error?: string;
+  nextVersion?: number;
+}
+
+async function loadPrompts(): Promise<PromptsResponse> {
+  const res = await adminFetch("/api/admin/prompts");
+  const data: PromptsResponse = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to load prompts");
+  return data;
+}
+
 export default function AdminPromptsPage() {
   const { user } = useAuth();
-  const [prompts, setPrompts] = useState<any[]>([]);
-  const [history, setHistory] = useState<any[]>([]);
+  const [prompts, setPrompts] = useState<PromptTemplate[]>([]);
+  const [history, setHistory] = useState<PromptHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   const [selectedPromptId, setSelectedPromptId] = useState("resume-parser");
-  const [promptContent, setPromptContent] = useState("");
-  const [updating, setUpdating] = useState(false);
+  // Latest-ref so the mount fetch can read the selected prompt without
+  // re-subscribing the effect to selection changes.
+  const selectedPromptIdRef = useRef(selectedPromptId);
+  useEffect(() => {
+    selectedPromptIdRef.current = selectedPromptId;
+  });
+  const [promptContent, setPromptContent] = useState("");  const [updating, setUpdating] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
 
   // Sandbox testing state
@@ -44,24 +76,46 @@ export default function AdminPromptsPage() {
     setLoading(true);
     setError("");
     try {
-      const res = await adminFetch("/api/admin/prompts");
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to load prompts");
+      const data = await loadPrompts();
       setPrompts(data.prompts || []);
       setHistory(data.history || []);
 
       // Load active prompt content
-      const active = (data.prompts || []).find((p: any) => p.id === selectedPromptId);
+      const active = (data.prompts || []).find((p) => p.id === selectedPromptId);
       if (active) setPromptContent(active.content || "");
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : String(e));
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchPrompts();
+    let cancelled = false;
+    const run = async () => {
+      if (!user) return;
+      setLoading(true);
+      setError("");
+      try {
+        const data = await loadPrompts();
+        if (!cancelled) {
+          setPrompts(data.prompts || []);
+          setHistory(data.history || []);
+
+          // Load active prompt content
+          const active = (data.prompts || []).find((p) => p.id === selectedPromptIdRef.current);
+          if (active) setPromptContent(active.content || "");
+        }
+      } catch (e: unknown) {
+        if (!cancelled) setError(e instanceof Error ? e.message : String(e));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
   }, [user]);
 
   // Sync content when selecting different prompt
@@ -94,8 +148,8 @@ export default function AdminPromptsPage() {
       
       setSuccessMsg(`Successfully saved prompt. Version elevated to ${data.nextVersion}!`);
       await fetchPrompts();
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : String(e));
     } finally {
       setUpdating(false);
     }
@@ -125,8 +179,8 @@ export default function AdminPromptsPage() {
       
       setSuccessMsg(`Successfully rolled back to version ${targetVersion}. Released new version ${data.nextVersion}!`);
       await fetchPrompts();
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : String(e));
     } finally {
       setUpdating(false);
     }
@@ -150,8 +204,8 @@ export default function AdminPromptsPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Sandbox analysis failed");
       setSandboxOutput(JSON.stringify(data.result, null, 2));
-    } catch (e: any) {
-      setSandboxOutput(`ERROR: ${e.message}`);
+    } catch (e: unknown) {
+      setSandboxOutput(`ERROR: ${e instanceof Error ? e.message : String(e)}`);
     } finally {
       setTesting(false);
     }

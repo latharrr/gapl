@@ -15,7 +15,8 @@ export async function GET(req: NextRequest) {
     const logs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 
     return NextResponse.json({ logs });
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || "Internal server error" }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : undefined;
+    return NextResponse.json({ error: message || "Internal server error" }, { status: 500 });
   }
 }

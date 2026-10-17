@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, collection, getDocs, doc, getDoc, updateDoc, query, orderBy, limit } from "@/lib/server-firestore";
 import { logAuditAction } from "@/lib/audit-logger";
-import { requireAdmin, requireSuperAdmin } from "@/lib/firebase-admin";
+import { requireAdmin } from "@/lib/firebase-admin";
 
 export const runtime = "nodejs";
 
@@ -16,8 +16,9 @@ export async function GET(req: NextRequest) {
     const payments = snap.docs.map((d) => ({ paymentId: d.id, ...d.data() }));
 
     return NextResponse.json({ payments });
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || "Internal server error" }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : undefined;
+    return NextResponse.json({ error: message || "Internal server error" }, { status: 500 });
   }
 }
 
@@ -74,7 +75,8 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || "Internal server error" }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : undefined;
+    return NextResponse.json({ error: message || "Internal server error" }, { status: 500 });
   }
 }

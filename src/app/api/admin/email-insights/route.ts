@@ -15,17 +15,27 @@ export async function GET(req: NextRequest) {
     const campaignsSnap = await db.collection("email_campaigns").get();
     const messagesSnap = await db.collection("email_messages").get();
     const paymentsSnap = await db.collection("payments").get();
-    const linksSnap = await db.collection("trackable_links").get();
     const reportsSnap = await db.collection("reports").get();
 
     const campaigns = campaignsSnap.docs.map((d) => d.data());
     const messages = messagesSnap.docs.map((d) => d.data());
     const payments = paymentsSnap.docs.map((d) => d.data());
-    const links = linksSnap.docs.map((d) => d.data());
     const reports = reportsSnap.docs.map((d) => d.data());
 
     // 2. Programmatic aggregation
-    const campaignStatsMap: Record<string, any> = {};
+    interface CampaignStats {
+      id: string;
+      name: string;
+      subject: string;
+      sent: number;
+      delivered: number;
+      opened: number;
+      clicked: number;
+      revenue: number;
+      reports: number;
+    }
+
+    const campaignStatsMap: Record<string, CampaignStats> = {};
     campaigns.forEach((c) => {
       campaignStatsMap[c.id] = {
         id: c.id,
@@ -68,7 +78,7 @@ export async function GET(req: NextRequest) {
       }
     });
 
-    const campaignsList = Object.values(campaignStatsMap).map((c: any) => {
+    const campaignsList = Object.values(campaignStatsMap).map((c) => {
       const openRate = c.delivered > 0 ? (c.opened / c.delivered) * 100 : 0;
       const clickRate = c.opened > 0 ? (c.clicked / c.opened) * 100 : 0;
       return {
@@ -80,19 +90,19 @@ export async function GET(req: NextRequest) {
 
     // 3. Answer core analytical questions
     // A. Best performance subject lines (highest open rate with min 3 sent)
-    const validOpenRates = campaignsList.filter((c: any) => c.sent >= 1);
+    const validOpenRates = campaignsList.filter((c) => c.sent >= 1);
     const bestSubjectCampaign = validOpenRates.length > 0
-      ? [...validOpenRates].sort((a: any, b: any) => b.openRate - a.openRate)[0]
+      ? [...validOpenRates].sort((a, b) => b.openRate - a.openRate)[0]
       : null;
 
     // B. Best revenue producer
     const bestRevenueCampaign = campaignsList.length > 0
-      ? [...campaignsList].sort((a: any, b: any) => b.revenue - a.revenue)[0]
+      ? [...campaignsList].sort((a, b) => b.revenue - a.revenue)[0]
       : null;
 
     // C. Best roadmap activity producer (highest CTR)
     const bestCtrCampaign = validOpenRates.length > 0
-      ? [...validOpenRates].sort((a: any, b: any) => b.clickRate - a.clickRate)[0]
+      ? [...validOpenRates].sort((a, b) => b.clickRate - a.clickRate)[0]
       : null;
 
     // D. User engagement analysis
@@ -139,7 +149,7 @@ export async function GET(req: NextRequest) {
     const promptData = {
       totalEmailsSent: messages.length,
       totalRevenueAttributed: payments.filter((p) => p.status === "captured" && p.attributedCampaignId).reduce((sum, p) => sum + (p.amount || 0), 0),
-      campaignBreakdowns: campaignsList.map((c: any) => ({
+      campaignBreakdowns: campaignsList.map((c) => ({
         id: c.id,
         name: c.name,
         sent: c.sent,
@@ -170,7 +180,7 @@ Write your response in clean Markdown formatting without markdown code fences in
         temperature: 0.7,
       });
       aiSummary = aiResponse.text;
-    } catch (err: any) {
+    } catch (err) {
       console.warn("Failed to generate AI insights via LLM, falling back to programmatic template:", err);
       // Premium fallback template
       aiSummary = `### Weekly Email Intelligence Summary
@@ -213,8 +223,9 @@ Gapl outbox sent a total of **${promptData.totalEmailsSent} emails**, generating
       likelyToChurn,
       aiSummary,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Failed to generate email insights:", err);
-    return NextResponse.json({ error: err.message || "Failed to load insights." }, { status: 500 });
+    const message = err instanceof Error ? err.message : undefined;
+    return NextResponse.json({ error: message || "Failed to load insights." }, { status: 500 });
   }
 }

@@ -8,11 +8,9 @@ import { adminFetch } from "@/lib/admin-fetch";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import {
-  BellRing,
   AlertOctagon,
   AlertTriangle,
   CheckCircle,
-  Loader2,
   RefreshCw,
   Info,
   ShieldCheck,
@@ -22,9 +20,31 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 
+interface AlertItem {
+  id: string;
+  type: string;
+  title: string;
+  message: string;
+  yesterday?: string | number;
+  metric?: string | number;
+}
+
+interface AlertsResponse {
+  alerts: AlertItem[];
+  timestamp: string;
+  error?: string;
+}
+
+async function loadAlerts(): Promise<AlertsResponse> {
+  const res = await adminFetch("/api/admin/alerts");
+  const json: AlertsResponse = await res.json();
+  if (!res.ok) throw new Error(json.error || "Failed to load alerts");
+  return json;
+}
+
 export default function AdminAlertsPage() {
   const { user } = useAuth();
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<AlertsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [refreshing, setRefreshing] = useState(false);
@@ -35,12 +55,9 @@ export default function AdminAlertsPage() {
     if (!isSilent) setLoading(true);
     setError("");
     try {
-      const res = await adminFetch("/api/admin/alerts");
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Failed to load alerts");
-      setData(json);
-    } catch (err: any) {
-      setError(err.message);
+      setData(await loadAlerts());
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -48,7 +65,27 @@ export default function AdminAlertsPage() {
   };
 
   useEffect(() => {
-    fetchAlerts();
+    let cancelled = false;
+    const run = async () => {
+      if (!user) return;
+      setLoading(true);
+      setError("");
+      try {
+        const result = await loadAlerts();
+        if (!cancelled) setData(result);
+      } catch (err: unknown) {
+        if (!cancelled) setError(err instanceof Error ? err.message : String(err));
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+          setRefreshing(false);
+        }
+      }
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
   }, [user]);
 
   const handleRefresh = () => {
@@ -160,7 +197,7 @@ export default function AdminAlertsPage() {
             </div>
           ) : (
             <div className="space-y-3">
-              {alerts.map((alert: any) => (
+              {alerts.map((alert: AlertItem) => (
                 <div
                   key={alert.id}
                   className={`border rounded-[5px] p-4 space-y-2.5 ${

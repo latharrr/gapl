@@ -4,6 +4,15 @@ import { requireAdmin } from "@/lib/firebase-admin";
 
 export const runtime = "nodejs";
 
+interface TimelineEntry {
+  id: string;
+  type: "audit" | "report" | "ai_call" | "payment" | "system";
+  timestamp: string;
+  title: string;
+  description: string;
+  meta: string;
+}
+
 export async function GET(req: NextRequest) {
   try {
     // SECURITY: Verify Firebase ID token and admin role via Admin SDK
@@ -24,7 +33,7 @@ export async function GET(req: NextRequest) {
     }
     const userData = userSnap.data();
 
-    const timeline: any[] = [];
+    const timeline: TimelineEntry[] = [];
 
     // 2. Fetch User registrations / audits
     const auditRef = collection(db, "audit_logs");
@@ -107,7 +116,8 @@ export async function GET(req: NextRequest) {
       user: { uid: targetUid, ...userData },
       timeline: sortedTimeline,
     });
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || "Internal server error" }, { status: 500 });
+  } catch (err) {
+    const message = err instanceof Error && err.message ? err.message : "Internal server error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

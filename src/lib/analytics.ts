@@ -1,8 +1,8 @@
-import { auth } from "./firebase";
+import { getClientAuth } from "./firebase";
 
-export async function trackEvent(event: string, metadata?: any) {
+export async function trackEvent(event: string, metadata?: Record<string, unknown>) {
   try {
-    const user = auth.currentUser;
+    const user = getClientAuth().currentUser;
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
@@ -11,7 +11,7 @@ export async function trackEvent(event: string, metadata?: any) {
       try {
         const token = await user.getIdToken();
         headers["Authorization"] = `Bearer ${token}`;
-      } catch (_) {}
+      } catch {}
     }
 
     const sid = typeof window !== "undefined" ? localStorage.getItem("gapl_session_id") || "" : "";

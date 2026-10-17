@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db, collection, getDocs, doc, getDoc, updateDoc, deleteDoc, query, orderBy, limit, startAfter } from "@/lib/server-firestore";
+import { db, collection, getDocs, doc, getDoc, updateDoc, query, orderBy, limit, startAfter } from "@/lib/server-firestore";
 import { logAuditAction } from "@/lib/audit-logger";
 import { requireAdmin, deleteAuthUser } from "@/lib/firebase-admin";
 import { cascadeDeleteUserData } from "@/lib/user-deletion";
@@ -29,8 +29,9 @@ export async function GET(req: NextRequest) {
     const lastDoc = snap.docs.length > 0 ? snap.docs[snap.docs.length - 1].id : null;
 
     return NextResponse.json({ users, nextCursor: lastDoc, hasMore: snap.docs.length === PAGE_SIZE });
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || "Internal server error" }, { status: 500 });
+  } catch (err) {
+    const message = err instanceof Error && err.message ? err.message : "Internal server error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
@@ -63,7 +64,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Only super_admin can modify user roles or subscriptions." }, { status: 403 });
       }
       
-      const updateData: any = {};
+      const updateData: { role?: string; plan?: string } = {};
       if (action === "updateRole") {
         updateData.role = data.role;
         await logAuditAction({
@@ -138,7 +139,8 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ error: "Unknown action" }, { status: 400 });
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || "Internal server error" }, { status: 500 });
+  } catch (err) {
+    const message = err instanceof Error && err.message ? err.message : "Internal server error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

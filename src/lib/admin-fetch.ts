@@ -1,4 +1,4 @@
-import { auth } from "./firebase";
+import { getClientAuth } from "./firebase";
 
 /**
  * Authorized fetch wrapper for admin API calls.
@@ -13,7 +13,7 @@ export async function adminFetch(
   url: string,
   options: RequestInit = {}
 ): Promise<Response> {
-  const user = auth.currentUser;
+  const user = getClientAuth().currentUser;
   if (!user) {
     throw new Error("Not authenticated. Please sign in.");
   }

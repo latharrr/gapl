@@ -8,7 +8,6 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { signUpWithEmail, signInWithGoogle, createUserDocument } from "@/lib/firebase";
-import { ArrowLeft } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 
 export default function SignupPage() {
