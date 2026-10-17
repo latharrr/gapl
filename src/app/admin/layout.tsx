@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
+import { Wordmark } from "@/components/brand/Wordmark";
+import { LoadingChart } from "@/components/ui/Sheet";
 import {
   LayoutDashboard,
   Users,
@@ -16,11 +16,10 @@ import {
   Activity,
   History,
   Settings,
-  Shield,
-  Loader2,
   ExternalLink,
-  ChevronRight,
   Sparkles,
+  Menu,
+  X,
   Mail,
   Link as LinkIcon,
   HeartPulse,
@@ -48,6 +47,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { user, userDoc, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Auto redirect unauthenticated users to login
   useEffect(() => {
@@ -58,8 +58,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#09090b] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-[#6366f1]" />
+      <div className="min-h-screen bg-surface-muted grid place-items-center">
+        <LoadingChart text="LOADING CONTROL ROOM" />
       </div>
     );
   }
@@ -71,21 +71,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (!isAdmin) {
     return (
-      <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex items-center justify-center p-6">
-        <div className="max-w-md w-full border border-[#27272a] bg-[#18181b] rounded-2xl p-8 text-center space-y-6">
-          <div className="w-12 h-12 bg-red-950/40 border border-red-900/60 rounded-xl flex items-center justify-center mx-auto text-red-500">
-            <Shield size={22} />
-          </div>
-          <div>
-            <h1 className="text-lg font-bold text-white mb-2">Access Denied</h1>
-            <p className="text-sm text-[#a1a1aa] leading-relaxed">
-              Your account (<strong>{user.email}</strong>) does not have administrative privileges required to access the Gapl Control Center.
+      <div className="min-h-screen bg-surface-muted grid place-items-center p-4">
+        <div className="chart-sheet rounded-[6px] overflow-hidden max-w-md w-full">
+          <div className="led-board px-4 py-2.5 text-[1rem]">ACCESS DENIED</div>
+          <div className="p-6 space-y-3">
+            <h1 className="text-xl font-[800] tracking-[-0.015em]">This area is for the Gapl team</h1>
+            <p className="text-[0.9375rem] text-ink-secondary">
+              Your account (<strong className="text-ink">{user.email}</strong>) doesn&apos;t have admin access.
             </p>
-          </div>
-
-          <div className="pt-4 border-t border-[#27272a]">
-            <Link href="/dashboard" className="block text-xs text-[#a1a1aa] hover:text-white transition-colors">
-              Return to User Dashboard
+            <Link href="/dashboard" className="inline-block text-sm font-semibold text-primary-600 underline hover:text-primary-700">
+              Back to your dashboard
             </Link>
           </div>
         </div>
@@ -93,62 +88,78 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  return (
-    <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex flex-col font-sans">
-
-      <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
-        <aside className="w-60 border-r border-[#1f1f23] bg-[#09090b] flex flex-col justify-between flex-shrink-0">
-          <div className="p-5 space-y-6">
-            {/* Logo */}
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 bg-[#6366f1] rounded-md flex items-center justify-center shadow-lg shadow-[#6366f1]/30">
-                <Shield size={13} className="text-white" />
-              </div>
-              <div>
-                <span className="font-bold text-sm tracking-tight text-white">Gapl</span>
-                <span className="text-[10px] text-[#71717a] ml-1.5 uppercase tracking-wider font-semibold">Admin</span>
-              </div>
-            </div>
-
-            {/* Menu */}
-            <nav className="space-y-1">
-              {SIDEBAR_ITEMS.map((item) => {
-                const isActive = pathname === item.href;
-                const Icon = item.icon;
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                      isActive
-                        ? "bg-[#18181b] text-white border border-[#27272a]"
-                        : "text-[#a1a1aa] hover:text-white hover:bg-[#18181b]/50 border border-transparent"
-                    }`}
-                  >
-                    <Icon size={14} className={isActive ? "text-[#6366f1]" : "text-[#71717a]"} />
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </nav>
-          </div>
-
-          {/* Footer */}
-          <div className="p-4 border-t border-[#1f1f23] space-y-2">
+  const nav = (
+    <>
+      <div className="h-14 px-4 flex items-center justify-between border-b border-white/15">
+        <Link href="/admin" className="flex items-center gap-2.5" aria-label="Gapl admin home">
+          <Wordmark size="sm" />
+          <span className="chart-data text-[0.6875rem] font-bold uppercase text-board">Control room</span>
+        </Link>
+        <button
+          className="md:hidden p-1.5 rounded-[4px] text-primary-100 hover:bg-white/10"
+          onClick={() => setMenuOpen(false)}
+          aria-label="Close menu"
+        >
+          <X size={18} />
+        </button>
+      </div>
+      <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-0.5">
+        {SIDEBAR_ITEMS.map((item) => {
+          const isActive = pathname === item.href;
+          const Icon = item.icon;
+          return (
             <Link
-              href="/dashboard"
-              className="flex items-center justify-between px-3 py-1.5 rounded-lg text-xs text-[#71717a] hover:text-white transition-colors"
+              key={item.href}
+              href={item.href}
+              onClick={() => setMenuOpen(false)}
+              aria-current={isActive ? "page" : undefined}
+              className={`flex items-center gap-3 h-9 px-3 rounded-[4px] text-sm transition-colors ${
+                isActive ? "bg-white/12 text-white font-semibold" : "text-primary-100 hover:text-white hover:bg-white/8"
+              }`}
             >
-              <span>User Dashboard</span>
-              <ExternalLink size={10} />
+              <Icon size={16} className={isActive ? "text-board" : "text-primary-400"} />
+              {item.label}
             </Link>
-          </div>
-        </aside>
+          );
+        })}
+      </nav>
+      <div className="p-3 border-t border-white/15">
+        <Link
+          href="/dashboard"
+          className="flex items-center justify-between h-9 px-3 rounded-[4px] text-sm text-primary-100 hover:text-white hover:bg-white/8"
+        >
+          <span>User dashboard</span>
+          <ExternalLink size={14} />
+        </Link>
+      </div>
+    </>
+  );
 
-        {/* Content body */}
-        <main className="flex-1 overflow-y-auto bg-[#09090b] p-8">
-          {children}
+  return (
+    <div className="min-h-screen bg-surface-muted text-ink flex">
+      <aside className="hidden md:flex flex-col w-60 shrink-0 bg-primary-600 border-r-[3px] border-board h-screen sticky top-0">
+        {nav}
+      </aside>
+
+      {menuOpen && (
+        <>
+          <div className="fixed inset-0 z-40 bg-primary-900/50 md:hidden" onClick={() => setMenuOpen(false)} />
+          <aside className="fixed inset-y-0 left-0 z-50 w-64 flex flex-col bg-primary-600 border-r-[3px] border-board md:hidden">
+            {nav}
+          </aside>
+        </>
+      )}
+
+      <div className="flex-1 min-w-0 flex flex-col">
+        <header className="md:hidden h-14 px-4 flex items-center gap-3 bg-primary-600 border-b-[3px] border-board">
+          <button onClick={() => setMenuOpen(true)} aria-label="Open menu" className="p-1.5 -ml-1.5 rounded-[4px] text-white hover:bg-white/10">
+            <Menu size={20} />
+          </button>
+          <Wordmark size="sm" />
+          <span className="chart-data text-[0.6875rem] font-bold uppercase text-board">Control room</span>
+        </header>
+        <main className="flex-1 min-w-0 px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          <div className="max-w-7xl mx-auto">{children}</div>
         </main>
       </div>
     </div>

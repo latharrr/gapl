@@ -1,5 +1,7 @@
 "use client";
 
+import { LoadingChart } from "@/components/ui/Sheet";
+
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Card } from "@/components/ui/Card";
@@ -64,7 +66,7 @@ export default function AdminHealthPage() {
   if (loading) {
     return (
       <div className="h-[60vh] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-[#6366f1]" />
+        <LoadingChart />
       </div>
     );
   }
@@ -74,10 +76,10 @@ export default function AdminHealthPage() {
       {/* Header */}
       <div className="flex justify-between items-center gap-4 flex-wrap">
         <div>
-          <h1 className="text-xl font-bold text-white tracking-tight">System Health & APIs</h1>
-          <p className="text-xs text-[#a1a1aa] mt-0.5">Live status checking and resources usage dashboard</p>
+          <h1 className="display text-[clamp(1.9rem,4vw,2.6rem)]">System health</h1>
+          <p className="mt-1.5 text-[0.9375rem] text-ink-secondary">Live status checking and resources usage dashboard</p>
         </div>
-        <Button variant="outline" size="sm" onClick={handlePingServices} loading={pinging} className="text-xs text-white border-[#27272a] hover:bg-[#27272a]">
+        <Button variant="outline" size="sm" onClick={handlePingServices} loading={pinging} className="text-xs text-ink border-border-DEFAULT hover:bg-surface-subtle">
           Ping Services
         </Button>
       </div>
@@ -85,7 +87,7 @@ export default function AdminHealthPage() {
       <div className="grid md:grid-cols-3 gap-6">
         {/* API Latencies status */}
         <div className="md:col-span-2 space-y-4">
-          <span className="text-[10px] text-[#71717a] font-bold uppercase tracking-wider block mb-1">
+          <span className="text-[0.6875rem] text-ink-muted font-bold uppercase tracking-wider block mb-1">
             API Health Status
           </span>
           <div className="grid gap-3">
@@ -95,35 +97,35 @@ export default function AdminHealthPage() {
               const latency = live && live.requests > 0 ? Math.round(live.totalLatency / live.requests) : null;
 
               let status = "🟢 Healthy";
-              let badgeColor = "bg-emerald-950/20 text-emerald-400 border-emerald-900/40";
+              let badgeColor = "bg-success-bg text-success border-success-border";
               if (uptime === null) {
                 status = "No data";
-                badgeColor = "bg-[#27272a] text-[#a1a1aa] border-transparent";
+                badgeColor = "bg-surface-subtle text-ink-muted border-transparent";
               } else if (uptime < 90) {
                 status = "🔴 Offline";
-                badgeColor = "bg-red-950/20 text-red-400 border-red-900/40";
+                badgeColor = "bg-danger-bg text-danger border-danger-border";
               } else if (uptime < 98) {
                 status = "🟡 Degraded";
-                badgeColor = "bg-amber-950/20 text-amber-400 border-amber-900/40";
+                badgeColor = "bg-warning-bg text-warning border-warning-border";
               }
 
               return (
                 <div
                   key={p.key}
-                  className="bg-[#18181b] border border-[#27272a] rounded-xl p-4 flex items-center justify-between gap-4"
+                  className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] p-4 flex items-center justify-between gap-4"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-[#09090b] flex items-center justify-center border border-[#27272a]">
-                      <Cpu size={14} className="text-[#6366f1]" />
+                    <div className="w-8 h-8 rounded-[5px] bg-surface-muted flex items-center justify-center border border-border-DEFAULT">
+                      <Cpu size={14} className="text-primary-600" />
                     </div>
                     <div>
-                      <span className="text-xs font-semibold text-white block">{p.name}</span>
-                      <span className="text-[9px] text-[#71717a] font-mono">Response time: {latency !== null ? `${latency}ms` : "N/A"}</span>
+                      <span className="text-xs font-semibold text-ink block">{p.name}</span>
+                      <span className="text-[0.6875rem] text-ink-muted font-mono">Response time: {latency !== null ? `${latency}ms` : "N/A"}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
-                    <span className="text-[10px] font-mono text-[#a1a1aa]">Uptime: {uptime !== null ? `${uptime}%` : "N/A"}</span>
-                    <Badge className={`${badgeColor} text-[9px] font-semibold flex items-center gap-1`}>
+                    <span className="text-[0.6875rem] font-mono text-ink-muted">Uptime: {uptime !== null ? `${uptime}%` : "N/A"}</span>
+                    <Badge className={`${badgeColor} text-[0.6875rem] font-semibold flex items-center gap-1`}>
                       {status}
                     </Badge>
                   </div>
@@ -135,11 +137,11 @@ export default function AdminHealthPage() {
 
         {/* System parameters */}
         <div className="space-y-4">
-          <span className="text-[10px] text-[#71717a] font-bold uppercase tracking-wider block mb-1">
+          <span className="text-[0.6875rem] text-ink-muted font-bold uppercase tracking-wider block mb-1">
             Resource Usage
           </span>
-          <Card variant="default" padding="md" className="bg-[#18181b] border-[#27272a] space-y-4">
-            <div className="text-center py-12 text-[#71717a] text-xs border border-dashed border-[#27272a] rounded-xl">
+          <Card variant="default" padding="md" className="bg-surface-DEFAULT border-border-DEFAULT space-y-4">
+            <div className="text-center py-12 text-ink-muted text-xs border border-dashed border-border-DEFAULT rounded-[6px]">
               Resource telemetry not available. Requires infrastructure monitoring integration.
             </div>
           </Card>

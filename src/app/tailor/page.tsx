@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
 import { type AnalysisResult } from "@/types/analysis";
 import { Navbar } from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/Button";
+import { DepartureBoard } from "@/components/brand/DepartureBoard";
+import { Sheet, FigureStrip } from "@/components/ui/Sheet";
+import { fieldClass } from "@/components/ui/Choice";
 import { cn } from "@/lib/utils";
 import {
   Download,
@@ -12,11 +14,10 @@ import {
   PenLine,
   TrendingUp,
   AlertCircle,
-  ChevronRight,
+  Check,
   Plus,
   Minus,
   RefreshCw,
-  ArrowUp,
   Mail,
   Phone,
   MapPin,
@@ -47,22 +48,24 @@ interface TailoredResume {
 }
 
 const CHANGE_META = {
-  improved: { icon: <TrendingUp size={11} />, color: "bg-primary-50 border-primary-100 text-primary-700" },
-  added:    { icon: <Plus size={11} />,       color: "bg-success-bg border-success-border text-success" },
-  removed:  { icon: <Minus size={11} />,      color: "bg-danger-bg border-danger-border text-danger" },
-  reordered:{ icon: <RefreshCw size={11} />,  color: "bg-warning-bg border-warning-border text-warning" },
+  improved: { icon: <TrendingUp size={14} />, color: "text-primary-600" },
+  added:    { icon: <Plus size={14} />,       color: "text-success" },
+  removed:  { icon: <Minus size={14} />,      color: "text-danger" },
+  reordered:{ icon: <RefreshCw size={14} />,  color: "text-warning" },
 };
+
+const TAILOR_STAGES = ["Reading your resume", "Rewriting bullets", "Adding ATS keywords", "Laying out your CV"];
 
 // ─── Resume renderer (printable) ─────────────────────────────────────────────
 function ResumePreview({ r }: { r: TailoredResume }) {
   return (
     <div
       id="resume-print-area"
-      className="bg-surface-DEFAULT font-serif text-ink"
+      className="bg-white font-serif text-black"
       style={{ fontFamily: "'Times New Roman', serif", fontSize: "11pt", lineHeight: 1.4 }}
     >
       {/* Header */}
-      <div className="text-center border-b-2 border-ink pb-3 mb-4">
+      <div className="text-center border-b-2 border-black pb-3 mb-4">
         <h1 style={{ fontSize: "20pt", fontWeight: 700, letterSpacing: "0.05em", marginBottom: "4px" }}>
           {r.name}
         </h1>
@@ -186,6 +189,7 @@ export default function TailorPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [step, setStep] = useState<"paste" | "loading" | "result">("paste");
+  const [tailorStage, setTailorStage] = useState(0);
 
   useEffect(() => {
     const stored = sessionStorage.getItem("gapl_last_report");
@@ -198,6 +202,8 @@ export default function TailorPage() {
     setStep("loading");
     setLoading(true);
     setError("");
+    setTailorStage(0);
+    const iv = setInterval(() => setTailorStage((n) => Math.min(n + 1, TAILOR_STAGES.length - 1)), 3500);
     try {
       const res = await authFetch("/api/tailor", {
         method: "POST",
@@ -216,6 +222,7 @@ export default function TailorPage() {
       setError("Network error. Please try again.");
       setStep("paste");
     } finally {
+      clearInterval(iv);
       setLoading(false);
     }
   };
@@ -237,22 +244,14 @@ export default function TailorPage() {
   // Loading
   if (step === "loading") {
     return (
-      <>
-        <Navbar />
-        <div className="min-h-screen pt-14 bg-surface-muted flex items-center justify-center">
-          <div className="text-center max-w-xs px-4">
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-              className="w-10 h-10 mx-auto mb-6 border-2 border-primary-600/20 border-t-primary-600 rounded-full"
-            />
-            <h2 className="text-base font-bold text-ink mb-1">Tailoring your CV…</h2>
-            <p className="text-xs text-ink-muted">
-              Rewriting for <strong>{analysis?.companyTier ?? "your target"}</strong> · {analysis?.role ?? "your role"}. ~15 seconds.
-            </p>
-          </div>
-        </div>
-      </>
+      <DepartureBoard
+        kicker={`${analysis?.role ?? "Your role"} · ${analysis?.companyTier ?? "Your tier"}`}
+        title="Tailoring your CV"
+        detail={`${TAILOR_STAGES[tailorStage]}…`}
+        stages={TAILOR_STAGES}
+        current={tailorStage}
+        footnote="Keep this tab open while your CV is tailored."
+      />
     );
   }
 
@@ -269,113 +268,94 @@ export default function TailorPage() {
           </div>
         </div>
 
-        <main className="pt-14 bg-surface-muted min-h-screen">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 space-y-6">
-
-            {/* Header */}
-            <div className="flex items-start justify-between gap-4 flex-wrap">
+        <main className="pt-[59px] bg-surface-muted min-h-screen">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-5">
+            <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
-                <button onClick={() => setStep("paste")} className="inline-flex items-center gap-1.5 text-xs text-ink-muted hover:text-ink mb-3 transition-colors">
-                  <ArrowLeft size={12} /> Re-tailor
+                <button onClick={() => setStep("paste")} className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-muted hover:text-ink mb-2">
+                  <ArrowLeft size={14} /> Re-tailor
                 </button>
-                <h1 className="text-xl font-bold text-ink">Your Tailored CV</h1>
-                <p className="text-xs text-ink-muted mt-0.5">{analysis?.role} · {analysis?.companyTier}</p>
+                <h1 className="display text-[clamp(2rem,4.5vw,3rem)]">Your tailored CV</h1>
+                <p className="chart-data mt-1.5 text-xs text-ink-muted">
+                  {analysis?.role} · {analysis?.companyTier}
+                </p>
               </div>
-              <Button variant="primary" size="sm" className="gap-1.5" onClick={downloadPDF}>
-                <Download size={14} /> Download PDF
+              <Button size="md" onClick={downloadPDF}>
+                <Download size={16} /> Download PDF
               </Button>
             </div>
 
-            {/* ATS scores */}
-            <div className="grid grid-cols-3 gap-4">
-              {[
-                { label: "Before ATS", value: result.beforeAtsScore, color: "text-danger" },
-                { label: "After ATS",  value: result.afterAtsScore,  color: "text-success" },
-                { label: "Improvement", value: `+${improvement}`, color: "text-primary-600", raw: true },
-              ].map(({ label, value, color, raw }) => (
-                <div key={label} className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] p-4 text-center">
-                  <p className="text-xs text-ink-muted mb-1">{label}</p>
-                  <span className={`text-2xl font-bold ${color}`}>{value}</span>
-                  {!raw && <span className="text-sm text-ink-muted">%</span>}
+            <Sheet title="ATS fit" aside="Estimated">
+              <FigureStrip
+                items={[
+                  { label: "Before", value: result.beforeAtsScore, tone: "text-danger" },
+                  { label: "After", value: result.afterAtsScore, tone: "text-success" },
+                  { label: "Change", value: `${improvement >= 0 ? "+" : ""}${improvement}` },
+                ]}
+              />
+              {result.topChange && (
+                <div className="border-t border-border-DEFAULT px-4 sm:px-6 py-4 grid grid-cols-[1.25rem_minmax(0,1fr)] gap-x-2">
+                  <PenLine size={16} className="mt-0.5 text-primary-600" />
+                  <p className="text-[0.9375rem]">
+                    <span className="font-bold">Biggest change: </span>
+                    <span className="text-ink-secondary">{result.topChange}</span>
+                  </p>
                 </div>
-              ))}
-            </div>
+              )}
+            </Sheet>
 
-            {/* Top change callout */}
-            <div className="flex items-start gap-3 p-4 bg-primary-50 rounded-[6px] border border-primary-100">
-              <PenLine size={14} className="text-primary-600 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="text-xs font-semibold text-primary-700 mb-0.5">Biggest impact change</p>
-                <p className="text-sm text-ink-secondary">{result.topChange}</p>
-              </div>
-            </div>
-
-            <div className="grid lg:grid-cols-3 gap-6">
-              {/* Resume preview — 2/3 width */}
-              <div className="lg:col-span-2">
-                <div className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] overflow-hidden shadow-sm">
-                  <div className="flex items-center justify-between px-5 py-3.5 border-b border-border-DEFAULT">
-                    <p className="text-xs font-semibold text-ink">Resume Preview</p>
-                    <button onClick={downloadPDF} className="flex items-center gap-1 text-xs text-ink-muted hover:text-ink transition-colors">
-                      <Download size={12} /> Download PDF
-                    </button>
-                  </div>
-                  <div className="p-6 max-h-[700px] overflow-y-auto" ref={printRef}>
+            <div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+              <Sheet
+                title="Preview"
+                aside={
+                  <button onClick={downloadPDF} className="font-sans text-xs font-bold text-primary-600 hover:underline inline-flex items-center gap-1">
+                    <Download size={13} /> PDF
+                  </button>
+                }
+              >
+                <div className="bg-surface-subtle p-3 sm:p-6 max-h-[760px] overflow-y-auto" ref={printRef}>
+                  <div className="bg-white shadow-md mx-auto max-w-[800px] p-5 sm:p-8">
                     <ResumePreview r={result} />
                   </div>
                 </div>
-              </div>
+              </Sheet>
 
-              {/* Changes + keywords — 1/3 width */}
-              <div className="space-y-4">
-                {/* Changes */}
-                <div className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] overflow-hidden">
-                  <div className="px-5 py-3.5 border-b border-border-DEFAULT">
-                    <p className="text-xs font-semibold text-ink">What changed</p>
-                    <p className="text-[0.625rem] text-ink-faint mt-0.5">{result.changes.length} modifications</p>
-                  </div>
-                  <div className="p-4 space-y-2">
+              <div className="space-y-5">
+                <Sheet title="What changed" aside={`${result.changes.length}`}>
+                  <ul className="chart-rows">
                     {result.changes.map((c, i) => (
-                      <motion.div
-                        key={i}
-                        initial={{ opacity: 0, x: -8 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: i * 0.05 }}
-                        className={cn("flex items-start gap-2 p-2.5 rounded-[5px] border", CHANGE_META[c.type].color)}
-                      >
-                        <div className="mt-0.5 flex-shrink-0">{CHANGE_META[c.type].icon}</div>
+                      <li key={i} className="grid grid-cols-[1.25rem_minmax(0,1fr)] gap-x-2.5 px-4 sm:px-5 py-3">
+                        <span className={cn("mt-0.5", CHANGE_META[c.type].color)}>{CHANGE_META[c.type].icon}</span>
                         <div>
-                          <span className="text-[0.625rem] font-semibold uppercase tracking-wider opacity-70">
-                            {c.section} · {c.type}
-                          </span>
-                          <p className="text-xs mt-0.5 leading-relaxed">{c.description}</p>
+                          <p className={cn("chart-data text-[0.6875rem] font-bold uppercase", CHANGE_META[c.type].color)}>
+                            {c.type} · {c.section}
+                          </p>
+                          <p className="mt-0.5 text-sm text-ink-secondary">{c.description}</p>
                         </div>
-                      </motion.div>
+                      </li>
                     ))}
-                  </div>
-                </div>
+                  </ul>
+                </Sheet>
 
-                {/* Keywords added */}
-                <div className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] p-5">
-                  <p className="text-xs font-semibold text-ink mb-3">ATS keywords added</p>
-                  <div className="flex flex-wrap gap-2">
+                <Sheet title="Keywords added" aside={`${result.keywordsAdded.length}`}>
+                  <ul className="px-4 sm:px-5 py-4 flex flex-wrap gap-2">
                     {result.keywordsAdded.map((kw) => (
-                      <span key={kw} className="inline-flex items-center gap-1 px-2.5 py-1 bg-success-bg border border-success-border rounded-full text-xs font-medium text-success">
-                        <ArrowUp size={9} /> {kw}
-                      </span>
+                      <li key={kw} className="chart-data inline-flex items-center gap-1.5 rounded-[3px] border border-border-strong bg-surface-DEFAULT px-2 py-1 text-xs">
+                        <span aria-hidden className="font-bold text-success">+</span>
+                        {kw}
+                      </li>
                     ))}
-                  </div>
-                </div>
+                  </ul>
+                </Sheet>
 
-                {/* Actions */}
-                <div className="space-y-2">
-                  <Button variant="primary" size="lg" className="w-full gap-2" onClick={downloadPDF}>
-                    <Download size={16} /> Download as PDF
+                <div className="flex flex-col gap-2">
+                  <Button size="lg" className="w-full" onClick={downloadPDF}>
+                    <Download size={17} /> Download as PDF
                   </Button>
                   {analysis && (
                     <Link href={`/report/${analysis.id}`}>
-                      <Button variant="outline" size="sm" className="w-full gap-2">
-                        <ArrowLeft size={14} /> Back to Report
+                      <Button variant="outline" size="lg" className="w-full">
+                        <ArrowLeft size={17} /> Back to report
                       </Button>
                     </Link>
                   )}
@@ -402,77 +382,60 @@ export default function TailorPage() {
   return (
     <>
       <Navbar />
-      <main className="pt-14 bg-surface-muted min-h-screen flex items-center justify-center p-6">
-        <div className="w-full max-w-lg">
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-            <Link
-              href={analysis ? `/report/${analysis.id}` : "/analyze"}
-              className="inline-flex items-center gap-1.5 text-xs text-ink-muted hover:text-ink mb-6 transition-colors"
-            >
-              <ArrowLeft size={12} /> Back to report
-            </Link>
+      <main className="pt-[59px] bg-surface-muted min-h-screen">
+        <div className="max-w-xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+          <Link
+            href={analysis ? `/report/${analysis.id}` : "/analyze"}
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-muted hover:text-ink mb-4"
+          >
+            <ArrowLeft size={14} /> {analysis ? "Back to report" : "Run an analysis first"}
+          </Link>
+          <h1 className="display text-[clamp(1.9rem,5vw,2.6rem)]">Tailor my CV</h1>
+          <p className="mt-2 text-ink-secondary">
+            Gapl rewrites your resume for <strong className="text-ink">{analysis?.companyTier ?? "your target"}</strong> companies
+            {analysis?.role && <> applying for <strong className="text-ink">{analysis.role}</strong></>}. Preview it here, then
+            download a PDF.
+          </p>
 
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-5 h-5 bg-ink rounded-[4px] flex items-center justify-center">
-                <PenLine size={11} className="text-white" />
-              </div>
-              <h1 className="text-xl font-bold text-ink">Tailor my CV</h1>
+          {error && (
+            <div role="alert" className="mt-5 flex items-start gap-2 p-3 bg-danger-bg border border-danger-border rounded-[5px]">
+              <AlertCircle size={16} className="text-danger mt-0.5 shrink-0" />
+              <p className="text-sm text-danger">{error}</p>
             </div>
-            <p className="text-sm text-ink-muted mb-8">
-              AI rewrites your resume for{" "}
-              <strong className="text-ink">{analysis?.companyTier ?? "your target"}</strong>{" "}
-              companies. Preview and download as PDF — no Overleaf needed.
-            </p>
+          )}
 
-            {error && (
-              <div className="flex items-start gap-2 p-3 bg-danger-bg border border-danger-border rounded-[6px] mb-4">
-                <AlertCircle size={14} className="text-danger mt-0.5 flex-shrink-0" />
-                <p className="text-xs text-danger">{error}</p>
-              </div>
-            )}
+          <label htmlFor="tailor-resume" className="block mt-6 mb-2 text-[0.8125rem] font-bold text-ink-secondary">
+            Paste your resume
+          </label>
+          <textarea
+            id="tailor-resume"
+            value={resumeText}
+            onChange={(e) => setResumeText(e.target.value)}
+            placeholder="Paste your full resume text…"
+            rows={14}
+            className={cn(fieldClass, "py-3 resize-y")}
+          />
 
-            <div className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] p-1 mb-4">
-              <div className="px-4 pt-3 pb-1">
-                <p className="text-xs font-medium text-ink mb-2">Paste your resume</p>
-              </div>
-              <textarea
-                value={resumeText}
-                onChange={(e) => setResumeText(e.target.value)}
-                placeholder="Paste your full resume text here…"
-                rows={14}
-                className="w-full px-4 py-2 text-sm text-ink placeholder:text-ink-faint focus:outline-none resize-none bg-transparent"
-              />
-            </div>
+          <Sheet title="What you get" className="mt-5">
+            <ul className="divide-y divide-border-DEFAULT">
+              {[
+                "Rewritten bullets with action verbs and quantified impact",
+                "ATS keywords for your role and tier",
+                "A live preview on this page",
+                "One-click PDF download",
+              ].map((item) => (
+                <li key={item} className="flex items-start gap-2.5 px-4 sm:px-5 py-3 text-sm">
+                  <Check size={15} strokeWidth={3} className="mt-0.5 shrink-0 text-success" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </Sheet>
 
-            <div className="p-4 bg-surface-subtle rounded-[6px] border border-border-DEFAULT mb-6">
-              <p className="text-xs font-semibold text-ink mb-2">What you get</p>
-              <ul className="space-y-1.5">
-                {[
-                  "Rewritten bullets — action verbs + quantified impact",
-                  "ATS keywords injected for your role and tier",
-                  "Live resume preview on this page",
-                  "One-click PDF download — no external tools",
-                ].map((item) => (
-                  <li key={item} className="flex items-center gap-2 text-xs text-ink-muted">
-                    <ChevronRight size={11} className="text-primary-600 flex-shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <Button
-              size="lg"
-              variant="primary"
-              className="w-full gap-2"
-              disabled={resumeText.trim().length < 100 || loading}
-              onClick={runTailor}
-            >
-              <PenLine size={16} />
-              Tailor for {analysis?.companyTier ?? "target company"}
-            </Button>
-            <p className="text-center text-xs text-ink-faint mt-3">~15 seconds · Uses 1 analysis credit</p>
-          </motion.div>
+          <Button size="lg" className="w-full mt-6" disabled={resumeText.trim().length < 100 || loading} onClick={runTailor}>
+            <PenLine size={17} /> Tailor for {analysis?.companyTier ?? "my target"}
+          </Button>
+          <p className="mt-3 text-center text-sm text-ink-muted">Uses 1 analysis credit.</p>
         </div>
       </main>
     </>

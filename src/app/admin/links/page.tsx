@@ -1,5 +1,7 @@
 "use client";
 
+import { LoadingChart } from "@/components/ui/Sheet";
+
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { adminFetch } from "@/lib/admin-fetch";
@@ -102,7 +104,7 @@ export default function AdminLinksPage() {
   if (loading) {
     return (
       <div className="h-[60vh] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-[#6366f1]" />
+        <LoadingChart />
       </div>
     );
   }
@@ -110,9 +112,9 @@ export default function AdminLinksPage() {
   if (error || !data) {
     return (
       <div className="text-center py-20 max-w-sm mx-auto space-y-4">
-        <AlertTriangle size={32} className="text-yellow-500 mx-auto" />
-        <h2 className="text-md font-bold text-white">Failed to Compile Shortlink Metrics</h2>
-        <p className="text-xs text-[#a1a1aa] leading-relaxed">{error}</p>
+        <AlertTriangle size={32} className="text-warning mx-auto" />
+        <h2 className="text-lg font-[800] tracking-[-0.015em] text-ink">Failed to Compile Shortlink Metrics</h2>
+        <p className="text-xs text-ink-muted leading-relaxed">{error}</p>
         <div className="flex gap-2 justify-center">
           <Button variant="primary" size="sm" onClick={() => fetchLinks()}>
             Retry Fetch
@@ -127,13 +129,12 @@ export default function AdminLinksPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-[#1f1f23] pb-5">
+      <div className="flex items-center justify-between border-b border-border-DEFAULT pb-5">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <LinkIcon size={18} className="text-[#6366f1]" />
-            <h1 className="text-xl font-bold tracking-tight text-white">Trackable Shortlinks</h1>
+            <h1 className="display text-[clamp(1.9rem,4vw,2.6rem)]">Trackable links</h1>
           </div>
-          <p className="text-xs text-[#a1a1aa]">
+          <p className="mt-1.5 text-[0.9375rem] text-ink-secondary">
             Redirect and attribution manager for links routing from links.gapl.in custom domains.
           </p>
         </div>
@@ -142,7 +143,7 @@ export default function AdminLinksPage() {
           size="sm"
           onClick={handleRefresh}
           disabled={refreshing}
-          className="bg-[#18181b] border-[#27272a] text-[#a1a1aa] hover:text-white"
+          className="bg-surface-DEFAULT border-border-DEFAULT text-ink-muted hover:text-ink"
         >
           <RefreshCw size={14} className={`mr-2 ${refreshing ? "animate-spin" : ""}`} />
           {refreshing ? "Refreshing..." : "Refresh"}
@@ -152,47 +153,47 @@ export default function AdminLinksPage() {
       {/* Main Grid: Generator + Analytics Summary */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Generator Card */}
-        <div className="bg-[#18181b] border border-[#27272a] rounded-xl p-6 h-fit space-y-5">
+        <div className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] p-6 h-fit space-y-5">
           <div className="flex items-center gap-2">
-            <Plus size={16} className="text-[#6366f1]" />
-            <h2 className="text-sm font-semibold text-white">Create Shortlink</h2>
+            <Plus size={16} className="text-primary-600" />
+            <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">Create Shortlink</h2>
           </div>
           <form onSubmit={handleCreate} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-[10px] uppercase font-bold text-[#71717a] tracking-wider">Link Name</label>
+              <label className="text-[0.6875rem] uppercase font-bold text-ink-muted tracking-wider">Link Name</label>
               <Input
                 placeholder="e.g. Welcome Start Analysis Button"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="bg-[#09090b] border-[#27272a] text-xs text-white"
+                className="bg-surface-muted border-border-DEFAULT text-xs text-ink"
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-[10px] uppercase font-bold text-[#71717a] tracking-wider">Target URL Path</label>
+              <label className="text-[0.6875rem] uppercase font-bold text-ink-muted tracking-wider">Target URL Path</label>
               <Input
                 placeholder="e.g. /analyze or /report/123"
                 value={targetUrl}
                 onChange={(e) => setTargetUrl(e.target.value)}
-                className="bg-[#09090b] border-[#27272a] text-xs text-white"
+                className="bg-surface-muted border-border-DEFAULT text-xs text-ink"
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-[10px] uppercase font-bold text-[#71717a] tracking-wider">Campaign ID</label>
+                <label className="text-[0.6875rem] uppercase font-bold text-ink-muted tracking-wider">Campaign ID</label>
                 <Input
                   placeholder="e.g. welcome_email"
                   value={campaignId}
                   onChange={(e) => setCampaignId(e.target.value)}
-                  className="bg-[#09090b] border-[#27272a] text-xs text-white"
+                  className="bg-surface-muted border-border-DEFAULT text-xs text-ink"
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-[10px] uppercase font-bold text-[#71717a] tracking-wider">Custom Slug (Opt)</label>
+                <label className="text-[0.6875rem] uppercase font-bold text-ink-muted tracking-wider">Custom Slug (Opt)</label>
                 <Input
                   placeholder="e.g. start"
                   value={customSlug}
                   onChange={(e) => setCustomSlug(e.target.value)}
-                  className="bg-[#09090b] border-[#27272a] text-xs text-white"
+                  className="bg-surface-muted border-border-DEFAULT text-xs text-ink"
                 />
               </div>
             </div>
@@ -212,18 +213,18 @@ export default function AdminLinksPage() {
         {/* Clicks Stats Summary */}
         <div className="lg:col-span-2 space-y-6">
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-[#18181b] border border-[#27272a] rounded-xl p-5 flex flex-col justify-between">
-              <span className="text-[10px] uppercase font-bold text-[#71717a] tracking-wider">Total Click Events</span>
+            <div className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] p-5 flex flex-col justify-between">
+              <span className="text-[0.6875rem] uppercase font-bold text-ink-muted tracking-wider">Total Click Events</span>
               <div className="flex items-baseline gap-2 mt-2">
-                <span className="text-2xl font-extrabold text-white">{metrics.totalClicks}</span>
-                <span className="text-xs text-[#a1a1aa]">raw actions</span>
+                <span className="text-2xl font-extrabold text-ink">{metrics.totalClicks}</span>
+                <span className="text-xs text-ink-muted">raw actions</span>
               </div>
             </div>
-            <div className="bg-[#18181b] border border-[#27272a] rounded-xl p-5 flex flex-col justify-between">
-              <span className="text-[10px] uppercase font-bold text-[#71717a] tracking-wider">Unique Visitors</span>
+            <div className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] p-5 flex flex-col justify-between">
+              <span className="text-[0.6875rem] uppercase font-bold text-ink-muted tracking-wider">Unique Visitors</span>
               <div className="flex items-baseline gap-2 mt-2">
-                <span className="text-2xl font-extrabold text-white text-emerald-400">{metrics.totalUniqueClicks}</span>
-                <span className="text-xs text-[#a1a1aa]">
+                <span className="text-2xl font-extrabold text-ink text-success">{metrics.totalUniqueClicks}</span>
+                <span className="text-xs text-ink-muted">
                   {metrics.totalClicks > 0 ? ((metrics.totalUniqueClicks / metrics.totalClicks) * 100).toFixed(0) : 0}% unique
                 </span>
               </div>
@@ -231,21 +232,21 @@ export default function AdminLinksPage() {
           </div>
 
           {/* Campaigns Click breakdown */}
-          <div className="bg-[#18181b] border border-[#27272a] rounded-xl p-5 space-y-4">
-            <h2 className="text-sm font-semibold text-white">Clicks by Campaign Source</h2>
+          <div className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] p-5 space-y-4">
+            <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">Clicks by Campaign Source</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {campaigns.length === 0 ? (
-                <div className="text-xs text-[#71717a] col-span-2">No campaigns loaded.</div>
+                <div className="text-xs text-ink-muted col-span-2">No campaigns loaded.</div>
               ) : (
                 campaigns.map((c: any) => (
-                  <div key={c.id} className="bg-[#09090b] border border-[#1f1f23] rounded-lg p-3 flex justify-between items-center">
+                  <div key={c.id} className="bg-surface-muted border border-border-DEFAULT rounded-[5px] p-3 flex justify-between items-center">
                     <div>
-                      <div className="text-xs font-bold text-white capitalize">{c.name}</div>
-                      <div className="text-[10px] text-[#71717a] mt-0.5">{c.linksCount} shortlinks registered</div>
+                      <div className="text-xs font-bold text-ink capitalize">{c.name}</div>
+                      <div className="text-[0.6875rem] text-ink-muted mt-0.5">{c.linksCount} shortlinks registered</div>
                     </div>
                     <div className="text-right">
-                      <div className="text-xs font-extrabold text-white">{c.clicks} clicks</div>
-                      <div className="text-[10px] text-emerald-400 font-medium">{c.unique} unique</div>
+                      <div className="text-xs font-extrabold text-ink">{c.clicks} clicks</div>
+                      <div className="text-[0.6875rem] text-success font-medium">{c.unique} unique</div>
                     </div>
                   </div>
                 ))
@@ -256,14 +257,14 @@ export default function AdminLinksPage() {
       </div>
 
       {/* Tracked Shortlinks Directory */}
-      <div className="bg-[#18181b] border border-[#27272a] rounded-xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-[#27272a] flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-white">Shortlinks Directory</h2>
+      <div className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] overflow-hidden">
+        <div className="px-6 py-4 border-b border-border-DEFAULT flex items-center justify-between">
+          <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">Shortlinks Directory</h2>
           <Badge variant="primary">{links.length} total active</Badge>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-[#a1a1aa]">
-            <thead className="bg-[#09090b] text-[10px] uppercase font-bold text-[#71717a] border-b border-[#27272a]">
+          <table className="w-full text-left text-xs text-ink-muted">
+            <thead className="bg-surface-muted text-[0.6875rem] uppercase font-bold text-ink-muted border-b border-border-DEFAULT">
               <tr>
                 <th className="px-6 py-3">Link Info</th>
                 <th className="px-6 py-3">Short Redirect URL</th>
@@ -272,10 +273,10 @@ export default function AdminLinksPage() {
                 <th className="px-6 py-3 text-right">Created At</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#27272a]">
+            <tbody className="divide-y divide-border-DEFAULT">
               {links.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-10 text-center text-[#71717a]">
+                  <td colSpan={5} className="px-6 py-10 text-center text-ink-muted">
                     No links tracked. Create one above to get started.
                   </td>
                 </tr>
@@ -284,31 +285,31 @@ export default function AdminLinksPage() {
                   const trackingDomain = process.env.NEXT_PUBLIC_TRACKING_DOMAIN || "links.gapl.in";
                   const shortUrl = `https://${trackingDomain}/${link.id}`;
                   return (
-                    <tr key={link.id} className="hover:bg-[#18181b]/55 transition-colors">
+                    <tr key={link.id} className="hover:bg-surface-muted transition-colors">
                       <td className="px-6 py-4">
-                        <div className="font-semibold text-white">{link.name}</div>
-                        <div className="text-[10px] text-[#71717a] mt-0.5 font-mono">
-                          Targets: <span className="text-white hover:underline">{link.targetUrl}</span>
+                        <div className="font-semibold text-ink">{link.name}</div>
+                        <div className="text-[0.6875rem] text-ink-muted mt-0.5 font-mono">
+                          Targets: <span className="text-ink hover:underline">{link.targetUrl}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
-                          <span className="font-mono text-white text-[11px] font-semibold">{shortUrl}</span>
+                          <span className="font-mono text-ink text-xs font-semibold">{shortUrl}</span>
                           <button
                             onClick={() => copyToClipboard(shortUrl)}
-                            className="p-1 hover:text-white text-[#71717a] transition-colors rounded hover:bg-[#27272a]"
+                            className="p-1 hover:text-ink text-ink-muted transition-colors rounded hover:bg-surface-subtle"
                             title="Copy link"
                           >
                             <Copy size={12} />
                           </button>
                         </div>
-                        <div className="text-[10px] text-[#71717a] mt-0.5">
-                          Campaign: <span className="font-medium text-[#6366f1]">{link.campaignId}</span>
+                        <div className="text-[0.6875rem] text-ink-muted mt-0.5">
+                          Campaign: <span className="font-medium text-primary-600">{link.campaignId}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-center font-bold text-white">{link.clickCount}</td>
-                      <td className="px-6 py-4 text-center font-bold text-emerald-400">{link.uniqueClicks}</td>
-                      <td className="px-6 py-4 text-right text-[#71717a]">
+                      <td className="px-6 py-4 text-center font-bold text-ink">{link.clickCount}</td>
+                      <td className="px-6 py-4 text-center font-bold text-success">{link.uniqueClicks}</td>
+                      <td className="px-6 py-4 text-right text-ink-muted">
                         {link.createdAt
                           ? typeof link.createdAt.toDate === "function"
                             ? link.createdAt.toDate().toLocaleDateString()

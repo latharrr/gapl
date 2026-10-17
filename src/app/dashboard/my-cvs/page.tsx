@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { getUserCVs, type SavedCV } from "@/lib/firebase";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
-import { Wand2, Plus, TrendingUp, Calendar, Building2, Loader2, FileText } from "lucide-react";
+import { Sheet, PageHeader, EmptyChart, LoadingChart, APP_PAGE } from "@/components/ui/Sheet";
+import { Plus, PenLine, ArrowRight } from "lucide-react";
 
 function formatDate(val: SavedCV["createdAt"]): string {
   try {
@@ -32,99 +32,69 @@ export default function MyCVsPage() {
   }, [user]);
 
   return (
-    <div className="p-6 md:p-8 max-w-4xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <motion.h1 initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="text-xl font-bold text-ink">
-            My CVs
-          </motion.h1>
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.05 }} className="text-sm text-ink-muted mt-0.5">
-            All your AI-built resumes, saved automatically
-          </motion.p>
-        </div>
-        <Link href="/cv-builder">
-          <Button variant="primary" size="sm" className="gap-1.5">
-            <Plus size={14} /> Build New CV
-          </Button>
-        </Link>
-      </div>
-
-      {/* Content */}
-      {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 size={20} className="animate-spin text-ink-muted" />
-        </div>
-      ) : cvs.length === 0 ? (
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="w-12 h-12 bg-surface-subtle border border-border-DEFAULT rounded-[6px] flex items-center justify-center mb-4">
-            <Wand2 size={20} className="text-ink-muted" />
-          </div>
-          <h2 className="text-sm font-semibold text-ink mb-1">No CVs yet</h2>
-          <p className="text-xs text-ink-muted mb-6 max-w-xs">
-            Build your first AI-assisted resume around evidence-based ATS fit.
-          </p>
+    <div className={APP_PAGE}>
+      <PageHeader
+        title="My CVs"
+        description="Every CV you have built with Gapl, saved automatically."
+        actions={
           <Link href="/cv-builder">
-            <Button variant="primary" size="sm" className="gap-1.5">
-              <Wand2 size={14} /> Build your first CV
+            <Button size="md">
+              <Plus size={16} strokeWidth={2.5} /> Build a new CV
             </Button>
           </Link>
-        </motion.div>
+        }
+      />
+
+      {loading ? (
+        <LoadingChart text="LOADING CVS" />
+      ) : cvs.length === 0 ? (
+        <Sheet>
+          <EmptyChart
+            led="NO CVS YET"
+            title="Build your first CV"
+            action={
+              <Link href="/cv-builder">
+                <Button size="lg"><PenLine size={17} /> Build my CV</Button>
+              </Link>
+            }
+          >
+            Gapl rewrites your bullets around evidence and ATS fit, then saves every version here.
+          </EmptyChart>
+        </Sheet>
       ) : (
-        <div className="grid sm:grid-cols-2 gap-4">
-          {cvs.map((cv, i) => {
-            const improvement = cv.atsScore - cv.originalAtsScore;
-            return (
-              <motion.div
-                key={cv.id}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.06 }}
-                className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] p-5 flex flex-col gap-4 hover:border-ink-faint transition-colors"
-              >
-                {/* Top */}
-                <div className="flex items-start justify-between gap-2">
-                  <div className="w-9 h-9 bg-surface-subtle rounded-[6px] flex items-center justify-center flex-shrink-0">
-                    <FileText size={16} className="text-ink-muted" />
+        <Sheet title="Saved CVs" aside={`${cvs.length} saved`}>
+          <ul className="chart-rows">
+            {cvs.map((cv) => {
+              const improvement = cv.atsScore - cv.originalAtsScore;
+              return (
+                <li
+                  key={cv.id}
+                  className="grid gap-x-5 gap-y-2 px-4 sm:px-6 py-4 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_7rem_8rem_auto] md:items-center"
+                >
+                  <div className="min-w-0">
+                    <p className="font-bold truncate">{cv.name || "Unnamed CV"}</p>
+                    <p className="text-sm text-ink-muted truncate">{cv.role}</p>
                   </div>
-                  <span className={cn(
-                    "text-xs font-bold px-2 py-0.5 rounded-full",
-                    cv.atsScore >= 90 ? "bg-success-bg text-success" : "bg-warning-bg text-warning"
-                  )}>
-                    ATS {cv.atsScore}%
-                  </span>
-                </div>
-
-                {/* Info */}
-                <div>
-                  <p className="text-sm font-semibold text-[#111] truncate">{cv.name || "Unnamed"}</p>
-                  <p className="text-xs text-ink-muted mt-0.5 truncate">{cv.role}</p>
-                </div>
-
-                {/* Meta */}
-                <div className="flex flex-wrap gap-x-3 gap-y-1">
-                  <span className="flex items-center gap-1 text-xs text-ink-muted">
-                    <Building2 size={10} /> {cv.companyType}
-                  </span>
-                  <span className="flex items-center gap-1 text-xs text-ink-muted">
-                    <TrendingUp size={10} /> +{improvement}% ATS
-                  </span>
-                  <span className="flex items-center gap-1 text-xs text-ink-muted">
-                    <Calendar size={10} /> {formatDate(cv.createdAt)}
-                  </span>
-                </div>
-
-                {/* Action */}
-                <Link href="/cv-builder" className="mt-auto">
-                  <Button variant="outline" size="sm" className="w-full gap-1.5 text-xs">
-                    <Wand2 size={12} /> Rebuild with updates
-                  </Button>
-                </Link>
-              </motion.div>
-            );
-          })}
-        </div>
+                  <p className="text-sm text-ink-secondary">{cv.companyType}</p>
+                  <p className="chart-data text-sm">
+                    <span className={cn("font-bold", cv.atsScore >= 90 ? "text-success" : "text-warning")}>ATS {cv.atsScore}</span>
+                    <span className="block text-xs text-ink-muted">
+                      {improvement >= 0 ? "+" : ""}
+                      {improvement} from original
+                    </span>
+                  </p>
+                  <p className="chart-data text-xs text-ink-muted">{formatDate(cv.createdAt)}</p>
+                  <Link
+                    href="/cv-builder"
+                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary-600 hover:text-primary-700 hover:underline whitespace-nowrap"
+                  >
+                    Rebuild <ArrowRight size={14} />
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </Sheet>
       )}
     </div>
   );

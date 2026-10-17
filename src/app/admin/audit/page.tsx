@@ -1,5 +1,7 @@
 "use client";
 
+import { LoadingChart } from "@/components/ui/Sheet";
+
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Card } from "@/components/ui/Card";
@@ -57,7 +59,7 @@ export default function AdminAuditPage() {
   if (loading) {
     return (
       <div className="h-[60vh] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-[#6366f1]" />
+        <LoadingChart />
       </div>
     );
   }
@@ -66,36 +68,36 @@ export default function AdminAuditPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-bold text-white tracking-tight">Audit Logs Trail</h1>
-        <p className="text-xs text-[#a1a1aa] mt-0.5">Immutable tracking logs of all actions performed by administrators, super admins, and support agents</p>
+        <h1 className="display text-[clamp(1.9rem,4vw,2.6rem)]">Audit log</h1>
+        <p className="mt-1.5 text-[0.9375rem] text-ink-secondary">Immutable tracking logs of all actions performed by administrators, super admins, and support agents</p>
       </div>
 
       {error && (
-        <div className="bg-red-950/20 border border-red-900/40 text-red-400 p-4 rounded-xl text-xs">
+        <div className="bg-danger-bg border border-danger-border text-danger p-4 rounded-[6px] text-xs">
           {error}
         </div>
       )}
 
       {/* Toolbar */}
       <div className="flex flex-wrap gap-3 items-center justify-between">
-        <div className="flex flex-1 min-w-[240px] max-w-md items-center gap-2 bg-[#18181b] border border-[#27272a] rounded-lg px-3 py-1.5">
-          <Search size={14} className="text-[#71717a]" />
+        <div className="flex flex-1 min-w-[240px] max-w-md items-center gap-2 bg-surface-DEFAULT border border-border-DEFAULT rounded-[5px] px-3 py-1.5">
+          <Search size={14} className="text-ink-muted" />
           <input
             type="text"
             placeholder="Search audit trail by email, action, details..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="bg-transparent border-none text-xs text-white placeholder-[#71717a] focus:outline-none w-full"
+            className="bg-transparent border-none text-xs text-ink focus:outline-none w-full"
           />
         </div>
       </div>
 
       {/* Audit Logs Table */}
-      <div className="bg-[#18181b] border border-[#27272a] rounded-xl overflow-hidden">
+      <div className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="border-b border-[#27272a] bg-[#1c1c1f] text-[#71717a] font-semibold uppercase tracking-wider">
+              <tr className="border-b border-border-DEFAULT bg-surface-subtle text-ink-muted font-semibold uppercase tracking-wider">
                 <th className="px-5 py-3.5">Timestamp</th>
                 <th className="px-5 py-3.5">Admin Email</th>
                 <th className="px-5 py-3.5">Role</th>
@@ -104,41 +106,41 @@ export default function AdminAuditPage() {
                 <th className="px-5 py-3.5">Description</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#27272a]">
+            <tbody className="divide-y divide-border-DEFAULT">
               {filteredLogs.map((l) => {
                 const dateStr = new Date(l.timestamp).toLocaleString();
                 const act = l.action || "Unknown";
 
                 return (
-                  <tr key={l.id} className="hover:bg-[#202024] transition-colors text-white">
-                    <td className="px-5 py-4 font-mono text-[10px] text-[#71717a]">
+                  <tr key={l.id} className="hover:bg-surface-subtle transition-colors text-ink">
+                    <td className="px-5 py-4 font-mono text-[0.6875rem] text-ink-muted">
                       {dateStr}
                     </td>
-                    <td className="px-5 py-4 text-white font-medium text-[10px]">
+                    <td className="px-5 py-4 text-ink font-medium text-[0.6875rem]">
                       {l.adminEmail}
                     </td>
-                    <td className="px-5 py-4 text-[10px]">
-                      <span className={`px-2 py-0.5 rounded text-[9px] font-semibold uppercase ${
-                        l.adminRole === "super_admin" ? "bg-purple-950/20 text-purple-400 border border-purple-900/40" :
-                        "bg-[#27272a] text-[#a1a1aa]"
+                    <td className="px-5 py-4 text-[0.6875rem]">
+                      <span className={`px-2 py-0.5 rounded text-[0.6875rem] font-semibold uppercase ${
+                        l.adminRole === "super_admin" ? "bg-primary-50 text-primary-600 border border-primary-100" :
+                        "bg-surface-subtle text-ink-muted"
                       }`}>
                         {l.adminRole?.replace("_", " ")}
                       </span>
                     </td>
                     <td className="px-5 py-4">
-                      <span className={`px-2 py-0.5 rounded text-[9px] font-semibold uppercase ${
-                        act.includes("Refund") ? "bg-amber-950/20 text-amber-400 border border-amber-900/40" :
-                        act.includes("Delete") ? "bg-red-950/20 text-red-400 border border-red-900/40" :
-                        act.includes("Role") ? "bg-blue-950/20 text-blue-400 border border-blue-900/40" :
-                        "bg-[#27272a] text-white"
+                      <span className={`px-2 py-0.5 rounded text-[0.6875rem] font-semibold uppercase ${
+                        act.includes("Refund") ? "bg-warning-bg text-warning border border-warning-border" :
+                        act.includes("Delete") ? "bg-danger-bg text-danger border border-danger-border" :
+                        act.includes("Role") ? "bg-primary-50 text-primary-600 border border-primary-100" :
+                        "bg-surface-subtle text-ink"
                       }`}>
                         {act}
                       </span>
                     </td>
-                    <td className="px-5 py-4 text-[10px] text-[#a1a1aa] font-mono">
+                    <td className="px-5 py-4 text-[0.6875rem] text-ink-muted font-mono">
                       {l.targetUser || "N/A"}
                     </td>
-                    <td className="px-5 py-4 text-[#a1a1aa] max-w-sm truncate leading-relaxed">
+                    <td className="px-5 py-4 text-ink-muted max-w-sm truncate leading-relaxed">
                       {l.details}
                     </td>
                   </tr>
@@ -147,7 +149,7 @@ export default function AdminAuditPage() {
 
               {filteredLogs.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="text-center py-10 text-[#71717a]">
+                  <td colSpan={6} className="text-center py-10 text-ink-muted">
                     No administrative audit logs registered in database.
                   </td>
                 </tr>

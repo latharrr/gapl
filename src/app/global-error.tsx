@@ -1,14 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
-import { Inter } from "next/font/google";
+import { Archivo, Doto } from "next/font/google";
 import "./globals.css";
+import { StatusScreen, ghostOnDark } from "@/components/brand/StatusScreen";
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-});
+const archivo = Archivo({ subsets: ["latin"], variable: "--font-archivo", axes: ["wdth"], display: "swap" });
+const doto = Doto({ subsets: ["latin"], variable: "--font-doto", weight: ["900"], display: "swap" });
 
 interface GlobalErrorProps {
   error: Error & { digest?: string };
@@ -21,47 +19,26 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
   }, [error]);
 
   return (
-    <html lang="en" className={inter.variable}>
-      <body className="bg-surface-muted text-ink antialiased min-h-screen flex flex-col items-center justify-center p-6 text-center">
-        <div className="max-w-md space-y-6">
-          <div className="w-16 h-16 bg-danger/10 border border-danger/20 rounded-[6px] flex items-center justify-center mx-auto">
-            <svg
-              className="w-8 h-8 text-danger"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-              />
-            </svg>
-          </div>
-
-          <div className="space-y-2">
-            <h2 className="text-xl font-bold text-ink">Application Error</h2>
-            <p className="text-sm text-ink-muted leading-relaxed">
-              A critical failure occurred. Please reload the page or click Try Again.
-            </p>
-          </div>
-
-          <div className="flex gap-3 justify-center">
-            <button
-              onClick={() => window.location.reload()}
-              className="px-4 py-2 text-xs font-semibold border border-border-DEFAULT hover:bg-surface-muted rounded-[6px] transition-all"
-            >
-              Reload Page
-            </button>
-            <button
-              onClick={() => reset()}
-              className="px-4 py-2 text-xs font-semibold bg-ink text-white hover:bg-black rounded-[6px] transition-all"
-            >
-              Try again
-            </button>
-          </div>
-        </div>
+    <html lang="en" className={`${archivo.variable} ${doto.variable}`}>
+      <body className="antialiased">
+        <StatusScreen
+          led="SYSTEM FAULT"
+          title="Gapl hit a critical error."
+          body="Reload the page or try again. If it keeps happening, email hello@gapl.in."
+          actions={
+            <>
+              <button
+                onClick={() => reset()}
+                className="h-12 px-6 inline-flex items-center justify-center rounded-[6px] border-2 border-board-ink bg-board text-board-ink font-semibold"
+              >
+                Try again
+              </button>
+              <button onClick={() => window.location.reload()} className={ghostOnDark}>
+                Reload the page
+              </button>
+            </>
+          }
+        />
       </body>
     </html>
   );

@@ -1,14 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import Link from "next/link";
 import { type AnalysisResult } from "@/types/analysis";
-import { Card } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { VerdictBadge } from "@/components/ui/Badge";
-import { Plus, ArrowRight, FileText, Loader2 } from "lucide-react";
+import { Sheet, PageHeader, EmptyChart, LoadingChart, APP_PAGE } from "@/components/ui/Sheet";
+import { waitlistCount } from "@/lib/sample-report";
+import { Plus, ArrowRight } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { getUserReports } from "@/lib/firebase";
 
@@ -38,86 +37,85 @@ export default function ReportsPage() {
       .finally(() => setLoading(false));
   }, [user]);
 
+  const fmt = (d: string) => new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+  const cols = "md:grid-cols-[6.5rem_minmax(0,1.3fr)_minmax(0,1fr)_3.5rem_5.5rem_8.5rem_1rem]";
+
   return (
-    <div className="p-6 md:p-8 max-w-4xl mx-auto space-y-6">
-      <div className="flex items-start justify-between">
-        <div>
-          <motion.h1 initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="text-xl font-bold text-ink">
-            Reports
-          </motion.h1>
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.05 }} className="text-sm text-ink-muted mt-0.5">
-            All your resume analyses
-          </motion.p>
-        </div>
-        <Link href="/analyze">
-          <Button size="sm" variant="primary" className="gap-1.5">
-            <Plus size={14} /> New Analysis
-          </Button>
-        </Link>
-      </div>
+    <div className={APP_PAGE}>
+      <PageHeader
+        title="Reports"
+        description="Every chart Gapl has prepared from your resume, newest first."
+        actions={
+          <Link href="/analyze">
+            <Button size="md">
+              <Plus size={16} strokeWidth={2.5} /> New analysis
+            </Button>
+          </Link>
+        }
+      />
 
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-6 w-6 animate-spin text-primary-600" />
-        </div>
+        <LoadingChart text="LOADING REPORTS" />
       ) : reports.length === 0 ? (
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="text-center py-20">
-          <div className="w-10 h-10 bg-surface-subtle border border-border-DEFAULT rounded-[6px] flex items-center justify-center mx-auto mb-3">
-            <FileText size={18} className="text-ink-muted" />
-          </div>
-          <p className="text-sm font-medium text-ink mb-1">No reports yet</p>
-          <p className="text-xs text-ink-muted mb-4">Run your first analysis to see results here.</p>
-          <Link href="/analyze">
-            <Button size="sm" variant="outline" className="gap-1.5"><Plus size={14} /> New Analysis</Button>
-          </Link>
-        </motion.div>
+        <Sheet>
+          <EmptyChart
+            led="NO REPORTS YET"
+            title="Run your first analysis"
+            action={
+              <Link href="/analyze">
+                <Button size="lg"><Plus size={17} strokeWidth={2.5} /> Check my status</Button>
+              </Link>
+            }
+          >
+            Upload your resume, pick a role and tier, and your first chart appears here.
+          </EmptyChart>
+        </Sheet>
       ) : (
-        <div className="space-y-3">
-          {reports.map((r, i) => (
-            <motion.div key={r.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
-              <Card variant="default" padding="none" className="hover:shadow-md transition-shadow duration-200">
-                <Link href={`/report/${r.id}`}>
-                  <div className="p-5 flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-[6px] bg-surface-subtle border border-border-DEFAULT flex items-center justify-center flex-shrink-0">
-                      <FileText size={16} className="text-ink-muted" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <p className="text-sm font-semibold text-ink">{r.role}</p>
-                        <span className="text-ink-faint">·</span>
-                        <p className="text-xs text-ink-muted">{r.companyTier}</p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-xs text-ink-muted">ATS: {r.atsScore}%</span>
-                        <span className="text-ink-faint">·</span>
-                        <span className="text-xs text-ink-muted">Readiness: {r.readiness}%</span>
-                        <span className="text-ink-faint">·</span>
-                        <span className="text-xs text-ink-muted">
-                          {new Date(r.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3 flex-shrink-0">
-                      <VerdictBadge verdict={r.recruiterVerdict.verdict} />
-                      <ArrowRight size={14} className="text-ink-faint" />
-                    </div>
-                  </div>
+        <Sheet title="Chart history" aside={`${reports.length} ${reports.length === 1 ? "report" : "reports"}`}>
+          <div
+            aria-hidden
+            className={`hidden md:grid gap-4 px-6 py-2 border-b border-border-DEFAULT text-[0.6875rem] font-bold uppercase tracking-[0.07em] text-ink-muted ${cols}`}
+          >
+            <span>Date</span>
+            <span>Applying for</span>
+            <span>Tier</span>
+            <span className="text-right">ATS</span>
+            <span className="text-right">Readiness</span>
+            <span>Status</span>
+            <span />
+          </div>
+          <ul className="chart-rows">
+            {reports.map((r) => (
+              <li key={r.id}>
+                <Link
+                  href={`/report/${r.id}`}
+                  className={`group grid grid-cols-2 gap-x-4 gap-y-1.5 px-4 sm:px-6 py-4 md:items-center hover:bg-board/20 ${cols}`}
+                >
+                  <span className="chart-data col-span-2 md:col-span-1 text-xs text-ink-muted">{fmt(r.createdAt)}</span>
+                  <span className="col-span-2 md:col-span-1 font-bold group-hover:text-primary-600">{r.role}</span>
+                  <span className="col-span-2 md:col-span-1 text-sm text-ink-secondary">{r.companyTier}</span>
+                  <span className="chart-data text-sm md:text-right"><span className="md:hidden text-ink-muted">ATS </span>{r.atsScore}</span>
+                  <span className="chart-data text-sm font-bold md:text-right"><span className="md:hidden font-normal text-ink-muted">Readiness </span>{r.readiness}</span>
+                  <span className="col-span-2 md:col-span-1">
+                    <VerdictBadge verdict={r.recruiterVerdict.verdict} waitlist={waitlistCount(r.careerGaps ?? [])} size="sm" />
+                  </span>
+                  <ArrowRight size={15} className="hidden md:block text-ink-faint group-hover:text-ink" />
                 </Link>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
+              </li>
+            ))}
+          </ul>
+        </Sheet>
       )}
 
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-        <div className="p-8 rounded-[6px] border-2 border-dashed border-border-DEFAULT text-center">
-          <p className="text-sm font-medium text-ink-muted mb-1">Run another analysis</p>
-          <p className="text-xs text-ink-faint mb-4">Upload a new version of your resume to track improvement.</p>
-          <Link href="/analyze">
-            <Button size="sm" variant="outline" className="gap-1.5"><Plus size={14} /> New Analysis</Button>
-          </Link>
-        </div>
-      </motion.div>
+      {!loading && reports.length > 0 && (
+        <p className="text-sm text-ink-muted">
+          Worked on your gaps?{" "}
+          <Link href="/analyze" className="font-semibold text-primary-600 underline hover:text-primary-700">
+            Re-analyze your updated resume
+          </Link>{" "}
+          to see what moved.
+        </p>
+      )}
     </div>
   );
 }

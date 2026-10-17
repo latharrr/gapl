@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
+import { ArrowLeft } from "lucide-react";
+import { ReadingPage } from "@/components/layout/ReadingPage";
 
 const POSTS: Record<string, { title: string; date: string; readTime: string; content: string[] }> = {
   "why-ats-scores-are-a-myth": {
@@ -52,29 +52,18 @@ export default async function BlogPostPage({ params }: PageProps) {
   }
 
   return (
-    <>
-      <Navbar />
-      <main className="pt-24 pb-16 bg-surface-muted min-h-screen text-ink">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <Link href="/blog" className="text-xs font-semibold text-ink-muted hover:text-ink-secondary mb-6 inline-block">
-            ← Back to blog
-          </Link>
-          <div className="flex items-center gap-3 text-xs text-ink-faint mb-4">
-            <span>{post.date}</span>
-            <span>•</span>
-            <span>{post.readTime}</span>
-          </div>
-          <h1 className="text-4xl font-extrabold tracking-tight mb-8">
-            {post.title}
-          </h1>
-          <div className="prose prose-zinc max-w-none space-y-6 text-sm text-ink-secondary leading-relaxed">
-            {post.content.map((paragraph, idx) => (
-              <p key={idx}>{paragraph}</p>
-            ))}
-          </div>
-        </div>
-      </main>
-      <Footer />
-    </>
+    <ReadingPage
+      title={post.title}
+      meta={`${post.date} · ${post.readTime}`}
+      back={
+        <Link href="/blog" className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink-muted hover:text-ink">
+          <ArrowLeft size={15} /> All articles
+        </Link>
+      }
+    >
+      {post.content.map((paragraph, idx) => (
+        <p key={idx}>{paragraph}</p>
+      ))}
+    </ReadingPage>
   );
 }

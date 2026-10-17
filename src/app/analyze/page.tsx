@@ -21,6 +21,9 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Wordmark } from "@/components/brand/Wordmark";
+import { StepRoute } from "@/components/brand/StepRoute";
+import { DepartureBoard } from "@/components/brand/DepartureBoard";
+import { OptionList } from "@/components/ui/Choice";
 import { ROLES, TIERS } from "@/lib/targets";
 
 // ── Client-side resume content check (mirrors backend heuristic) ──────────────
@@ -310,41 +313,7 @@ function AnalyzeFlow() {
         </div>
       </header>
 
-      {/* Route strip of the four steps */}
-      <nav aria-label="Steps" className="border-b border-border-strong bg-surface-DEFAULT">
-        <ol className="max-w-3xl mx-auto px-4 sm:px-6 py-4 grid grid-cols-4">
-          {steps.map((s, i) => {
-            const done = i < currentIndex;
-            const active = i === currentIndex;
-            return (
-              <li key={s.key} className="relative flex flex-col items-start" aria-current={active ? "step" : undefined}>
-                {i < steps.length - 1 && (
-                  <span
-                    aria-hidden
-                    className={cn("absolute left-5 right-0 top-[0.6875rem] h-[3px]", done ? "bg-ink" : "bg-border-DEFAULT")}
-                  />
-                )}
-                <span
-                  className={cn(
-                    "relative z-10 h-6 w-6 rounded-full border-[3px] grid place-items-center",
-                    done ? "border-ink bg-ink text-white" : active ? "border-ink bg-board" : "border-border-strong bg-surface-DEFAULT"
-                  )}
-                >
-                  {done && <Check size={12} strokeWidth={3.5} />}
-                </span>
-                <span
-                  className={cn(
-                    "mt-2 text-xs sm:text-sm pr-2",
-                    active ? "font-bold text-ink" : done ? "font-medium text-ink-secondary" : "text-ink-muted"
-                  )}
-                >
-                  {s.label}
-                </span>
-              </li>
-            );
-          })}
-        </ol>
-      </nav>
+      <StepRoute steps={steps.map((st) => st.label)} current={currentIndex} />
 
       {/* Paywall */}
       {showPaywall && (
@@ -424,6 +393,7 @@ function AnalyzeFlow() {
                 <h1 className="display text-[clamp(1.9rem,5vw,2.6rem)]">What role are you applying for?</h1>
                 <p className="mt-2 text-ink-secondary">This decides what a recruiter looks for in your resume.</p>
                 <OptionList
+                  className="mt-6"
                   name="role"
                   value={selectedRole}
                   onChange={setSelectedRole}
@@ -440,6 +410,7 @@ function AnalyzeFlow() {
                 <h1 className="display text-[clamp(1.9rem,5vw,2.6rem)]">Which companies are you targeting?</h1>
                 <p className="mt-2 text-ink-secondary">The bar for a {selectedRole || "candidate"} is very different across tiers.</p>
                 <OptionList
+                  className="mt-6"
                   name="tier"
                   value={selectedTier}
                   onChange={setSelectedTier}
@@ -598,51 +569,6 @@ function AnalyzeFlow() {
   );
 }
 
-function OptionList({
-  name,
-  value,
-  onChange,
-  options,
-}: {
-  name: string;
-  value: string;
-  onChange: (v: string) => void;
-  options: { value: string; label: string; hint?: string }[];
-}) {
-  return (
-    <div role="radiogroup" aria-label={name} className="mt-6 chart-sheet rounded-[6px] overflow-hidden divide-y divide-border-DEFAULT">
-      {options.map((o) => {
-        const selected = value === o.value;
-        return (
-          <button
-            key={o.value}
-            role="radio"
-            aria-checked={selected}
-            onClick={() => onChange(o.value)}
-            className={cn(
-              "w-full flex items-center gap-4 px-4 py-4 text-left transition-colors",
-              selected ? "bg-board/30" : "hover:bg-surface-muted"
-            )}
-          >
-            <span
-              className={cn(
-                "h-5 w-5 shrink-0 rounded-full border-[2px] grid place-items-center",
-                selected ? "border-ink bg-ink" : "border-border-strong"
-              )}
-            >
-              {selected && <span className="h-2 w-2 rounded-full bg-board" />}
-            </span>
-            <span className="min-w-0">
-              <span className="block font-bold">{o.label}</span>
-              {o.hint && <span className="block text-sm text-ink-muted">{o.hint}</span>}
-            </span>
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
 const STAGE_DETAILS = [
   "Extracting skills, project complexity and experience",
   "Matching keywords and finding missing requirements",
@@ -651,47 +577,15 @@ const STAGE_DETAILS = [
   "Weighting the scores and setting your readiness",
 ];
 
-// The analysis as a departure board: each stage is a row that goes WAIT → NOW → DONE.
 function LoadingScreen({ loadingStep, role, tier }: { loadingStep: number; role: string; tier: string }) {
-  const active = ANALYSIS_STAGES[loadingStep] ?? ANALYSIS_STAGES[ANALYSIS_STAGES.length - 1];
-  const detail = STAGE_DETAILS[loadingStep] ?? "Finalizing your report";
-
   return (
-    <div className="min-h-screen led-ground text-surface-muted flex items-center justify-center p-4 sm:p-6">
-      <div className="w-full max-w-xl">
-        <p className="chart-data text-xs text-surface-muted/60">
-          {role} · {tier}
-        </p>
-        <h1 className="display mt-2 text-[clamp(1.9rem,5vw,2.6rem)]">Preparing your chart</h1>
-        <p className="mt-2 text-surface-muted/70" aria-live="polite">{detail}…</p>
-
-        <div className="mt-8 rounded-[6px] border border-led-dim bg-black/40 font-[family-name:var(--font-led)] font-black text-led">
-          <div className="flex justify-between px-4 py-2 border-b border-led-dim text-sm tracking-[0.06em]">
-            <span>STAGE</span>
-            <span>STATUS</span>
-          </div>
-          <ol>
-            {ANALYSIS_STAGES.map((s, i) => {
-              const done = i < loadingStep;
-              const now = i === loadingStep;
-              return (
-                <li
-                  key={s.id}
-                  className={cn(
-                    "flex items-center justify-between gap-4 px-4 py-3 text-[1.05rem] tracking-[0.04em] border-b border-led-dim/50 last:border-0",
-                    !done && !now && "opacity-35"
-                  )}
-                >
-                  <span className="truncate">{s.label.toUpperCase()}</span>
-                  <span className={cn("shrink-0", now && "animate-led-blink")}>{done ? "DONE" : now ? "NOW" : "WAIT"}</span>
-                </li>
-              );
-            })}
-          </ol>
-        </div>
-        <p className="sr-only" aria-live="polite">Current stage: {active.label}</p>
-        <p className="mt-4 text-sm text-surface-muted/60">Keep this tab open while the chart is prepared.</p>
-      </div>
-    </div>
+    <DepartureBoard
+      kicker={`${role} · ${tier}`}
+      title="Preparing your chart"
+      detail={`${STAGE_DETAILS[loadingStep] ?? "Finalizing your report"}…`}
+      stages={ANALYSIS_STAGES.map((s) => s.label)}
+      current={loadingStep}
+      footnote="Keep this tab open while the chart is prepared."
+    />
   );
 }
