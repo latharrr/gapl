@@ -1,6 +1,7 @@
 import { getAdminDb } from "./firebase-admin";
 import { sendEmail } from "./resend";
 import { createTrackableLink } from "./link-tracker";
+import { emailLayout, emailButton, escapeHtml, EMAIL } from "./email-layout";
 
 // Utility to parse and replace all links targeting Gapl with links.gapl.in redirects
 async function rewriteLinks({
@@ -23,6 +24,8 @@ async function rewriteLinks({
 
   for (const match of matches) {
     const originalUrl = match[1];
+    // Brand links (logo, footer) point at the bare homepage; don't spend a tracked link on them.
+    if (originalUrl === appUrl || originalUrl === `${appUrl}/`) continue;
 
     // Determine link name based on URL
     let linkName = "CTA Link";
@@ -57,6 +60,7 @@ interface DispatchOptions {
   campaignName: string;
   subject: string;
   bodyHtml: string;
+  preheader?: string;
 }
 
 // Low-level helper to log messages, rewrite links, dispatch, and update resendEmailId
@@ -67,6 +71,7 @@ async function dispatchEmail({
   campaignName,
   subject,
   bodyHtml,
+  preheader,
 }: DispatchOptions) {
   const db = getAdminDb();
   
@@ -91,7 +96,7 @@ async function dispatchEmail({
 
   // 3. Rewrite HTML links using messageId context
   const trackingHtml = await rewriteLinks({
-    html: bodyHtml,
+    html: emailLayout(bodyHtml, { preheader }),
     campaignId,
     emailId: messageId,
     userId,
@@ -164,34 +169,40 @@ async function dispatchEmail({
 }
 
 // ── Welcome Email ─────────────────────────────────────────────────────────────
-function escapeHtml(value: string): string {
-  return value.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] as string);
+const h2 = (text: string) =>
+  `<h1 style="margin:0 0 12px 0;font-family:${EMAIL.font};font-size:24px;line-height:1.2;font-weight:800;letter-spacing:-0.02em;color:${EMAIL.ink};">${text}</h1>`;
+const para = (text: string) => `<p style="margin:0 0 14px 0;">${text}</p>`;
+const label = (text: string, color: string = EMAIL.muted) =>
+  `<p style="margin:0 0 4px 0;font-size:11px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:${color};">${text}</p>`;
+const cta = (href: string, text: string) => `<div style="margin:28px 0 8px 0;">${emailButton(href, text)}</div>`;
+
+/** A row of figures printed like a reservation chart. */
+function figures(items: { label: string; value: string; color?: string }[]): string {
+  const cells = items
+    .map(
+      (it) => `<td style="padding:14px 16px;border-right:1px solid ${EMAIL.rule};vertical-align:top;">
+        ${label(escapeHtml(it.label))}
+        <span style="font-family:${EMAIL.mono};font-size:26px;font-weight:700;color:${it.color ?? EMAIL.ink};">${escapeHtml(it.value)}</span>
+      </td>`
+    )
+    .join("");
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;border:1px solid ${EMAIL.rule};border-top:2px solid ${EMAIL.ink};background-color:#ffffff;"><tr>${cells}</tr></table>`;
 }
 
 export async function sendWelcomeEmail(userId: string, email: string, name: string) {
-  const safeName = escapeHtml(String(name || "there").slice(0, 80));
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.in";
-  
-  const bodyHtml = `
-    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #111111;">
-      <h2>Welcome to Gapl, ${safeName}!</h2>
-      <p>Thanks for joining our community.</p>
-      <p>To accelerate your job search, upload your resume and target job description to discover:</p>
-      <ul>
-        <li><strong>Why recruiters reject you:</strong> Live recruiter alignment reviews.</li>
-        <li><strong>Which skills you are missing:</strong> Core missing technical topics.</li>
-        <li><strong>What project to build next:</strong> Custom evidence roadmaps.</li>
-      </ul>
-      <div style="margin: 32px 0;">
-        <a href="${appUrl}/analyze" style="background-color: #111111; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px;">
-          Start Analysis →
-        </a>
-      </div>
-      <p style="font-size: 12px; color: #71717a; margin-top: 48px;">
-        Gapl | Application Readiness Intelligence Engine
-      </p>
-    </div>
-  `;
+  const safeName = escapeHtml(String(name || "there").slice(0, 80));
+
+  const bodyHtml =
+    h2(`Welcome to Gapl, ${safeName}.`) +
+    para("Gapl reads your resume the way a recruiter at your target tier would, and tells you three things:") +
+    `<ul style="margin:0 0 14px 0;padding-left:20px;">
+      <li style="margin-bottom:6px;"><strong>Why you're being filtered out:</strong> an honest recruiter verdict with the reasons.</li>
+      <li style="margin-bottom:6px;"><strong>Which skills are missing:</strong> gaps ranked by impact for your role and tier.</li>
+      <li><strong>What to build next:</strong> a week-by-week route to close them.</li>
+    </ul>` +
+    para("Your first analysis is free.") +
+    cta(`${appUrl}/analyze`, "Check my status");
 
   return dispatchEmail({
     userId,
@@ -200,6 +211,7 @@ export async function sendWelcomeEmail(userId: string, email: string, name: stri
     campaignName: "Welcome Onboarding Sequence",
     subject: "Welcome to Gapl",
     bodyHtml,
+    preheader: "Your first analysis is free. Here's what Gapl checks.",
   });
 }
 
@@ -213,33 +225,15 @@ export async function sendReportReadyEmail(
 ) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.in";
 
-  const bodyHtml = `
-    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #111111;">
-      <h2>Your Gapl report is ready!</h2>
-      <p>We have completed evaluating your application readiness profile.</p>
-      
-      <div style="display: flex; gap: 16px; margin: 24px 0;">
-        <div style="background-color: #f4f4f5; padding: 16px; border-radius: 8px; text-align: center; flex: 1;">
-          <p style="font-size: 12px; color: #71717a; margin: 0 0 8px 0;">ATS SCORE</p>
-          <span style="font-size: 24px; font-weight: bold; color: #dc2626;">${atsScore}%</span>
-        </div>
-        <div style="background-color: #f4f4f5; padding: 16px; border-radius: 8px; text-align: center; flex: 1;">
-          <p style="font-size: 12px; color: #71717a; margin: 0 0 8px 0;">READINESS</p>
-          <span style="font-size: 24px; font-weight: bold; color: #16a34a;">${readiness}%</span>
-        </div>
-      </div>
-
-      <p>We simulated recruiter reviews and mapped out a custom roadmap to fill your skill gaps.</p>
-      <div style="margin: 32px 0;">
-        <a href="${appUrl}/report/${reportId}" style="background-color: #111111; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px;">
-          View Report →
-        </a>
-      </div>
-      <p style="font-size: 12px; color: #71717a; margin-top: 48px;">
-        Gapl | Application Readiness Intelligence Engine
-      </p>
-    </div>
-  `;
+  const bodyHtml =
+    h2("Your chart is ready.") +
+    para("Gapl has finished reading your resume. Here's where it stands:") +
+    figures([
+      { label: "ATS", value: String(atsScore) },
+      { label: "Readiness", value: String(readiness) },
+    ]) +
+    para("Your report has the recruiter's verdict, the gaps behind it, and a week-by-week route to close them.") +
+    cta(`${appUrl}/report/${encodeURIComponent(reportId)}`, "Open my report");
 
   return dispatchEmail({
     userId,
@@ -248,6 +242,7 @@ export async function sendReportReadyEmail(
     campaignName: "Analysis Finished Notification",
     subject: "Your Gapl report is ready",
     bodyHtml,
+    preheader: `Readiness ${readiness}, ATS ${atsScore}. See the reasons and your route.`,
   });
 }
 
@@ -257,41 +252,32 @@ export async function sendPaymentSuccessEmail(
   email: string,
   paymentId: string,
   plan: string,
-  amount: number
+  amount: number // whole rupees, e.g. 149
 ) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.in";
+  const rupees = `₹${Number(amount || 0).toLocaleString("en-IN")}`;
+  const planName = plan ? plan.charAt(0).toUpperCase() + plan.slice(1) : "";
 
-  const bodyHtml = `
-    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #111111;">
-      <h2>Payment Receipt & Confirmation</h2>
-      <p>Thanks for upgrading. Your transaction was processed successfully.</p>
-      
-      <div style="background-color: #f4f4f5; padding: 20px; border-radius: 8px; margin: 24px 0;">
-        <p style="margin: 0 0 8px 0; font-size: 14px;"><strong>Plan:</strong> ${plan.toUpperCase()}</p>
-        <p style="margin: 0 0 8px 0; font-size: 14px;"><strong>Amount Paid:</strong> $${(amount / 100).toFixed(2)}</p>
-        <p style="margin: 0 0 8px 0; font-size: 14px;"><strong>Transaction ID:</strong> ${paymentId}</p>
-        <p style="margin: 0; font-size: 14px;"><strong>Status:</strong> Captured (Credits Added)</p>
-      </div>
-
-      <p>Go to your dashboard to review your upgraded limits and begin deep-scanning reports.</p>
-      <div style="margin: 32px 0;">
-        <a href="${appUrl}/dashboard" style="background-color: #111111; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px;">
-          Go to Dashboard →
-        </a>
-      </div>
-      <p style="font-size: 12px; color: #71717a; margin-top: 48px;">
-        Gapl | Application Readiness Intelligence Engine
-      </p>
-    </div>
-  `;
+  const bodyHtml =
+    h2("Payment received.") +
+    para("Thanks for upgrading. Your plan is active now.") +
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;border:1px solid ${EMAIL.rule};border-top:2px solid ${EMAIL.ink};background-color:#ffffff;font-size:14px;">
+      <tr><td style="padding:10px 16px;color:${EMAIL.muted};">Plan</td><td style="padding:10px 16px;font-weight:700;text-align:right;">${escapeHtml(planName)}</td></tr>
+      <tr><td style="padding:10px 16px;color:${EMAIL.muted};background-color:#e3ecdc;">Amount paid</td><td style="padding:10px 16px;font-family:${EMAIL.mono};font-weight:700;text-align:right;background-color:#e3ecdc;">${escapeHtml(rupees)}</td></tr>
+      <tr><td style="padding:10px 16px;color:${EMAIL.muted};">Payment ID</td><td style="padding:10px 16px;font-family:${EMAIL.mono};text-align:right;">${escapeHtml(paymentId)}</td></tr>
+      <tr><td style="padding:10px 16px;color:${EMAIL.muted};background-color:#e3ecdc;">Status</td><td style="padding:10px 16px;font-weight:700;color:${EMAIL.success};text-align:right;background-color:#e3ecdc;">Captured · credits added</td></tr>
+    </table>` +
+    para("Keep this email as your receipt.") +
+    cta(`${appUrl}/dashboard`, "Go to my dashboard");
 
   return dispatchEmail({
     userId,
     email,
     campaignId: "payment_receipt",
     campaignName: "Receipt Billing Transaction",
-    subject: "Receipt: Plan Purchased",
+    subject: `Receipt: Gapl ${planName} plan`,
     bodyHtml,
+    preheader: `${rupees} received for the ${planName} plan.`,
   });
 }
 
@@ -305,29 +291,15 @@ export async function sendDay1ReminderEmail(
 ) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.in";
 
-  const bodyHtml = `
-    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #111111;">
-      <h2>You haven't started your roadmap yet</h2>
-      <p>Fill the gaps and stand out to recruiters.</p>
-      
-      <div style="border-left: 4px solid #4f46e5; padding-left: 16px; margin: 24px 0;">
-        <p style="margin: 0 0 8px 0; font-size: 14px; color: #4f46e5;"><strong>Top Skill Deficit:</strong></p>
-        <p style="margin: 0 0 16px 0; font-size: 16px; font-weight: bold;">${topGap}</p>
-        <p style="margin: 0 0 8px 0; font-size: 14px; color: #4f46e5;"><strong>Recommended Action Project:</strong></p>
-        <p style="margin: 0; font-size: 16px; font-weight: bold;">${recommendedProject}</p>
-      </div>
-
-      <p>Every day without actions is another day without recruiter signals. Start tracking tasks today.</p>
-      <div style="margin: 32px 0;">
-        <a href="${appUrl}/report/${reportId}#roadmap" style="background-color: #111111; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px;">
-          Start Building →
-        </a>
-      </div>
-      <p style="font-size: 12px; color: #71717a; margin-top: 48px;">
-        Gapl | Application Readiness Intelligence Engine
-      </p>
-    </div>
-  `;
+  const bodyHtml =
+    h2("Your route hasn't started yet.") +
+    para("One build closes the gap that's costing you the most:") +
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;border:1px solid ${EMAIL.rule};border-top:2px solid ${EMAIL.ink};background-color:#ffffff;">
+      <tr><td style="padding:14px 16px;">${label("Top gap", EMAIL.danger)}<span style="font-size:16px;font-weight:700;">${escapeHtml(topGap)}</span></td></tr>
+      <tr><td style="padding:14px 16px;background-color:#e3ecdc;">${label("Build next", EMAIL.navy)}<span style="font-size:16px;font-weight:700;">${escapeHtml(recommendedProject)}</span></td></tr>
+    </table>` +
+    para("Tick off the first task today and your readiness starts moving.") +
+    cta(`${appUrl}/report/${encodeURIComponent(reportId)}#roadmap`, "Start my route");
 
   return dispatchEmail({
     userId,
@@ -336,6 +308,7 @@ export async function sendDay1ReminderEmail(
     campaignName: "Inactivity Day 1 Reminder",
     subject: "You haven't started your roadmap yet",
     bodyHtml,
+    preheader: `Build next: ${recommendedProject}`,
   });
 }
 
@@ -350,27 +323,15 @@ export async function sendRoadmapMilestoneEmail(
 ) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.in";
 
-  const bodyHtml = `
-    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #111111;">
-      <h2>You're ${percentage}% done with your roadmap!</h2>
-      <p>Outstanding progress. You are successfully closing your skill gaps.</p>
-      
-      <div style="background-color: #eef2ff; border: 1px solid #e0e7ff; padding: 20px; border-radius: 8px; margin: 24px 0; text-align: center;">
-        <p style="margin: 0 0 8px 0; font-size: 12px; color: #4338ca; uppercase font-weight: bold;">EST. READINESS SCORES</p>
-        <span style="font-size: 32px; font-weight: bold; color: #4338ca;">${currentReadiness}% → ${targetReadiness}%</span>
-      </div>
-
-      <p>Keep the momentum going. Finish your remaining checklist items and stand out to recruiters.</p>
-      <div style="margin: 32px 0;">
-        <a href="${appUrl}/report/${reportId}#roadmap" style="background-color: #111111; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px;">
-          Keep going →
-        </a>
-      </div>
-      <p style="font-size: 12px; color: #71717a; margin-top: 48px;">
-        Gapl | Application Readiness Intelligence Engine
-      </p>
-    </div>
-  `;
+  const bodyHtml =
+    h2(`You're ${escapeHtml(percentage)}% through your route.`) +
+    para("You're closing your gaps. Here's where your projected readiness stands:") +
+    figures([
+      { label: "Now", value: String(currentReadiness) },
+      { label: "Target", value: String(targetReadiness), color: EMAIL.success },
+    ]) +
+    para("Finish the remaining tasks, then re-analyze your updated resume to get a fresh chart.") +
+    cta(`${appUrl}/report/${encodeURIComponent(reportId)}#roadmap`, "Keep going");
 
   return dispatchEmail({
     userId,
@@ -379,6 +340,7 @@ export async function sendRoadmapMilestoneEmail(
     campaignName: `Roadmap Milestone ${percentage}% Notification`,
     subject: `You're ${percentage}% done!`,
     bodyHtml,
+    preheader: `Projected readiness ${currentReadiness} of ${targetReadiness}.`,
   });
 }
 
@@ -391,30 +353,20 @@ export async function sendDay7ReminderEmail(
 ) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.in";
 
-  const bodyHtml = `
-    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #111111;">
-      <h2>Weekly Roadmap Sync</h2>
-      <p>It's been a week since we generated your readiness checklist. Let's sync up.</p>
-      <p>You have completed <strong>${completedTasksCount}</strong> tasks so far.</p>
-      <p>Consistent effort is what separates successful candidates. Stand out by updating your roadmap progress.</p>
-      <div style="margin: 32px 0;">
-        <a href="${appUrl}/report/${reportId}#roadmap" style="background-color: #111111; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px;">
-          Resume Roadmap →
-        </a>
-      </div>
-      <p style="font-size: 12px; color: #71717a; margin-top: 48px;">
-        Gapl | Application Readiness Intelligence Engine
-      </p>
-    </div>
-  `;
+  const bodyHtml =
+    h2("A week on your route.") +
+    para(`It's been a week since Gapl prepared your roadmap. You've completed <strong>${escapeHtml(completedTasksCount)}</strong> ${completedTasksCount === 1 ? "task" : "tasks"} so far.`) +
+    para("Steady weekly progress is what turns a waitlist into a shortlist. Pick up the next task.") +
+    cta(`${appUrl}/report/${encodeURIComponent(reportId)}#roadmap`, "Resume my route");
 
   return dispatchEmail({
     userId,
     email,
     campaignId: "day_7_reminder",
     campaignName: "Inactivity Day 7 Reminder",
-    subject: "Your Weekly Roadmap Sync",
+    subject: "Your weekly roadmap check-in",
     bodyHtml,
+    preheader: `${completedTasksCount} tasks done. Here's the next one.`,
   });
 }
 
@@ -422,21 +374,11 @@ export async function sendDay7ReminderEmail(
 export async function sendReanalysisReminderEmail(userId: string, email: string) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.in";
 
-  const bodyHtml = `
-    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #111111;">
-      <h2>Time to re-analyze your resume?</h2>
-      <p>If you've completed your roadmap goals and built new projects, you've improved your readiness profile.</p>
-      <p>Upload your updated resume now to recalculate your ATS score, verify gap closures, and see your score jump.</p>
-      <div style="margin: 32px 0;">
-        <a href="${appUrl}/analyze" style="background-color: #111111; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px;">
-          Analyze Again →
-        </a>
-      </div>
-      <p style="font-size: 12px; color: #71717a; margin-top: 48px;">
-        Gapl | Application Readiness Intelligence Engine
-      </p>
-    </div>
-  `;
+  const bodyHtml =
+    h2("Time to re-check your status?") +
+    para("If you've finished roadmap tasks or built new projects, your resume has changed.") +
+    para("Upload the updated version to get a fresh chart and see which gaps you've closed.") +
+    cta(`${appUrl}/analyze`, "Re-analyze my resume");
 
   return dispatchEmail({
     userId,
@@ -445,5 +387,6 @@ export async function sendReanalysisReminderEmail(userId: string, email: string)
     campaignName: "Two-Week Reanalysis Trigger",
     subject: "Time to check your score improvement?",
     bodyHtml,
+    preheader: "Upload your updated resume for a fresh chart.",
   });
 }

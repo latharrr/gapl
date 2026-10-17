@@ -57,6 +57,7 @@
   --color-danger: #b0241c;
   --color-danger-bg: #f6e1dd;
   --color-danger-border: #e4aea7;
+  --color-danger-deep: #8f1b15;
 
   /* Type */
   --font-sans: var(--font-archivo), "Archivo", system-ui, sans-serif;
@@ -75,47 +76,9 @@
   --shadow-xl: 0 24px 48px -12px rgb(23 24 31 / 0.22), 0 8px 16px -8px rgb(23 24 31 / 0.08);
   --shadow-card: 0 1px 2px 0 rgb(23 24 31 / 0.08), 0 4px 14px -6px rgb(23 24 31 / 0.12);
 
-  --radius-4xl: 2rem;
-
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
-  --animate-fade-in: fade-in 0.5s var(--ease-out-expo);
-  --animate-slide-in-right: slide-in-right 0.4s var(--ease-out-expo);
-  --animate-scale-in: scale-in 0.25s var(--ease-out-expo);
-  --animate-shimmer: shimmer 1.5s infinite;
-  --animate-pulse-slow: pulse-slow 2s ease-in-out infinite;
-  --animate-spin-slow: spin-slow 3s linear infinite;
   --animate-led-blink: led-blink 1.1s steps(2, jump-none) infinite;
-
-  @keyframes fade-in {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes slide-in-right {
-    from { opacity: 0; transform: translateX(-12px); }
-    to { opacity: 1; transform: translateX(0); }
-  }
-
-  @keyframes scale-in {
-    from { opacity: 0; transform: scale(0.97); }
-    to { opacity: 1; transform: scale(1); }
-  }
-
-  @keyframes shimmer {
-    from { background-position: -200% 0; }
-    to { background-position: 200% 0; }
-  }
-
-  @keyframes pulse-slow {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-  }
-
-  @keyframes spin-slow {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
 
   @keyframes led-blink {
     0% { opacity: 1; }
@@ -324,15 +287,4 @@
     box-shadow: var(--shadow-card);
   }
 
-  .shimmer {
-    background: linear-gradient(90deg, #e6e6dc 0%, #d2d1c4 50%, #e6e6dc 100%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-  }
-
-  /* Kept for legacy callers; resolves to a solid paper sheet, not blur. */
-  .glass {
-    background: var(--color-surface-DEFAULT);
-    border: 1px solid var(--color-border-DEFAULT);
-  }
 }

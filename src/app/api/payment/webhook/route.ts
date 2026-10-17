@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { FieldValue } from "firebase-admin/firestore";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { normalizePlan, PLAN_PRICES_INR } from "@/lib/plans";
 
@@ -101,14 +101,14 @@ export async function POST(req: NextRequest) {
         const userData = userSnap.data() || {};
         const email = userData.email;
         if (email) {
-          const { sendPaymentSuccessEmail } = await import("@/lib/email-service");
-          sendPaymentSuccessEmail(
-            userId,
-            email,
-            paymentId,
-            plan,
-            PLAN_PRICES_INR[plan] || 0
-          ).catch(console.error);
+          after(async () => {
+            try {
+              const { sendPaymentSuccessEmail } = await import("@/lib/email-service");
+              await sendPaymentSuccessEmail(userId, email, paymentId, plan, PLAN_PRICES_INR[plan] || 0);
+            } catch (err) {
+              console.error("Webhook payment success email failed to send:", err);
+            }
+          });
         }
       }
     } catch (emailErr) {

@@ -1,18 +1,20 @@
 // Static content for landing page, pricing, and UI — no mock analysis data
 
+// Every plan gets the full product; plans differ only in monthly analysis credits
+// (PLAN_LIMITS in src/lib/plans.ts). Analyses, CV builds and tailoring each use one.
 export const PRICING_PLANS = [
   {
     name: "Free",
     price: 0,
-    period: "forever",
-    description: "Get a feel for your readiness.",
+    period: "free",
+    description: "Check where you stand.",
     features: [
-      "1 resume analysis",
-      "ATS Score",
-      "Basic skill gap list",
-      "No roadmap",
+      "1 analysis a month",
+      "Recruiter verdict with reasons",
+      "Career gaps and roadmap",
+      "CV builder and tailoring",
     ],
-    cta: "Start Free",
+    cta: "Start free",
     highlighted: false,
   },
   {
@@ -21,11 +23,9 @@ export const PRICING_PLANS = [
     period: "one-time",
     description: "For a focused application sprint.",
     features: [
-      "5 resume analyses",
-      "Full recruiter simulation",
-      "Career gap analysis",
-      "4-week roadmap",
-      "Printable CV export",
+      "5 analyses a month",
+      "Everything in Free",
+      "Re-check after each build",
     ],
     cta: "Get Basic",
     highlighted: false,
@@ -34,16 +34,27 @@ export const PRICING_PLANS = [
     name: "Pro",
     price: 149,
     period: "one-time",
-    description: "For an active job search.",
+    description: "For an active placement season.",
     features: [
-      "20 analyses each month",
-      "Progress tracking",
-      "Return user delta",
-      "JD matching",
-      "Shareable report summary",
+      "20 analyses a month",
+      "Everything in Free",
+      "Check several roles and tiers",
     ],
     cta: "Get Pro",
     highlighted: true,
+  },
+  {
+    name: "Premium",
+    price: 299,
+    period: "one-time",
+    description: "For heavy tailoring across many applications.",
+    features: [
+      "50 analyses a month",
+      "Everything in Free",
+      "Tailor a CV for every application",
+    ],
+    cta: "Get Premium",
+    highlighted: false,
   },
 ];
 

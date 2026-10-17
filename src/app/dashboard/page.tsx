@@ -66,7 +66,7 @@ export default function DashboardPage() {
 
 function EmptyState() {
   return (
-    <div className="px-4 sm:px-6 md:px-8 pt-16 md:pt-10 pb-12 max-w-5xl mx-auto">
+    <div className="px-4 sm:px-6 md:px-8 pt-[5.25rem] md:pt-10 pb-12 max-w-5xl mx-auto">
       <h1 className="display text-[clamp(2rem,4.5vw,3rem)]">Your status</h1>
       <p className="mt-1 text-ink-muted">Your application readiness hub</p>
 
@@ -110,7 +110,7 @@ function DashboardWithData({
   const created = new Date(r.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 
   return (
-    <div className="px-4 sm:px-6 md:px-8 pt-16 md:pt-10 pb-12 max-w-5xl mx-auto space-y-5">
+    <div className="px-4 sm:px-6 md:px-8 pt-[5.25rem] md:pt-10 pb-12 max-w-5xl mx-auto space-y-5">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="display text-[clamp(2rem,4.5vw,3rem)]">Your status</h1>

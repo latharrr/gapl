@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { FieldValue } from "firebase-admin/firestore";
 import { validateAnalysisPayload } from "@/lib/analysis-validation";
 import { releaseAnalysis, reserveAnalysis, UsageLimitError } from "@/lib/analysis-usage";
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
   if (userOrError instanceof NextResponse) return userOrError;
   const user = userOrError;
 
-  if (!takeRateLimit(`analyze:${user.uid}`, 6, 10 * 60 * 1000)) {
+  if (!(await takeRateLimit(`analyze:${user.uid}`, 6, 10 * 60 * 1000))) {
     return NextResponse.json({ error: "Too many analysis requests. Please wait a few minutes.", code: "RATE_LIMITED" }, { status: 429 });
   }
 
@@ -101,14 +101,18 @@ export async function POST(req: NextRequest) {
 
     // Trigger Report Ready Email
     if (user.email) {
-      const { sendReportReadyEmail } = await import("@/lib/email-service");
-      sendReportReadyEmail(
-        user.uid,
-        user.email,
-        reportRef.id,
-        safePayload.atsScore ?? 70,
-        safePayload.readiness ?? 65
-      ).catch((err) => console.error("Failed to send Report Ready email:", err));
+      const email = user.email;
+      const reportId = reportRef.id;
+      const ats = safePayload.atsScore ?? 70;
+      const readiness = safePayload.readiness ?? 65;
+      after(async () => {
+        try {
+          const { sendReportReadyEmail } = await import("@/lib/email-service");
+          await sendReportReadyEmail(user.uid, email, reportId, ats, readiness);
+        } catch (err) {
+          console.error("Failed to send Report Ready email:", err);
+        }
+      });
     }
 
     return NextResponse.json({ result });

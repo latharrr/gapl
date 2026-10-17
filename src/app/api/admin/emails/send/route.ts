@@ -1,3 +1,4 @@
+import { emailLayout, escapeHtml, EMAIL } from "@/lib/email-layout";
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminDb, requireAdmin } from "@/lib/firebase-admin";
 import { sendEmail } from "@/lib/resend";
@@ -36,14 +37,10 @@ export async function POST(req: NextRequest) {
     }
 
     // 2. Format HTML email body
-    const bodyHtml = `
-      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #111111; line-height: 1.6; padding: 20px;">
-        <div style="white-space: pre-wrap; font-size: 14px;">${message}</div>
-        <p style="font-size: 11px; color: #a1a1aa; margin-top: 48px; border-top: 1px solid #e4e4e7; padding-top: 12px;">
-          Sent by Admin from Gapl | Application Readiness Intelligence Engine
-        </p>
-      </div>
-    `;
+    const bodyHtml = emailLayout(
+      `<div style="white-space:pre-wrap;">${escapeHtml(message)}</div>
+       <p style="margin:28px 0 0 0;font-size:12px;color:${EMAIL.muted};">Sent by the Gapl team.</p>`
+    );
 
     // 3. Generate Campaign Document if it doesn't exist
     const campaignId = "admin_manual";

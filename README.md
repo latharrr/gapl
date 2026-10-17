@@ -14,15 +14,16 @@ graph TD
   
   API_Analyze -->|Query Routing & Prompts| Firestore[(Firestore DB: settings/routing)]
   API_Analyze -->|Central AI Dispatcher| AI_Gateway[AI Gateway Fallback System]
-  AI_Gateway -->|Attempt 1| FreeModel[FreeModel GPT-5.4]
-  AI_Gateway -->|Attempt 2| OpenAI[OpenAI GPT-4o-mini]
-  AI_Gateway -->|Attempt 3| Gemini[Gemini 1.5 Flash]
+  AI_Gateway -->|Attempt 1| Preferred[Routed provider, default Groq gpt-oss-120b]
+  AI_Gateway -->|Attempt 2| OpenAI[OpenAI gpt-4o-mini]
+  AI_Gateway -->|Attempt 3| Anthropic[Anthropic, else Gemini 1.5 Flash]
+  AI_Gateway -.->|Provider key missing| FreeModel[FreeModel if configured, else Groq]
   
   API_Analyze -->|Save Report Summary| Reports_Db[(Firestore DB: reports)]
   API_Analyze -->|Trigger Notification| Email_Service[Email Service Abstraction]
   
   Email_Service -->|Rewrite Links to Shortlinks| Link_Tracker[Shortlink Redirect Generator]
-  Link_Tracker -->|Point to Subdomain| Links_Domain["links.deepanshulathar.dev"]
+  Link_Tracker -->|Point to Subdomain| Links_Domain["links.&lt;your-domain&gt;"]
   Link_Tracker -->|Register Redirect Mapping| Trackable_Links[(Firestore DB: trackable_links)]
   
   Email_Service -->|Dispatch Transactional/Retention Mail| Resend_API[Resend SMTP/API]
@@ -76,10 +77,10 @@ graph TD
 
 ## 📧 Email Intelligence & Attribution Platform
 
-To protect domain reputation and maximize deliverability, the app decouples tracking redirect URLs using a dedicated subdomain: **`links.deepanshulathar.dev`**.
+To protect domain reputation and maximize deliverability, the app decouples tracking redirect URLs using a dedicated subdomain set by **`NEXT_PUBLIC_TRACKING_DOMAIN`** (for example `links.gapl.in`). The proxy routes any `links.*` host to the shortlink handler.
 
 ### 1. Shortlink Rewriting & Edge Middleware
-* **Decoupled DNS Setup**: Subdomain `links.deepanshulathar.dev` has a `CNAME` pointing to `cname.vercel-dns.com` in your DNS registrar.
+* **Decoupled DNS Setup**: Your tracking subdomain (e.g. `links.gapl.in`) has a `CNAME` pointing to `cname.vercel-dns.com` in your DNS registrar.
 * **Next.js Proxy Redirection**: `src/proxy.ts` (the `proxy` file convention, renamed from middleware in Next.js 16) intercepts requests to any host starting with `links.` and rewrites the request internally to `/api/t/[id]`, preventing page reloads or client-side latency.
 * **User Telemetry Tracking**: On redirect, the system logs the recipient's geographic country, browser type, operating system, and IP address, and places a long-lived browser tracking cookie to monitor returning traffic.
 * **30-Day Last-Touch Attribution**: On critical actions (e.g. paying, creating a report), the system queries the candidate's clicks in the past 30 days and stamps the matching `campaignId` and `emailId` on the document for revenue attribution.
@@ -285,7 +286,7 @@ Administrative controls at `/admin` are gated using Firestore custom claim user 
 * **Styling**: Vanilla CSS, Tailwind CSS, & Radix UI (shadcn/ui layout standards)
 * **Database & Auth**: Google Firebase Auth and Cloud Firestore Admin SDK
 * **Email Engine**: Resend Node SDK
-* **AI Orchestrator**: Custom Gateway (`src/lib/ai-gateway.ts`) with automated failover (Groq ➔ OpenAI ➔ Anthropic ➔ Gemini)
+* **AI Orchestrator**: Custom Gateway (`src/lib/ai-gateway.ts`) with automated failover over three attempts: the provider set in admin routing (default Groq `openai/gpt-oss-120b`) ➔ OpenAI `gpt-4o-mini` ➔ Anthropic, else Gemini. Any attempt whose provider key is missing runs on FreeModel when `FREEMODEL_API_KEY` is set, otherwise on Groq
 * **Payment Gateway**: Razorpay Node API (HMAC SHA256 Webhook Verification)
 
 ---
@@ -319,9 +320,9 @@ RAZORPAY_WEBHOOK_SECRET=your_razorpay_webhook_secret
 
 # Email & Domain Configurations
 RESEND_API_KEY=your_resend_api_key
-RESEND_FROM_EMAIL="Gapl <onboarding@deepanshulathar.dev>"
+RESEND_FROM_EMAIL="Gapl <hello@gapl.in>"
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-NEXT_PUBLIC_TRACKING_DOMAIN=links.deepanshulathar.dev
+NEXT_PUBLIC_TRACKING_DOMAIN=links.gapl.in
 ```
 
 ### 2. Run Commands

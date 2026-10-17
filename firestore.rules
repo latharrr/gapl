@@ -32,10 +32,11 @@ service cloud.firestore {
       allow update, delete: if signedIn() && resource.data.userId == request.auth.uid;
     }
 
+    // Roadmap progress is written only by the server (/api/roadmaps/[id]) so
+    // completion and readiness figures can't be edited from the browser.
     match /roadmaps/{roadmapId} {
       allow read: if signedIn() && resource.data.userId == request.auth.uid;
-      allow create, update: if signedIn() && request.resource.data.userId == request.auth.uid;
-      allow delete: if signedIn() && resource.data.userId == request.auth.uid;
+      allow write: if false;
     }
 
     match /{document=**} {

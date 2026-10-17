@@ -150,7 +150,7 @@ export default function AdminAnalyticsPage() {
         </Card>
         <Card variant="default" padding="sm" className="bg-surface-DEFAULT border-border-DEFAULT">
           <span className="text-[0.6875rem] text-ink-muted font-semibold uppercase block">Est. DB Storage</span>
-          <p className="text-md font-bold text-danger mt-1">${profitability.storageCost}</p>
+          <p className="text-md font-bold text-danger mt-1">₹{profitability.storageCost}</p>
         </Card>
         <Card variant="default" padding="sm" className="bg-surface-DEFAULT border-border-DEFAULT">
           <span className="text-[0.6875rem] text-ink-muted font-semibold uppercase block">Net Margin Profit</span>
@@ -172,37 +172,37 @@ export default function AdminAnalyticsPage() {
           <div className="p-3 bg-surface-muted border border-border-DEFAULT rounded-[6px] text-center">
             <span className="text-[0.6875rem] text-ink-muted block uppercase font-medium">Revenue</span>
             <span className="text-sm font-bold text-ink font-mono mt-1 block">
-              ${profitability.unitEconomics?.revenuePerReport || "0.00"}
+              ₹{Number(profitability.unitEconomics?.revenuePerReport ?? 0).toFixed(2)}
             </span>
           </div>
           <div className="p-3 bg-surface-muted border border-border-DEFAULT rounded-[6px] text-center">
             <span className="text-[0.6875rem] text-ink-muted block uppercase font-medium">AI Cost</span>
             <span className="text-sm font-bold text-danger font-mono mt-1 block">
-              -${profitability.unitEconomics?.aiCostPerReport || "0.000"}
+              -${Number(profitability.unitEconomics?.aiCostPerReport ?? 0).toFixed(3)}
             </span>
           </div>
           <div className="p-3 bg-surface-muted border border-border-DEFAULT rounded-[6px] text-center">
             <span className="text-[0.6875rem] text-ink-muted block uppercase font-medium">PDF Engine</span>
             <span className="text-sm font-bold text-danger font-mono mt-1 block">
-              -${profitability.unitEconomics?.pdfCostPerReport || "0.15"}
+              -₹{Number(profitability.unitEconomics?.pdfCostPerReport ?? 0).toFixed(2)}
             </span>
           </div>
           <div className="p-3 bg-surface-muted border border-border-DEFAULT rounded-[6px] text-center">
             <span className="text-[0.6875rem] text-ink-muted block uppercase font-medium">Storage</span>
             <span className="text-sm font-bold text-danger font-mono mt-1 block">
-              -${profitability.unitEconomics?.storageCostPerReport || "0.05"}
+              -₹{Number(profitability.unitEconomics?.storageCostPerReport ?? 0).toFixed(2)}
             </span>
           </div>
           <div className="p-3 bg-surface-muted border border-border-DEFAULT rounded-[6px] text-center">
             <span className="text-[0.6875rem] text-ink-muted block uppercase font-medium">Hosting</span>
             <span className="text-sm font-bold text-danger font-mono mt-1 block">
-              -${profitability.unitEconomics?.hostingCostPerReport || "0.10"}
+              -₹{Number(profitability.unitEconomics?.hostingCostPerReport ?? 0).toFixed(2)}
             </span>
           </div>
           <div className="p-3 bg-surface-muted border border-border-DEFAULT rounded-[6px] text-center col-span-2 md:col-span-1">
             <span className="text-[0.6875rem] text-ink-muted block uppercase font-medium">Profit</span>
             <span className="text-sm font-bold text-success font-mono mt-1 block">
-              ${profitability.unitEconomics?.profitPerReport || "0.00"}
+              ₹{Number(profitability.unitEconomics?.profitPerReport ?? 0).toFixed(2)}
             </span>
           </div>
         </div>

@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
   if (userOrError instanceof NextResponse) return userOrError;
   const user = userOrError;
 
-  if (!takeRateLimit(`payment-order:${user.uid}`, 10, 10 * 60 * 1000)) {
+  if (!(await takeRateLimit(`payment-order:${user.uid}`, 10, 10 * 60 * 1000))) {
     return NextResponse.json({ error: "Too many payment attempts. Please wait and try again." }, { status: 429 });
   }
 

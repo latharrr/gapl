@@ -430,7 +430,7 @@ function UserDetailDrawer({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-primary-900/55 z-50 flex items-center justify-center p-4">
       <div className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] w-full max-w-4xl max-h-[85vh] overflow-y-auto p-6 grid md:grid-cols-2 gap-6">
         
         {/* Left column: Admin modifications controls */}

@@ -1,4 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { emailLayout, escapeHtml, EMAIL } from "@/lib/email-layout";
+
+const e = escapeHtml;
+// Only http(s) links may appear in the emailed CV.
+function safeUrl(url: unknown): string {
+  const value = String(url ?? "");
+  return /^https?:\/\//i.test(value) ? escapeHtml(value) : "#";
+}
 import { requireUser } from "@/lib/firebase-admin";
 import { sendEmail } from "@/lib/resend";
 
@@ -43,15 +51,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "CV data payload is required." }, { status: 400 });
     }
 
-    const bodyHtml = `
+    const cvHtml = `
       <div style="font-family: 'Times New Roman', Times, serif; max-width: 650px; margin: 0 auto; color: #111111; line-height: 1.45; font-size: 11pt; padding: 20px;">
         <!-- Header -->
         <div style="text-align: center; border-bottom: 2px solid #111111; padding-bottom: 10px; margin-bottom: 16px;">
-          <h2 style="font-size: 20pt; font-weight: bold; margin: 0 0 6px 0; letter-spacing: 0.04em;">${cv.name}</h2>
+          <h2 style="font-size: 20pt; font-weight: bold; margin: 0 0 6px 0; letter-spacing: 0.04em;">${e(cv.name)}</h2>
           <div style="font-size: 9.5pt; color: #444444;">
-            ${cv.email ? `${cv.email} &middot; ` : ""}${cv.phone ? `${cv.phone} &middot; ` : ""}${cv.location || ""}<br/>
-            ${cv.linkedin ? `<a href="${cv.linkedin}" style="color: #444444; text-decoration: none;">${cv.linkedin.replace("https://", "")}</a>` : ""}
-            ${cv.github ? ` &middot; <a href="${cv.github}" style="color: #444444; text-decoration: none;">${cv.github.replace("https://", "")}</a>` : ""}
+            ${cv.email ? `${e(cv.email)} &middot; ` : ""}${cv.phone ? `${e(cv.phone)} &middot; ` : ""}${e(cv.location || "")}<br/>
+            ${cv.linkedin ? `<a href="${safeUrl(cv.linkedin)}" style="color: #444444; text-decoration: none;">${e(cv.linkedin.replace("https://", ""))}</a>` : ""}
+            ${cv.github ? ` &middot; <a href="${safeUrl(cv.github)}" style="color: #444444; text-decoration: none;">${e(cv.github.replace("https://", ""))}</a>` : ""}
           </div>
         </div>
 
@@ -59,7 +67,7 @@ export async function POST(req: NextRequest) {
         ${cv.objective ? `
           <div style="margin-bottom: 16px;">
             <h3 style="font-size: 11pt; font-weight: bold; border-bottom: 1px solid #111111; text-transform: uppercase; margin: 0 0 6px 0; padding-bottom: 2px; letter-spacing: 0.05em;">Objective</h3>
-            <p style="margin: 0; font-size: 10pt; color: #222222; text-align: justify;">${cv.objective}</p>
+            <p style="margin: 0; font-size: 10pt; color: #222222; text-align: justify;">${e(cv.objective)}</p>
           </div>
         ` : ""}
 
@@ -70,16 +78,16 @@ export async function POST(req: NextRequest) {
             ${cv.experience.map((exp: CvExperienceItem) => `
               <div style="margin-bottom: 10px; font-size: 10pt;">
                 <div style="display: flex; justify-content: space-between; font-weight: bold;">
-                  <span>${exp.role}</span>
-                  <span style="font-weight: normal; color: #555555;">${exp.duration}</span>
+                  <span>${e(exp.role)}</span>
+                  <span style="font-weight: normal; color: #555555;">${e(exp.duration)}</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; font-style: italic; margin-top: 1px;">
-                  <span style="color: #444444;">${exp.company}</span>
-                  <span style="color: #555555; font-style: italic;">${exp.location}</span>
+                  <span style="color: #444444;">${e(exp.company)}</span>
+                  <span style="color: #555555; font-style: italic;">${e(exp.location)}</span>
                 </div>
                 <ul style="margin: 4px 0 0 18px; padding: 0;">
                   ${exp.bullets.map((bullet: string) => `
-                    <li style="margin-bottom: 3px; text-align: justify;">${bullet}</li>
+                    <li style="margin-bottom: 3px; text-align: justify;">${e(bullet)}</li>
                   `).join("")}
                 </ul>
               </div>
@@ -95,8 +103,8 @@ export async function POST(req: NextRequest) {
               <tbody>
                 ${cv.skills.map((skill: CvSkillItem) => `
                   <tr>
-                    <td style="font-weight: bold; padding-bottom: 4px; vertical-align: top; width: 140px;">${skill.category}</td>
-                    <td style="padding-bottom: 4px; color: #222222;">${skill.items}</td>
+                    <td style="font-weight: bold; padding-bottom: 4px; vertical-align: top; width: 140px;">${e(skill.category)}</td>
+                    <td style="padding-bottom: 4px; color: #222222;">${e(skill.items)}</td>
                   </tr>
                 `).join("")}
               </tbody>
@@ -111,8 +119,8 @@ export async function POST(req: NextRequest) {
             <ul style="margin: 0; padding: 0; list-style: none;">
               ${cv.projects.map((proj: CvProjectItem) => `
                 <li style="margin-bottom: 6px; font-size: 10pt; text-align: justify;">
-                  <strong style="font-weight: bold;">${proj.name}</strong> &ndash; 
-                  <span style="color: #222222;">${proj.description}</span>
+                  <strong style="font-weight: bold;">${e(proj.name)}</strong> &ndash; 
+                  <span style="color: #222222;">${e(proj.description)}</span>
                 </li>
               `).join("")}
             </ul>
@@ -126,13 +134,13 @@ export async function POST(req: NextRequest) {
             ${cv.education.map((ed: CvEducationItem) => `
               <div style="margin-bottom: 8px; font-size: 10pt;">
                 <div style="display: flex; justify-content: space-between; font-weight: bold;">
-                  <span>${ed.degree}</span>
-                  <span style="font-weight: normal; color: #555555;">${ed.year}</span>
+                  <span>${e(ed.degree)}</span>
+                  <span style="font-weight: normal; color: #555555;">${e(ed.year)}</span>
                 </div>
-                <div style="color: #444444;">${ed.institution}</div>
+                <div style="color: #444444;">${e(ed.institution)}</div>
                 ${ed.coursework ? `
                   <div style="font-size: 9.5pt; color: #666666; margin-top: 2px;">
-                    <strong>Relevant Coursework:</strong> ${ed.coursework}
+                    <strong>Relevant Coursework:</strong> ${e(ed.coursework)}
                   </div>
                 ` : ""}
               </div>
@@ -146,13 +154,18 @@ export async function POST(req: NextRequest) {
             <h3 style="font-size: 11pt; font-weight: bold; border-bottom: 1px solid #111111; text-transform: uppercase; margin: 0 0 6px 0; padding-bottom: 2px; letter-spacing: 0.05em;">Activities</h3>
             <ul style="margin: 4px 0 0 18px; padding: 0; font-size: 10pt; color: #222222;">
               ${cv.activities.map((act: string) => `
-                <li style="margin-bottom: 2px;">${act}</li>
+                <li style="margin-bottom: 2px;">${e(act)}</li>
               `).join("")}
             </ul>
           </div>
         ` : ""}
       </div>
     `;
+    const bodyHtml = emailLayout(
+      `<p style="margin:0 0 16px 0;">Here's the CV you built with Gapl. It's laid out for print: open it on a computer to save or print it as a PDF.</p>
+       <div style="background-color:#ffffff;border:1px solid ${EMAIL.rule};padding:8px;">${cvHtml}</div>`,
+      { preheader: "Your Gapl CV, ready to print." }
+    );
 
     // ── Rolling 8-hour window rate limit (3 sends per window) ──────────────────
     const WINDOW_MS = 8 * 60 * 60 * 1000;

@@ -131,21 +131,21 @@ export type BreakdownItem = { label: string; score: number; weight?: string; not
 export function Breakdown({ items, pulledBy }: { items: BreakdownItem[]; pulledBy?: string }) {
   const weakest = Math.min(...items.map((i) => i.score));
   return (
-    <ul className="divide-y divide-border-DEFAULT">
+    <ul className="@container divide-y divide-border-DEFAULT">
       {items.map((b) => {
         const weak = b.score === weakest;
         const note = b.note ?? (weak ? pulledBy : undefined);
         return (
-          <li key={b.label} className="grid gap-x-5 gap-y-2 px-4 sm:px-6 py-4 sm:grid-cols-[12rem_minmax(0,1fr)] sm:items-center">
-            <div className="flex items-baseline justify-between sm:block">
+          <li key={b.label} className="grid gap-x-5 gap-y-2 px-4 sm:px-6 py-4 @xl:grid-cols-[12rem_minmax(0,1fr)] @xl:items-center">
+            <div className="flex items-baseline justify-between @xl:block">
               <p className="font-bold">{b.label}</p>
-              <p className="text-xs text-ink-muted sm:mt-0.5">
+              <p className="text-xs text-ink-muted @xl:mt-0.5">
                 <span className={cn("chart-data font-bold", weak ? "text-danger" : "text-ink")}>{b.score}</span>/100
                 {b.weight && <span> · {b.weight} weight</span>}
               </p>
             </div>
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 min-w-0">
-              <div className="relative h-2.5 w-full sm:w-48 shrink-0 bg-surface-subtle rounded-[2px] overflow-hidden">
+            <div className="flex flex-col gap-2 @xl:flex-row @xl:items-center @xl:gap-3 min-w-0">
+              <div className="relative h-2.5 w-full @xl:w-48 shrink-0 bg-surface-subtle rounded-[2px] overflow-hidden">
                 <div
                   className={cn("absolute inset-y-0 left-0 rounded-[2px]", weak ? "bg-danger" : "bg-primary-600")}
                   style={{ width: `${b.score}%` }}
@@ -153,8 +153,8 @@ export function Breakdown({ items, pulledBy }: { items: BreakdownItem[]; pulledB
               </div>
               {note && (
                 <>
-                  <span aria-hidden className="hidden sm:block h-px flex-1 min-w-4 border-t border-dashed border-ink-faint" />
-                  <p className={cn("text-sm sm:max-w-[24rem] sm:text-right", weak ? "font-semibold text-danger" : "text-ink-secondary")}>
+                  <span aria-hidden className="hidden @xl:block h-px flex-1 min-w-4 border-t border-dashed border-ink-faint" />
+                  <p className={cn("text-sm @xl:max-w-[24rem] @xl:text-right", weak ? "font-semibold text-danger" : "text-ink-secondary")}>
                     {weak && !b.note ? "Pulled down most by: " : ""}
                     {note}
                   </p>

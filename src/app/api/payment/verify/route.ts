@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { FieldValue } from "firebase-admin/firestore";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { getAdminDb, requireUser } from "@/lib/firebase-admin";
 import { normalizePlan, PLAN_PRICES_INR } from "@/lib/plans";
 import { takeRateLimit } from "@/lib/rate-limit";
@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
   if (userOrError instanceof NextResponse) return userOrError;
   const user = userOrError;
 
-  if (!takeRateLimit(`payment-verify:${user.uid}`, 12, 10 * 60 * 1000)) {
+  if (!(await takeRateLimit(`payment-verify:${user.uid}`, 12, 10 * 60 * 1000))) {
     return NextResponse.json({ error: "Too many verification attempts. Please wait and try again." }, { status: 429 });
   }
 
@@ -45,6 +45,7 @@ export async function POST(req: NextRequest) {
     const attribution = await getLastTouchAttribution(user.uid);
 
     let verifiedPlan = "";
+    let alreadyProcessed = false;
     await db.runTransaction(async (transaction) => {
       const orderSnapshot = await transaction.get(orderRef);
       if (!orderSnapshot.exists) throw new Error("Payment order was not found.");
@@ -56,6 +57,11 @@ export async function POST(req: NextRequest) {
       }
 
       verifiedPlan = plan;
+      // The webhook may have captured this order first: confirm, don't double-process.
+      if (order.status === "captured" || order.status === "verified") {
+        alreadyProcessed = true;
+        return;
+      }
       transaction.set(paymentRef, {
         paymentId,
         orderId,
@@ -78,16 +84,17 @@ export async function POST(req: NextRequest) {
       transaction.set(userRef, { plan, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
     });
 
-    // Trigger Payment Success Email
-    if (user.email) {
-      const { sendPaymentSuccessEmail } = await import("@/lib/email-service");
-      sendPaymentSuccessEmail(
-        user.uid,
-        user.email,
-        paymentId,
-        verifiedPlan,
-        PLAN_PRICES_INR[verifiedPlan] || 0
-      ).catch((err) => console.error("Failed to send Payment Success email:", err));
+    // Trigger Payment Success Email (once per order)
+    if (user.email && !alreadyProcessed) {
+      const email = user.email;
+      after(async () => {
+        try {
+          const { sendPaymentSuccessEmail } = await import("@/lib/email-service");
+          await sendPaymentSuccessEmail(user.uid, email, paymentId, verifiedPlan, PLAN_PRICES_INR[verifiedPlan] || 0);
+        } catch (err) {
+          console.error("Failed to send Payment Success email:", err);
+        }
+      });
     }
 
     return NextResponse.json({ success: true, plan: verifiedPlan });
