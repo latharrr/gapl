@@ -25,17 +25,20 @@ export default function DashboardPage() {
     }
   });
   const [loading, setLoading] = useState(() => !!user);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
     const run = async () => {
       setLoading(true);
+      setLoadError(false);
       try {
         const data = await getUserReports(user.uid);
         if (!cancelled) setReports(data as unknown as AnalysisResult[]);
       } catch (err) {
         console.error("Error loading dashboard reports:", err);
+        if (!cancelled) setLoadError(true);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -55,7 +58,7 @@ export default function DashboardPage() {
   }
 
   if (reports.length === 0) {
-    return <EmptyState />;
+    return <EmptyState loadError={loadError} />;
   }
 
   // Most recent report is the primary one displayed
@@ -64,14 +67,25 @@ export default function DashboardPage() {
   return <DashboardWithData result={latestReport} allReports={reports} />;
 }
 
-function EmptyState() {
+function EmptyState({ loadError = false }: { loadError?: boolean }) {
   return (
     <div className="px-4 sm:px-6 md:px-8 pt-[5.25rem] md:pt-10 pb-12 max-w-5xl mx-auto">
       <h1 className="display text-[clamp(2rem,4.5vw,3rem)]">Your status</h1>
       <p className="mt-1 text-ink-muted">Your application readiness hub</p>
 
       <div className="mt-8 chart-sheet rounded-[6px] overflow-hidden">
-        <div className="led-board px-4 py-2.5 text-[1rem]">NO CHART PREPARED YET</div>
+        <div className="led-board px-4 py-2.5 text-[1rem]">{loadError ? "COULD NOT LOAD" : "NO CHART PREPARED YET"}</div>
+        {loadError ? (
+          <div className="px-5 sm:px-8 py-10 sm:py-14 max-w-2xl">
+            <h2 className="text-2xl font-[800] tracking-[-0.015em]">Your charts didn&apos;t load</h2>
+            <p className="mt-2 text-[0.9375rem] leading-relaxed text-ink-secondary">
+              This is on our side, not yours. Your reports are safe; reload to try again.
+            </p>
+            <div className="mt-6">
+              <Button size="lg" onClick={() => window.location.reload()}>Try again</Button>
+            </div>
+          </div>
+        ) : (
         <div className="px-5 sm:px-8 py-10 sm:py-14 max-w-2xl">
           <h2 className="text-2xl font-[800] tracking-[-0.015em]">Run your first analysis</h2>
           <p className="mt-2 text-[0.9375rem] leading-relaxed text-ink-secondary">
@@ -89,6 +103,7 @@ function EmptyState() {
             </Link>
           </div>
         </div>
+        )}
       </div>
     </div>
   );

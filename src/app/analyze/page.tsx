@@ -31,6 +31,48 @@ function currentUsageMonth(): string {
 }
 
 const ALLOWED_EXTENSIONS = new Set([".pdf", ".txt"]);
+const DRAFT_KEY = "gapl_analyze_draft";
+const MAX_DRAFT_RESUME_LENGTH = 50_000;
+
+// Wizard answers kept across the sign-in redirect, so the visitor does not redo the wizard.
+interface AnalyzeDraft {
+  role: string;
+  tier: string;
+  jdText: string;
+  resumeText: string;
+  fileName: string;
+}
+
+function readDraft(): AnalyzeDraft | null {
+  try {
+    const raw = sessionStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    const draft = JSON.parse(raw) as Partial<AnalyzeDraft>;
+    if (!draft.role || !draft.tier || !draft.resumeText) return null;
+    return {
+      role: String(draft.role),
+      tier: String(draft.tier),
+      jdText: String(draft.jdText || ""),
+      resumeText: String(draft.resumeText),
+      fileName: String(draft.fileName || ""),
+    };
+  } catch {
+    return null;
+  }
+}
+
+function validDraft(draft: AnalyzeDraft | null): AnalyzeDraft | null {
+  if (!draft || !ROLES.includes(draft.role) || !TIERS.some((t) => t.label === draft.tier)) return null;
+  return draft;
+}
+
+function clearDraft() {
+  try {
+    sessionStorage.removeItem(DRAFT_KEY);
+  } catch {
+    // Storage unavailable; nothing to clear.
+  }
+}
 
 type Stage = "role" | "tier" | "resume" | "jd" | "loading";
 
@@ -48,21 +90,31 @@ function AnalyzeFlow() {
   const searchParams = useSearchParams();
   const paramRole = searchParams.get("role") ?? "";
   const paramTier = searchParams.get("tier") ?? "";
-  const initialRole = ROLES.includes(paramRole) ? paramRole : "";
-  const initialTier = TIERS.some((t) => t.label === paramTier) ? paramTier : "";
-  const [stage, setStage] = useState<Stage>(initialRole && initialTier ? "resume" : initialRole ? "tier" : "role");
+  // A draft saved at the sign-in gate takes precedence. This component only renders on the
+  // client (useSearchParams inside Suspense), so sessionStorage is readable on first render.
+  const [draft] = useState(() =>
+    typeof window === "undefined" ? null : validDraft(readDraft())
+  );
+  const initialRole = draft?.role ?? (ROLES.includes(paramRole) ? paramRole : "");
+  const initialTier = draft?.tier ?? (TIERS.some((t) => t.label === paramTier) ? paramTier : "");
+  const [stage, setStage] = useState<Stage>(
+    draft ? "jd" : initialRole && initialTier ? "resume" : initialRole ? "tier" : "role"
+  );
   const [selectedRole, setSelectedRole] = useState(initialRole);
   const [selectedTier, setSelectedTier] = useState(initialTier);
   const [resumeFile, setResumeFile] = useState<File | null>(null);
-  const [resumeText, setResumeText] = useState("");
-  const [showPaste, setShowPaste] = useState(false);
+  const [resumeText, setResumeText] = useState(draft?.resumeText ?? "");
+  const [showPaste, setShowPaste] = useState(Boolean(draft));
   const [fileError, setFileError] = useState("");
   const [pasteError, setPasteError] = useState("");
-  const [jdText, setJdText] = useState("");
+  const [jdText, setJdText] = useState(draft?.jdText ?? "");
   const [loadingStep, setLoadingStep] = useState(0);
   const [loadingError, setLoadingError] = useState("");
   const [showPaywall, setShowPaywall] = useState(false);
   const [validating, setValidating] = useState(false);
+  const [validatedText, setValidatedText] = useState(draft?.resumeText ?? "");
+  const [showSignInGate, setShowSignInGate] = useState(false);
+  const [restoredFileName, setRestoredFileName] = useState(draft?.fileName ?? "");
   const router = useRouter();
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -109,6 +161,8 @@ function AnalyzeFlow() {
       setResumeFile(file);
       setShowPaste(false);
       setResumeText("");
+      setValidatedText("");
+      setRestoredFileName("");
       import("@/lib/analytics").then(({ trackEvent }) => trackEvent("resume_uploaded"));
     }
   }, []);
@@ -143,12 +197,13 @@ function AnalyzeFlow() {
         formData.append("resumeText", resumeText.trim());
       }
 
-      const res = await authFetch("/api/analyze/validate", {
+      // Validation does no AI work, so it runs before sign-in.
+      const res = await fetch("/api/analyze/validate", {
         method: "POST",
         body: formData,
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         if (resumeFile) {
           setFileError(data.error || "Invalid resume content.");
@@ -158,10 +213,14 @@ function AnalyzeFlow() {
         return;
       }
 
+      setValidatedText(typeof data.resumeText === "string" ? data.resumeText : "");
       setStage("jd");
     } catch (err) {
       console.error("Resume validation failed:", err);
-      const errMsg = "Validation failed. Please check your internet connection and try again.";
+      const offline = typeof navigator !== "undefined" && navigator.onLine === false;
+      const errMsg = offline
+        ? "You appear to be offline. Check your connection and try again."
+        : "Something went wrong while checking your resume. Please try again.";
       if (resumeFile) {
         setFileError(errMsg);
       } else {
@@ -172,9 +231,27 @@ function AnalyzeFlow() {
     }
   };
 
+  const saveDraft = () => {
+    const text = (validatedText || resumeText).trim();
+    if (!text || text.length > MAX_DRAFT_RESUME_LENGTH) return;
+    try {
+      const draft: AnalyzeDraft = {
+        role: selectedRole,
+        tier: selectedTier,
+        jdText,
+        resumeText: text,
+        fileName: resumeFile?.name || restoredFileName,
+      };
+      sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    } catch {
+      // Storage full or blocked; the visitor re-enters the wizard after signing in.
+    }
+  };
+
   const runAnalysis = async () => {
     if (!user) {
-      router.push("/auth/login?next=/analyze");
+      saveDraft();
+      setShowSignInGate(true);
       return;
     }
 
@@ -238,6 +315,7 @@ function AnalyzeFlow() {
       }
 
       import("@/lib/analytics").then(({ trackEvent }) => trackEvent("analysis_completed"));
+      clearDraft();
 
       const reportId = data.result.id;
 
@@ -299,6 +377,30 @@ function AnalyzeFlow() {
       </header>
 
       <StepRoute steps={steps.map((st) => st.label)} current={currentIndex} />
+
+      {/* Sign-in gate: the chart is free, but it is saved to an account */}
+      {showSignInGate && !user && (
+        <div className="max-w-xl mx-auto w-full px-4 sm:px-6 pt-8">
+          <div className="chart-sheet rounded-[6px] overflow-hidden">
+            <div className="led-board px-4 py-2.5 text-[0.95rem]">ONE STEP LEFT</div>
+            <div className="p-5 sm:p-6">
+              <h2 className="text-xl font-[800] tracking-[-0.015em]">Sign in free to get your chart</h2>
+              <p className="mt-2 text-[0.9375rem] text-ink-secondary">
+                Your first analysis is free, no card needed. Your chart is saved to your account so you can come back
+                to the roadmap. Your answers are kept, so you won&apos;t have to start over.
+              </p>
+              <div className="mt-5 flex flex-col sm:flex-row gap-2">
+                <Link href={`/auth/signup?next=${encodeURIComponent("/analyze")}`} className="sm:flex-1">
+                  <Button size="lg" className="w-full">Create free account</Button>
+                </Link>
+                <Link href={`/auth/login?next=${encodeURIComponent("/analyze")}`} className="sm:flex-1">
+                  <Button variant="outline" size="lg" className="w-full">I have an account</Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Paywall */}
       {showPaywall && (
@@ -486,6 +588,8 @@ function AnalyzeFlow() {
                       value={resumeText}
                       onChange={(e) => {
                         setResumeText(e.target.value);
+                        setValidatedText("");
+                        setRestoredFileName("");
                         setPasteError("");
                       }}
                       placeholder="Paste your full resume: Education, Skills, Experience, Projects…"
@@ -526,6 +630,12 @@ function AnalyzeFlow() {
 
             {stage === "jd" && (
               <motion.div key="jd" {...stepMotion}>
+                {restoredFileName && (
+                  <p className="mb-4 flex items-start gap-2 text-sm text-success">
+                    <FileText size={15} className="mt-0.5 shrink-0" />
+                    Picked up where you left off with {restoredFileName}.
+                  </p>
+                )}
                 <h1 className="display text-[clamp(1.9rem,5vw,2.6rem)]">Add a job description</h1>
                 <p className="mt-2 text-ink-secondary">
                   Optional, but it sharpens the gap analysis. Skip it to use defaults for {selectedRole || "your role"}.

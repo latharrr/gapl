@@ -10,7 +10,7 @@ import { StepRoute } from "@/components/brand/StepRoute";
 import { DepartureBoard } from "@/components/brand/DepartureBoard";
 import { OptionList, ChipGroup, FieldLabel, fieldClass } from "@/components/ui/Choice";
 import { Sheet, FigureStrip } from "@/components/ui/Sheet";
-import { ResumePreview, type CVData } from "@/components/cv/ResumePreview";
+import { ResumePreview, CV_PRINT_CSS, type CVData } from "@/components/cv/ResumePreview";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import { saveCV } from "@/lib/firebase";
@@ -340,23 +340,7 @@ export default function CVBuilderPage() {
           <ResumePreview cv={result} />
         </div>
 
-        <style>{`
-          @media print {
-            /* Hide everything */
-            body * { visibility: hidden; }
-            /* Show only the resume */
-            #cv-print-target, #cv-print-target * { visibility: visible; }
-            #cv-print-target {
-              display: block !important;
-              position: fixed;
-              inset: 0;
-              padding: 0.5in;
-              background: white;
-              font-family: 'Times New Roman', serif;
-            }
-            @page { margin: 0; size: A4; }
-          }
-        `}</style>
+        <style>{CV_PRINT_CSS}</style>
       </>
     );
   }

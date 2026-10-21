@@ -1,16 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { AuthPanel, AuthMobileBar } from "@/components/brand/AuthPanel";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { signUpWithEmail, signInWithGoogle, createUserDocument } from "@/lib/firebase";
 import { trackEvent } from "@/lib/analytics";
+import { authErrorMessage, safeNextPath } from "@/lib/auth-errors";
 
 export default function SignupPage() {
+  return (
+    <Suspense>
+      <SignupForm />
+    </Suspense>
+  );
+}
+
+function SignupForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,6 +27,9 @@ export default function SignupPage() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+  const nextParam = useSearchParams().get("next");
+  const next = safeNextPath(nextParam);
+  const loginHref = nextParam ? `/auth/login?next=${encodeURIComponent(next)}` : "/auth/login";
 
   const handleEmailSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,16 +47,16 @@ export default function SignupPage() {
         email: result.user.email || email,
         name: name,
       });
-      router.push("/dashboard");
+      router.push(next);
     } catch (err: unknown) {
-      const error = err as { message?: string };
-      setError(error?.message || "Failed to create account");
+      setError(authErrorMessage(err, "Couldn't create your account. Please try again."));
     } finally {
       setLoading(false);
     }
   };
 
   const handleGoogleSignup = async () => {
+    setError("");
     setGoogleLoading(true);
     try {
       const result = await signInWithGoogle();
@@ -54,10 +66,9 @@ export default function SignupPage() {
         email: result.user.email || "",
         name: result.user.displayName || "Explorer",
       });
-      router.push("/dashboard");
+      router.push(next);
     } catch (err: unknown) {
-      const error = err as { message?: string };
-      setError(error?.message || "Google sign up failed");
+      setError(authErrorMessage(err, "Google sign up failed. Please try again."));
     } finally {
       setGoogleLoading(false);
     }
@@ -132,7 +143,7 @@ export default function SignupPage() {
             />
 
             {error && (
-              <p className="text-xs text-danger bg-danger-bg px-3 py-2 rounded-[5px] border border-danger-border">
+              <p role="alert" className="text-xs text-danger bg-danger-bg px-3 py-2 rounded-[5px] border border-danger-border">
                 {error}
               </p>
             )}
@@ -158,7 +169,7 @@ export default function SignupPage() {
 
           <p className="mt-6 text-center text-sm text-ink-muted">
             Already have an account?{" "}
-            <Link href="/auth/login" className="text-primary-600 font-medium hover:text-primary-700">
+            <Link href={loginHref} className="text-primary-600 font-medium hover:text-primary-700">
               Sign in
             </Link>
           </p>

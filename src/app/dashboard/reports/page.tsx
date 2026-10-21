@@ -25,17 +25,20 @@ export default function ReportsPage() {
     }
   });
   const [loading, setLoading] = useState(() => !!user);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
     const run = async () => {
       setLoading(true);
+      setLoadError(false);
       try {
         const data = await getUserReports(user.uid);
         if (!cancelled) setReports(data as unknown as AnalysisResult[]);
       } catch (err) {
         console.error("Failed to load user reports:", err);
+        if (!cancelled) setLoadError(true);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -65,6 +68,16 @@ export default function ReportsPage() {
 
       {loading ? (
         <LoadingChart text="LOADING REPORTS" />
+      ) : loadError ? (
+        <Sheet>
+          <EmptyChart
+            led="COULD NOT LOAD"
+            title="Your reports didn't load"
+            action={<Button size="lg" onClick={() => window.location.reload()}>Try again</Button>}
+          >
+            This is on our side, not yours. Your reports are safe; reload to try again.
+          </EmptyChart>
+        </Sheet>
       ) : reports.length === 0 ? (
         <Sheet>
           <EmptyChart
