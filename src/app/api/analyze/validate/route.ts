@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireUser } from "@/lib/firebase-admin";
+import { takeRateLimit } from "@/lib/rate-limit";
 import { extractText, validateResumeContent } from "@/lib/resume-parser";
 
 export const runtime = "nodejs";
@@ -13,10 +13,16 @@ function extension(fileName: string) {
   return index >= 0 ? fileName.slice(index).toLowerCase() : "";
 }
 
+function clientIp(req: NextRequest) {
+  return req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "unknown";
+}
+
+// Validation runs before sign-in (no AI work), so it is limited per IP instead of per user.
 export async function POST(req: NextRequest) {
   try {
-    const userOrError = await requireUser(req);
-    if (userOrError instanceof NextResponse) return userOrError;
+    if (!(await takeRateLimit(`validate:${clientIp(req)}`, 20, 10 * 60 * 1000))) {
+      return NextResponse.json({ error: "Too many checks. Wait a few minutes and try again." }, { status: 429 });
+    }
 
     const formData = await req.formData();
     const resumeFile = formData.get("resume");
@@ -42,7 +48,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: validation.reason, code: "NOT_A_RESUME" }, { status: 422 });
     }
 
-    return NextResponse.json({ success: true, textLength: content.length });
+    // The text is returned so the wizard can keep the resume across the sign-in redirect.
+    return NextResponse.json({ success: true, textLength: content.length, resumeText: content });
   } catch (err) {
     console.error("Resume validation error:", err);
     const message = err instanceof Error && err.message ? err.message : "Failed to validate resume.";

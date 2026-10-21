@@ -47,9 +47,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (firebaseUser) {
         setUser(firebaseUser as AuthUser);
         try {
-          await createUserDocument(firebaseUser);
+          // The server returns the profile too, so plan and usage show even if the live listener is denied.
+          const profile = await createUserDocument(firebaseUser);
+          if (profile) setUserDoc(profile);
         } catch (e) {
-          console.warn("Could not create user document in Firestore:", e);
+          console.warn("Could not create user document:", e);
         }
 
         // Set up real-time listener for the user document

@@ -52,9 +52,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   // Auto redirect unauthenticated users to login
   useEffect(() => {
     if (!loading && !user) {
-      router.push("/auth/login");
+      router.push(`/auth/login?next=${encodeURIComponent(pathname || "/admin")}`);
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, pathname]);
 
   if (loading) {
     return (

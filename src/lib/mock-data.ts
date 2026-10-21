@@ -12,7 +12,7 @@ export const PRICING_PLANS = [
       "1 analysis a month",
       "Recruiter verdict with reasons",
       "Career gaps and roadmap",
-      "CV builder and tailoring",
+      "CV builder and tailoring (each uses your 1 credit)",
     ],
     cta: "Start free",
     highlighted: false,

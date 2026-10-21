@@ -75,16 +75,12 @@ export function ResumePreview({ cv }: { cv: CVData }) {
 
       {cv.skills?.length > 0 && (
         <Section title="Skills">
-          <table style={{ width: "100%", fontSize: "10pt", borderCollapse: "collapse" }}>
-            <tbody>
-              {cv.skills.map((s, i) => (
-                <tr key={i}>
-                  <td style={{ fontWeight: 700, paddingRight: "24px", paddingBottom: "3px", verticalAlign: "top", whiteSpace: "nowrap" as const }}>{s.category}</td>
-                  <td style={{ paddingBottom: "3px", color: "#333" }}>{s.items}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          {/* Plain "Label: items" lines; tables are a common ATS parsing failure. */}
+          {cv.skills.map((s, i) => (
+            <p key={i} style={{ fontSize: "10pt", marginBottom: "3px", color: "#333" }}>
+              <strong style={{ color: "#111" }}>{s.category}:</strong> {s.items}
+            </p>
+          ))}
         </Section>
       )}
 
@@ -133,3 +129,31 @@ export function ResumePreview({ cv }: { cv: CVData }) {
     </div>
   );
 }
+
+/**
+ * Print styles for a page that renders its CV inside `#cv-print-target`.
+ *
+ * The target stays in normal document flow so a long CV continues onto page 2
+ * (a `position: fixed` target prints on one page only and drops the rest).
+ * `@page { margin: 0 }` keeps browser URL/date headers off the PDF; the cloned
+ * padding gives every page, not just the first, its 0.5in margin.
+ */
+export const CV_PRINT_CSS = `
+  @media print {
+    html, body { background: white !important; }
+    body * { visibility: hidden; }
+    #cv-print-target, #cv-print-target * { visibility: visible; }
+    #cv-print-target {
+      display: block !important;
+      position: static;
+      padding: 0.5in;
+      -webkit-box-decoration-break: clone;
+      box-decoration-break: clone;
+      background: white;
+      font-family: 'Times New Roman', serif;
+    }
+    #cv-print-target h2 { break-after: avoid; }
+    #cv-print-target li, #cv-print-target p { break-inside: avoid; }
+    @page { margin: 0; size: A4; }
+  }
+`;

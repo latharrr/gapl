@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -26,6 +26,21 @@ export function Navbar() {
     setPrevPathname(pathname);
     setMobileOpen(false);
   }
+
+  // Lock page scroll while the mobile menu covers it.
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [mobileOpen]);
+
+  // Sign-in from a content page comes back to it; from home it goes to the dashboard.
+  const loginHref = pathname && pathname !== "/" && !pathname.startsWith("/auth")
+    ? `/auth/login?next=${encodeURIComponent(pathname)}`
+    : "/auth/login";
 
   return (
     <>
@@ -64,7 +79,7 @@ export function Navbar() {
             ) : (
               <>
                 <Link
-                  href="/auth/login"
+                  href={loginHref}
                   className="px-3 py-1.5 text-sm font-medium text-primary-100 hover:text-white rounded-[4px] hover:bg-white/10 transition-colors"
                 >
                   Sign in
@@ -79,7 +94,7 @@ export function Navbar() {
           </div>
 
           <button
-            className="md:hidden -mr-2 p-2 rounded-[4px] text-primary-100 hover:bg-white/10"
+            className="md:hidden -mr-2 w-11 h-11 inline-flex items-center justify-center rounded-[4px] text-primary-100 hover:bg-white/10"
             onClick={() => setMobileOpen((v) => !v)}
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileOpen}
@@ -125,7 +140,7 @@ export function Navbar() {
                       </Button>
                     </Link>
                     <Link
-                      href="/auth/login"
+                      href={loginHref}
                       className="w-full h-12 inline-flex items-center justify-center text-sm font-semibold text-primary-100 border-[1.5px] border-white/25 rounded-[6px]"
                     >
                       Sign in

@@ -5,6 +5,7 @@ import {
   signInWithPopup,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
   signOut,
   onAuthStateChanged,
   setPersistence,
@@ -17,7 +18,6 @@ import {
   getFirestore,
   collection,
   doc,
-  setDoc,
   getDoc,
   updateDoc,
   addDoc,
@@ -77,29 +77,29 @@ export const signInWithEmail = (email: string, password: string) =>
   signInWithEmailAndPassword(getClientAuth(), email, password);
 export const signUpWithEmail = (email: string, password: string) =>
   createUserWithEmailAndPassword(getClientAuth(), email, password);
+export const resetPassword = (email: string) => sendPasswordResetEmail(getClientAuth(), email);
 export const logOut = () => signOut(getClientAuth());
 export const onAuthChange = (callback: (user: User | null) => void) =>
   onAuthStateChanged(getClientAuth(), callback);
 
 // ── User document ─────────────────────────────────────────────────────────────
-export const createUserDocument = async (user: User, additionalData?: Record<string, unknown>) => {
+export const createUserDocument = async (user: User, additionalData?: { displayName?: string }) => {
   if (!user) return;
-  const db = getClientDb();
-  const userRef = doc(db, "users", user.uid);
-  const snapshot = await getDoc(userRef);
-  if (!snapshot.exists()) {
-    const { displayName, email, photoURL } = user;
-    await setDoc(userRef, {
-      displayName,
-      email,
-      photoURL,
-      createdAt: new Date(),
-      plan: "free",
-      analysisCount: 0,
-      ...additionalData,
-    });
-  }
-  return userRef;
+  // Created server-side (/api/user/ensure) so signup never depends on the deployed Firestore rules.
+  const res = await fetch("/api/user/ensure", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${await user.getIdToken()}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      displayName: additionalData?.displayName || user.displayName || "",
+      photoURL: user.photoURL || "",
+    }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || "Couldn't finish setting up your account. Please try again.");
+  return data.user as Record<string, unknown>;
 };
 
 export const getUserDocument = async (uid: string) => {
@@ -133,11 +133,12 @@ export const saveReport = async (uid: string, report: Record<string, unknown>) =
 };
 
 export const getUserReports = async (uid: string) => {
-  const db = getClientDb();
-  const reportsRef = collection(db, "reports");
-  const q = query(reportsRef, where("userId", "==", uid), orderBy("createdAt", "desc"));
-  const snapshot = await getDocs(q);
-  return snapshot.docs.map((d) => normalizeCreatedAt({ id: d.id, ...d.data() }));
+  const user = getClientAuth().currentUser;
+  if (!user || user.uid !== uid) throw new Error("Please sign in to continue.");
+  const res = await fetch("/api/reports", { headers: { Authorization: `Bearer ${await user.getIdToken()}` } });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || "Couldn't load your reports.");
+  return data.reports as Record<string, unknown>[];
 };
 
 export const getReport = async (reportId: string) => {

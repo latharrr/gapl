@@ -1,12 +1,13 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { type AnalysisResult } from "@/types/analysis";
 import { Navbar } from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/Button";
 import { DepartureBoard } from "@/components/brand/DepartureBoard";
 import { Sheet, FigureStrip } from "@/components/ui/Sheet";
 import { fieldClass } from "@/components/ui/Choice";
+import { CV_PRINT_CSS } from "@/components/cv/ResumePreview";
 import { cn } from "@/lib/utils";
 import {
   Download,
@@ -60,7 +61,6 @@ const TAILOR_STAGES = ["Reading your resume", "Rewriting bullets", "Adding ATS k
 function ResumePreview({ r }: { r: TailoredResume }) {
   return (
     <div
-      id="resume-print-area"
       className="bg-white font-serif text-black"
       style={{ fontFamily: "'Times New Roman', serif", fontSize: "11pt", lineHeight: 1.4 }}
     >
@@ -106,16 +106,12 @@ function ResumePreview({ r }: { r: TailoredResume }) {
       {/* Skills */}
       {r.skills?.length > 0 && (
         <Section title="SKILLS">
-          <table className="w-full text-sm">
-            <tbody>
-              {r.skills.map((s, i) => (
-                <tr key={i}>
-                  <td className="font-bold pr-6 pb-1 align-top whitespace-nowrap">{s.category}</td>
-                  <td className="pb-1 text-[#333]">{s.items}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          {/* Plain "Label: items" lines; tables are a common ATS parsing failure. */}
+          {r.skills.map((s, i) => (
+            <p key={i} className="text-sm pb-1 text-[#333]">
+              <strong className="text-black">{s.category}:</strong> {s.items}
+            </p>
+          ))}
         </Section>
       )}
 
@@ -181,7 +177,6 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function TailorPage() {
-  const printRef = useRef<HTMLDivElement>(null);
 
   // The last report is read straight from sessionStorage — derived during render, no effect.
   const [analysis] = useState<AnalysisResult | null>(() => {
@@ -228,19 +223,7 @@ export default function TailorPage() {
     }
   };
 
-  const downloadPDF = () => {
-    const style = document.createElement("style");
-    style.innerHTML = `
-      @media print {
-        body > * { display: none !important; }
-        #resume-print-wrapper { display: block !important; position: fixed; top: 0; left: 0; width: 100%; }
-        #resume-print-area { padding: 0.5in; }
-      }
-    `;
-    document.head.appendChild(style);
-    window.print();
-    document.head.removeChild(style);
-  };
+  const downloadPDF = () => window.print();
 
   // Loading
   if (step === "loading") {
@@ -261,15 +244,11 @@ export default function TailorPage() {
     const improvement = result.afterAtsScore - result.beforeAtsScore;
     return (
       <>
-        <Navbar />
-        {/* Hidden print wrapper */}
-        <div id="resume-print-wrapper" style={{ display: "none" }}>
-          <div id="resume-print-area" style={{ padding: "0.5in", fontFamily: "'Times New Roman', serif" }}>
-            <ResumePreview r={result} />
-          </div>
+        <div className="print:hidden">
+          <Navbar />
         </div>
 
-        <main className="pt-[59px] bg-surface-muted min-h-screen">
+        <main className="pt-[59px] bg-surface-muted min-h-screen print:hidden">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-5">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
@@ -314,7 +293,7 @@ export default function TailorPage() {
                   </button>
                 }
               >
-                <div className="bg-surface-subtle p-3 sm:p-6 max-h-[760px] overflow-y-auto" ref={printRef}>
+                <div className="bg-surface-subtle p-3 sm:p-6 max-h-[760px] overflow-y-auto">
                   <div className="bg-white shadow-md mx-auto max-w-[800px] p-5 sm:p-8">
                     <ResumePreview r={result} />
                   </div>
@@ -366,15 +345,12 @@ export default function TailorPage() {
           </div>
         </main>
 
-        {/* Print-only styles */}
-        <style>{`
-          @media print {
-            body > *:not(#resume-print-wrapper) { display: none !important; }
-            #resume-print-wrapper { display: block !important; }
-            #resume-print-area { padding: 0.5in; }
-            @page { margin: 0; size: A4; }
-          }
-        `}</style>
+        {/* Hidden print-only layer — rendered outside the clipped scroll container */}
+        <div id="cv-print-target" style={{ display: "none" }} aria-hidden="true">
+          <ResumePreview r={result} />
+        </div>
+
+        <style>{CV_PRINT_CSS}</style>
       </>
     );
   }
