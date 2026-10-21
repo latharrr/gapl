@@ -134,7 +134,7 @@ export default function BillingPage() {
 
   return (
     <div className={APP_PAGE}>
-      <PageHeader title="Billing" description="Your plan and what it includes. Paid plans are one-time payments." />
+      <PageHeader title="Billing" description="Your plan and what it includes. Paid plans are billed monthly." />
 
       {successPlan && (
         <div role="status" className="flex items-start gap-3 p-4 bg-success-bg border border-success-border rounded-[6px]">
@@ -164,7 +164,7 @@ export default function BillingPage() {
       </Sheet>
 
       {availablePlans.length > 0 ? (
-        <Sheet title="Upgrade" aside="One-time · Razorpay">
+        <Sheet title="Upgrade" aside="Monthly · Razorpay">
           <ul className="chart-rows">
             {availablePlans.map((plan) => {
               const isLoading = loadingPlan === plan.name;
@@ -189,7 +189,7 @@ export default function BillingPage() {
                   </ul>
                   <p className="lg:text-right">
                     <span className="chart-data text-2xl font-bold">₹{plan.price}</span>
-                    <span className="block text-xs text-ink-muted">one-time</span>
+                    <span className="block text-xs text-ink-muted">per month</span>
                   </p>
                   <Button
                     size="md"

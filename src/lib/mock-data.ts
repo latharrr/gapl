@@ -20,7 +20,7 @@ export const PRICING_PLANS = [
   {
     name: "Basic",
     price: 49,
-    period: "one-time",
+    period: "per month",
     description: "For a focused application sprint.",
     features: [
       "5 analyses a month",
@@ -33,7 +33,7 @@ export const PRICING_PLANS = [
   {
     name: "Pro",
     price: 149,
-    period: "one-time",
+    period: "per month",
     description: "For an active placement season.",
     features: [
       "20 analyses a month",
@@ -46,7 +46,7 @@ export const PRICING_PLANS = [
   {
     name: "Premium",
     price: 299,
-    period: "one-time",
+    period: "per month",
     description: "For heavy tailoring across many applications.",
     features: [
       "50 analyses a month",

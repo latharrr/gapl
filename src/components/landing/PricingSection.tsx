@@ -64,7 +64,7 @@ export function PricingSection({ heading = true }: { heading?: boolean }) {
 
                 <p className="lg:text-right">
                   <span className="chart-data text-3xl font-bold">{plan.price === 0 ? "₹0" : `₹${plan.price}`}</span>
-                  <span className="block text-xs text-ink-muted">{plan.price === 0 ? "no card needed" : "one-time"}</span>
+                  <span className="block text-xs text-ink-muted">{plan.price === 0 ? "no card needed" : "per month"}</span>
                 </p>
 
                 <Link href={plan.price === 0 ? "/auth/signup" : "/dashboard/billing"} className="lg:justify-self-end w-full lg:w-auto">
@@ -76,7 +76,7 @@ export function PricingSection({ heading = true }: { heading?: boolean }) {
             ))}
           </ul>
         </div>
-        <p className="mt-3 text-sm text-ink-muted">Prices in INR. One-time payment through Razorpay. Credits reset on the 1st of each month; an analysis, a CV build and a tailoring each use one.</p>
+        <p className="mt-3 text-sm text-ink-muted">Prices in INR. Paid plans are billed monthly through Razorpay. Credits reset on the 1st of each month; an analysis, a CV build and a tailoring each use one.</p>
       </div>
     </section>
   );
