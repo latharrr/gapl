@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
+import { Loading } from "@/components/ui/Sheet";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -19,11 +20,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (loading) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-surface-muted">
-        <div className="flex flex-col items-center gap-3">
-          <div className="led-board h-11 px-4 flex items-center rounded-[4px] text-[1.05rem]">
-            <span className="animate-led-blink">LOADING WORKSPACE</span>
-          </div>
-        </div>
+        <Loading text="Opening your workspace" />
       </div>
     );
   }

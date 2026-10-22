@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { adminFetch } from "@/lib/admin-fetch";
 import { Button } from "@/components/ui/Button";
-import { Sheet, PageHeader, FigureStrip, EmptyChart, LoadingChart } from "@/components/ui/Sheet";
+import { Sheet, PageHeader, FigureStrip, EmptyState, Loading } from "@/components/ui/Sheet";
 import { RotateCcw } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -122,7 +122,7 @@ export default function AdminDashboardPage() {
   if (loading) {
     return (
       <div className="h-[60vh] flex items-center justify-center">
-        <LoadingChart />
+        <Loading />
       </div>
     );
   }
@@ -132,13 +132,12 @@ export default function AdminDashboardPage() {
       <div className="space-y-5">
         <PageHeader title="Control room" description="Live operations overview." />
         <Sheet>
-          <EmptyChart
-            led="STATS UNAVAILABLE"
+          <EmptyState
             title="Couldn't load the stats"
             action={<Button onClick={fetchStats}><RotateCcw size={16} /> Try again</Button>}
           >
             {error || "The database is empty or the admin credentials failed."}
-          </EmptyChart>
+          </EmptyState>
         </Sheet>
       </div>
     );
@@ -146,8 +145,8 @@ export default function AdminDashboardPage() {
 
   const { metrics = {}, charts = {} } = stats;
   const inr = (n: number | undefined) => `₹${Number(n || 0).toLocaleString("en-IN")}`;
-  const axis = { stroke: "#a9a89a", fontSize: 11, tickLine: false, tick: { fill: "#595c69", fontFamily: "var(--font-martian)" } };
-  const tip = { contentStyle: { background: "#1d2b6b", border: "none", borderRadius: 4, color: "#fcfcf7", fontSize: 12 }, labelStyle: { color: "#f5c518" }, itemStyle: { color: "#fcfcf7" } };
+  const axis = { stroke: "#c3c3bb", fontSize: 11, tickLine: false, tick: { fill: "#5e616a" } };
+  const tip = { contentStyle: { background: "#ffffff", border: "1px solid #e1e1db", borderRadius: 8, color: "#16171b", fontSize: 12 }, labelStyle: { color: "#5e616a" }, itemStyle: { color: "#16171b" } };
 
   return (
     <div className="space-y-5">
@@ -202,7 +201,7 @@ export default function AdminDashboardPage() {
                 <XAxis dataKey="date" {...axis} />
                 <YAxis {...axis} />
                 <Tooltip {...tip} />
-                <Line type="linear" dataKey="users" stroke="#1d2b6b" strokeWidth={2.5} dot={{ r: 3, fill: "#f5c518", stroke: "#14140f" }} />
+                <Line type="linear" dataKey="users" stroke="#16171b" strokeWidth={2} dot={{ r: 3, fill: "#ffe14d", stroke: "#16171b" }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -244,7 +243,7 @@ export default function AdminDashboardPage() {
                 <XAxis type="number" {...axis} />
                 <YAxis dataKey="name" type="category" {...axis} width={120} />
                 <Tooltip {...tip} cursor={{ fill: "#e6e6dc" }} />
-                <Bar dataKey="value" fill="#1d2b6b" radius={[0, 2, 2, 0]} />
+                <Bar dataKey="value" fill="#16171b" radius={[0, 2, 2, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

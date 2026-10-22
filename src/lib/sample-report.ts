@@ -28,14 +28,8 @@ export const SAMPLE = {
   ],
   // The route the sample roadmap takes, in build order. Readiness values are illustrative.
   route: [
-    { code: "STN", label: "Today", build: "Resume as it stands", weeks: 0, readiness: 65, status: "WL 3" },
-    { code: "W1", label: "Week 1", build: "Deploy any project on Railway/Render", closes: "Deployment & DevOps", weeks: 1, readiness: 69, status: "WL 2" },
-    { code: "W2", label: "Week 2", build: "Design a URL Shortener", closes: "System Design", weeks: 1, readiness: 72, status: "WL 1" },
-    { code: "W3–5", label: "Weeks 3–5", build: "Expense Tracking SaaS", closes: "Backend Development", weeks: 3, readiness: 78, status: "RAC" },
+    { when: "Week 1", build: "Deploy any project on Railway/Render", closes: "Deployment & DevOps", weeks: 1, readiness: 69 },
+    { when: "Week 2", build: "Design a URL Shortener", closes: "System Design", weeks: 1, readiness: 72 },
+    { when: "Weeks 3–5", build: "Expense Tracking SaaS", closes: "Backend Development", weeks: 3, readiness: 78 },
   ],
 } as const;
-
-/** Gaps standing between a resume and a shortlist: Critical + High priority gaps. */
-export function waitlistCount(gaps: ReadonlyArray<{ priority: string }>): number {
-  return gaps.filter((g) => g.priority === "Critical" || g.priority === "High").length;
-}

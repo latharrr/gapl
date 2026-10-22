@@ -6,14 +6,14 @@ import { StatusScreen, ghostOnDark } from "@/components/brand/StatusScreen";
 export default function NotFound() {
   return (
     <StatusScreen
-      led="404 · NO SUCH STOP"
-      title="This page isn't on the route."
-      body="The link may be old or mistyped. Head back to the start, or check your status."
+      mark="404 · Not found"
+      title="Nothing on this page."
+      body="The link may be old or mistyped. Head back to the start, or get your resume read."
       actions={
         <>
           <Link href="/analyze">
             <Button size="lg" className="w-full sm:w-auto">
-              Check my status <ArrowRight size={17} strokeWidth={2.5} />
+              Read my resume <ArrowRight size={17} strokeWidth={2.5} />
             </Button>
           </Link>
           <Link href="/" className={ghostOnDark}>

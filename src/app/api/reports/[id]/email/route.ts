@@ -41,31 +41,31 @@ export async function POST(
     const careerGaps = report.careerGaps || [];
 
     const verdict: string = report.recruiterVerdict?.verdict ?? "";
-    const status = verdict === "Shortlist" ? { code: "CNF", color: EMAIL.success } : verdict === "Maybe" ? { code: "RAC", color: "#8f5300" } : { code: "WL", color: EMAIL.danger };
+    const verdictColor = verdict === "Shortlist" ? EMAIL.success : verdict === "Maybe" ? "#94600a" : EMAIL.danger;
     const gapRows = careerGaps
       .map(
         (gap: ReportCareerGap, i: number) => `
-        <tr style="${i % 2 ? "background-color:#e3ecdc;" : ""}">
-          <td style="padding:10px 12px;font-family:${EMAIL.mono};font-size:11px;font-weight:700;text-transform:uppercase;white-space:nowrap;color:${gap.priority === "Critical" ? EMAIL.danger : EMAIL.muted};">${escapeHtml(gap.priority ?? "")}</td>
+        <tr style="${i % 2 ? "background-color:${EMAIL.band};" : ""}">
+          <td style="padding:10px 12px;font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;white-space:nowrap;color:${gap.priority === "Critical" ? EMAIL.danger : EMAIL.muted};">${escapeHtml(gap.priority ?? "")}</td>
           <td style="padding:10px 12px;font-weight:700;">${escapeHtml(gap.skill ?? gap.gapName ?? "Skill gap")}</td>
-          <td style="padding:10px 12px;color:${EMAIL.navy};font-weight:600;">${escapeHtml(gap.recommendedProject ?? "See your roadmap")}</td>
+          <td style="padding:10px 12px;color:${EMAIL.fix};font-weight:600;">${escapeHtml(gap.recommendedProject ?? "See your roadmap")}</td>
         </tr>`
       )
       .join("");
 
     const bodyHtml = emailLayout(
-      `<h1 style="margin:0 0 10px 0;font-size:24px;line-height:1.2;font-weight:800;letter-spacing:-0.02em;">Your report summary</h1>
+      `<h1 style="margin:0 0 10px 0;font-size:26px;line-height:1.15;font-weight:800;letter-spacing:-0.025em;">Your report summary</h1>
        <p style="margin:0 0 14px 0;">${escapeHtml(report.role)} · ${escapeHtml(report.companyTier)}</p>
-       <p style="margin:0 0 18px 0;"><span style="display:inline-block;border:1.5px solid ${status.color};color:${status.color};border-radius:3px;padding:2px 8px;font-family:${EMAIL.mono};font-size:12px;font-weight:700;text-transform:uppercase;">${status.code} / ${escapeHtml(verdict || "Pending")}</span></p>
-       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px 0;border:1px solid ${EMAIL.rule};border-top:2px solid ${EMAIL.ink};background-color:#ffffff;"><tr>
-         <td style="padding:14px 16px;border-right:1px solid ${EMAIL.rule};"><p style="margin:0 0 4px 0;font-size:11px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:${EMAIL.muted};">ATS</p><span style="font-family:${EMAIL.mono};font-size:26px;font-weight:700;">${escapeHtml(report.atsScore)}</span></td>
-         <td style="padding:14px 16px;"><p style="margin:0 0 4px 0;font-size:11px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:${EMAIL.muted};">Readiness</p><span style="font-family:${EMAIL.mono};font-size:26px;font-weight:700;">${escapeHtml(report.readiness)}</span></td>
+       <p style="margin:0 0 18px 0;"><span style="display:inline-block;border:2px solid ${verdictColor};color:${verdictColor};border-radius:4px;padding:3px 10px;font-size:14px;font-weight:800;letter-spacing:0.07em;text-transform:uppercase;">${escapeHtml(verdict || "Pending")}</span></p>
+       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px 0;border:1px solid ${EMAIL.rule};border-radius:8px;background-color:#ffffff;"><tr>
+         <td style="padding:14px 16px;border-right:1px solid ${EMAIL.rule};"><p style="margin:0 0 4px 0;font-size:11px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:${EMAIL.muted};">ATS</p><span style="font-size:28px;font-weight:700;letter-spacing:-0.02em;">${escapeHtml(report.atsScore)}</span></td>
+         <td style="padding:14px 16px;"><p style="margin:0 0 4px 0;font-size:11px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:${EMAIL.muted};">Readiness</p><span style="font-size:28px;font-weight:700;letter-spacing:-0.02em;">${escapeHtml(report.readiness)}</span></td>
        </tr></table>
        ${report.recruiterVerdict?.reason ? `<p style="margin:0 0 18px 0;"><strong>Why:</strong> ${escapeHtml(report.recruiterVerdict.reason)}</p>` : ""}
        ${gapRows ? `<p style="margin:0 0 6px 0;font-size:11px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:${EMAIL.muted};">Gaps and what to build</p>
-       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid ${EMAIL.rule};border-top:2px solid ${EMAIL.ink};background-color:#ffffff;font-size:13px;text-align:left;">${gapRows}</table>` : ""}
+       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid ${EMAIL.rule};border-radius:8px;background-color:#ffffff;font-size:13px;text-align:left;">${gapRows}</table>` : ""}
        <div style="margin:28px 0 0 0;">${emailButton(`${appUrl}/report/${encodeURIComponent(id)}`, "Open my full report")}</div>`,
-      { preheader: `${status.code} / ${verdict} · Readiness ${report.readiness}` }
+      { preheader: `${verdict || "Report"} · Readiness ${report.readiness}` }
     );
 
     // ── Rolling 8-hour window rate limit (3 sends per window) ──────────────────

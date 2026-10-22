@@ -5,7 +5,7 @@ import { type AnalysisResult } from "@/types/analysis";
 import { cn } from "@/lib/utils";
 import { ChevronDown, Plus, Check } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { Sheet, PageHeader, EmptyChart, LoadingChart, APP_PAGE } from "@/components/ui/Sheet";
+import { Sheet, PageHeader, EmptyState, Loading, FigureStrip, APP_PAGE } from "@/components/ui/Sheet";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { getUserReports } from "@/lib/firebase";
@@ -57,15 +57,14 @@ export default function RoadmapsPage() {
     });
   };
 
-  if (loading) return <LoadingChart text="LOADING ROUTE" />;
+  if (loading) return <Loading text="Loading roadmaps" />;
 
   if (!result) {
     return (
       <div className={APP_PAGE}>
         <PageHeader title="Roadmap" />
         <Sheet>
-          <EmptyChart
-            led="NO ROUTE YET"
+          <EmptyState
             title="No roadmap yet"
             action={
               <Link href="/analyze">
@@ -73,8 +72,8 @@ export default function RoadmapsPage() {
               </Link>
             }
           >
-            Run an analysis to get your week-by-week route to close your gaps.
-          </EmptyChart>
+            Run an analysis to get a week-by-week plan for closing your gaps.
+          </EmptyState>
         </Sheet>
       </div>
     );
@@ -89,23 +88,22 @@ export default function RoadmapsPage() {
     <div className={APP_PAGE}>
       <PageHeader
         title="Roadmap"
-        description="Your route, week by week. Tick tasks as you finish them."
+        description="What to build, week by week. Tick tasks as you finish them."
         meta={`${result.role} · ${result.companyTier} · ${result.roadmap.length} weeks`}
       />
 
-      <div className="led-board rounded-[6px] px-4 sm:px-5 py-3.5 grid grid-cols-3 gap-4 text-sm">
-        <span>
-          TASKS<span className="block text-2xl leading-none mt-1">{doneTasks}/{totalTasks}</span>
-        </span>
-        <span>
-          DONE<span className="block text-2xl leading-none mt-1">{progress}%</span>
-        </span>
-        <span className="text-right">
-          READINESS<span className="block text-2xl leading-none mt-1">{result.readiness}→{expected}</span>
-        </span>
-      </div>
+      <Sheet>
+        <FigureStrip
+          className="grid-cols-3 sm:grid-cols-3"
+          items={[
+            { label: "Tasks", value: `${doneTasks}/${totalTasks}` },
+            { label: "Done", value: `${progress}%` },
+            { label: "Readiness", value: <><span className="text-ink-faint">{result.readiness}→</span>{expected}</> },
+          ]}
+        />
+      </Sheet>
 
-      <Sheet title="Route">
+      <Sheet title="Week by week">
         <ol className="divide-y divide-border-DEFAULT">
           {result.roadmap.map((week) => {
             const weekDone = week.tasks.filter((t) => completedTasks.has(`${week.week}-${t}`)).length;
@@ -120,17 +118,17 @@ export default function RoadmapsPage() {
                 >
                   <span
                     className={cn(
-                      "h-10 w-10 shrink-0 rounded-full border-[3px] grid place-items-center chart-data text-xs font-bold",
-                      complete ? "border-success bg-success text-white" : "border-ink bg-surface-DEFAULT"
+                      "h-10 w-10 shrink-0 rounded-full border-2 grid place-items-center figure text-xs font-semibold",
+                      complete ? "border-ink bg-ink text-highlight" : "border-ink bg-surface-DEFAULT"
                     )}
                   >
                     {complete ? <Check size={17} strokeWidth={3} /> : `W${week.week}`}
                   </span>
                   <span className="flex-1 min-w-0">
-                    <span className="block font-bold">{week.title}</span>
+                    <span className="block font-semibold">{week.title}</span>
                     <span className="block text-sm text-ink-muted truncate">{week.description}</span>
                   </span>
-                  <span className="chart-data text-xs text-ink-muted shrink-0">
+                  <span className="figure text-xs text-ink-muted shrink-0">
                     {weekDone}/{week.tasks.length}
                   </span>
                   <ChevronDown size={18} className={cn("shrink-0 text-ink-muted transition-transform duration-300", isExpanded && "rotate-180")} />
@@ -151,20 +149,20 @@ export default function RoadmapsPage() {
                             >
                               <span
                                 className={cn(
-                                  "mt-0.5 h-5 w-5 shrink-0 rounded-[3px] border-[1.5px] grid place-items-center",
-                                  done ? "border-success bg-success text-white" : "border-ink-muted group-hover:border-ink"
+                                  "mt-0.5 h-5 w-5 shrink-0 rounded-[5px] border-[1.5px] grid place-items-center",
+                                  done ? "border-ink bg-ink text-highlight" : "border-ink-faint group-hover:border-ink"
                                 )}
                               >
                                 {done && <Check size={13} strokeWidth={3.5} />}
                               </span>
-                              <span className={cn("text-[0.9375rem]", done ? "text-ink-muted line-through" : "text-ink")}>{task}</span>
+                              <span className={cn("text-[0.9375rem]", done ? "text-ink-muted line-through decoration-ink-faint" : "text-ink")}>{task}</span>
                             </button>
                           </li>
                         );
                       })}
                     </ul>
                     <p className="mt-2.5 text-sm">
-                      <span className="chart-data text-xs font-bold text-success">MILESTONE › </span>
+                      <span className="font-semibold text-primary-700">Milestone: </span>
                       <span className="text-ink-secondary">{week.milestone}</span>
                     </p>
                   </div>

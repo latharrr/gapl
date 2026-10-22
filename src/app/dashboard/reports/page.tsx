@@ -5,8 +5,7 @@ import Link from "next/link";
 import { type AnalysisResult } from "@/types/analysis";
 import { Button } from "@/components/ui/Button";
 import { VerdictBadge } from "@/components/ui/Badge";
-import { Sheet, PageHeader, EmptyChart, LoadingChart, APP_PAGE } from "@/components/ui/Sheet";
-import { waitlistCount } from "@/lib/sample-report";
+import { Sheet, PageHeader, EmptyState, Loading, APP_PAGE } from "@/components/ui/Sheet";
 import { Plus, ArrowRight } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { getUserReports } from "@/lib/firebase";
@@ -56,7 +55,7 @@ export default function ReportsPage() {
     <div className={APP_PAGE}>
       <PageHeader
         title="Reports"
-        description="Every chart Gapl has prepared from your resume, newest first."
+        description="Every read Gapl has written for your resume, newest first."
         actions={
           <Link href="/analyze">
             <Button size="md">
@@ -67,33 +66,31 @@ export default function ReportsPage() {
       />
 
       {loading ? (
-        <LoadingChart text="LOADING REPORTS" />
+        <Loading text="Loading reports" />
       ) : loadError ? (
         <Sheet>
-          <EmptyChart
-            led="COULD NOT LOAD"
+          <EmptyState
             title="Your reports didn't load"
             action={<Button size="lg" onClick={() => window.location.reload()}>Try again</Button>}
           >
             This is on our side, not yours. Your reports are safe; reload to try again.
-          </EmptyChart>
+          </EmptyState>
         </Sheet>
       ) : reports.length === 0 ? (
         <Sheet>
-          <EmptyChart
-            led="NO REPORTS YET"
+          <EmptyState
             title="Run your first analysis"
             action={
               <Link href="/analyze">
-                <Button size="lg"><Plus size={17} strokeWidth={2.5} /> Check my status</Button>
+                <Button size="lg"><Plus size={17} strokeWidth={2.5} /> Read my resume</Button>
               </Link>
             }
           >
-            Upload your resume, pick a role and tier, and your first chart appears here.
-          </EmptyChart>
+            Upload your resume, pick a role and tier, and your first report appears here.
+          </EmptyState>
         </Sheet>
       ) : (
-        <Sheet title="Chart history" aside={`${reports.length} ${reports.length === 1 ? "report" : "reports"}`}>
+        <Sheet title="All reports" aside={`${reports.length} ${reports.length === 1 ? "report" : "reports"}`}>
           <div
             aria-hidden
             className={`hidden md:grid gap-4 px-6 py-2 border-b border-border-DEFAULT text-[0.6875rem] font-bold uppercase tracking-[0.07em] text-ink-muted ${cols}`}
@@ -103,23 +100,23 @@ export default function ReportsPage() {
             <span>Tier</span>
             <span className="text-right">ATS</span>
             <span className="text-right">Readiness</span>
-            <span>Status</span>
+            <span>Verdict</span>
             <span />
           </div>
-          <ul className="chart-rows">
+          <ul className="divide-y divide-border-DEFAULT">
             {reports.map((r) => (
               <li key={r.id}>
                 <Link
                   href={`/report/${r.id}`}
-                  className={`group grid grid-cols-2 gap-x-4 gap-y-1.5 px-4 sm:px-6 py-4 md:items-center hover:bg-board/20 ${cols}`}
+                  className={`group grid grid-cols-2 gap-x-4 gap-y-1.5 px-4 sm:px-6 py-4 md:items-center hover:bg-highlight-soft ${cols}`}
                 >
-                  <span className="chart-data col-span-2 md:col-span-1 text-xs text-ink-muted">{fmt(r.createdAt)}</span>
-                  <span className="col-span-2 md:col-span-1 font-bold group-hover:text-primary-600">{r.role}</span>
+                  <span className="figure col-span-2 md:col-span-1 text-xs text-ink-muted">{fmt(r.createdAt)}</span>
+                  <span className="col-span-2 md:col-span-1 font-semibold group-hover:text-primary-700">{r.role}</span>
                   <span className="col-span-2 md:col-span-1 text-sm text-ink-secondary">{r.companyTier}</span>
-                  <span className="chart-data text-sm md:text-right"><span className="md:hidden text-ink-muted">ATS </span>{r.atsScore}</span>
-                  <span className="chart-data text-sm font-bold md:text-right"><span className="md:hidden font-normal text-ink-muted">Readiness </span>{r.readiness}</span>
+                  <span className="figure text-sm md:text-right"><span className="md:hidden text-ink-muted">ATS </span>{r.atsScore}</span>
+                  <span className="figure text-sm font-bold md:text-right"><span className="md:hidden font-normal text-ink-muted">Readiness </span>{r.readiness}</span>
                   <span className="col-span-2 md:col-span-1">
-                    <VerdictBadge verdict={r.recruiterVerdict.verdict} waitlist={waitlistCount(r.careerGaps ?? [])} size="sm" />
+                    <VerdictBadge verdict={r.recruiterVerdict.verdict} size="sm" />
                   </span>
                   <ArrowRight size={15} className="hidden md:block text-ink-faint group-hover:text-ink" />
                 </Link>

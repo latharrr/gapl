@@ -21,9 +21,10 @@ import {
 import Link from "next/link";
 import { Wordmark } from "@/components/brand/Wordmark";
 import { StepRoute } from "@/components/brand/StepRoute";
-import { DepartureBoard } from "@/components/brand/DepartureBoard";
+import { ReadingScreen } from "@/components/brand/ReadingScreen";
 import { OptionList } from "@/components/ui/Choice";
 import { ROLES, TIERS } from "@/lib/targets";
+import { clearHandedOffResume, peekHandedOffResume } from "@/lib/resume-handoff";
 
 function currentUsageMonth(): string {
   const now = new Date();
@@ -86,7 +87,7 @@ export default function AnalyzePage() {
 
 function AnalyzeFlow() {
   const { user, userDoc } = useAuth();
-  // Prefill from the landing enquiry (/analyze?role=…&tier=…) and skip the answered steps.
+  // Prefill from the landing hero (/analyze?role=…&tier=…) and skip the answered steps.
   const searchParams = useSearchParams();
   const paramRole = searchParams.get("role") ?? "";
   const paramTier = searchParams.get("tier") ?? "";
@@ -102,7 +103,8 @@ function AnalyzeFlow() {
   );
   const [selectedRole, setSelectedRole] = useState(initialRole);
   const [selectedTier, setSelectedTier] = useState(initialTier);
-  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  // A PDF dropped on the landing page arrives here already chosen.
+  const [resumeFile, setResumeFile] = useState<File | null>(() => (draft ? null : peekHandedOffResume()));
   const [resumeText, setResumeText] = useState(draft?.resumeText ?? "");
   const [showPaste, setShowPaste] = useState(Boolean(draft));
   const [fileError, setFileError] = useState("");
@@ -119,6 +121,7 @@ function AnalyzeFlow() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
+    clearHandedOffResume();
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
@@ -356,37 +359,37 @@ function AnalyzeFlow() {
   };
 
   return (
-    <div className="min-h-screen bg-surface-muted flex flex-col">
+    <div className="min-h-screen on-desk flex flex-col">
       {/* Rail bar */}
-      <header className="bg-primary-600 text-primary-foreground border-b-[3px] border-board">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 h-14 flex items-center gap-3">
+      <header className="on-desk border-b border-desk-line">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 h-16 flex items-center gap-3">
           <Link href={user ? "/dashboard" : "/"} aria-label="Gapl home">
             <Wordmark size="sm" />
           </Link>
-          <span className="text-sm font-semibold text-primary-100">New chart</span>
-          <span
-            className={cn(
-              "stamp ml-auto text-[0.6875rem] bg-surface-DEFAULT",
-              remaining === 0 ? "text-danger" : remaining === 1 ? "text-warning" : "text-success"
-            )}
-            title="Analyses used this month"
-          >
-            {usageLabel}
-          </span>
+          <span className="text-sm font-medium text-desk-muted">New analysis</span>
+          {user && (
+            <span
+              className={cn(
+                "ml-auto tabular text-xs font-medium",
+                remaining === 0 ? "text-danger-on-desk" : "text-desk-muted"
+              )}
+              title="Analyses used this month"
+            >
+              {usageLabel} plan used
+            </span>
+          )}
         </div>
       </header>
 
-      <StepRoute steps={steps.map((st) => st.label)} current={currentIndex} />
 
-      {/* Sign-in gate: the chart is free, but it is saved to an account */}
+      {/* Sign-in gate: the read is free, but it is saved to an account */}
       {showSignInGate && !user && (
         <div className="max-w-xl mx-auto w-full px-4 sm:px-6 pt-8">
-          <div className="chart-sheet rounded-[6px] overflow-hidden">
-            <div className="led-board px-4 py-2.5 text-[0.95rem]">ONE STEP LEFT</div>
+          <div className="sheet rounded-[10px] overflow-hidden">
             <div className="p-5 sm:p-6">
-              <h2 className="text-xl font-[800] tracking-[-0.015em]">Sign in free to get your chart</h2>
+              <h2 className="text-xl font-semibold tracking-[-0.015em]">One step left: sign in to see your read</h2>
               <p className="mt-2 text-[0.9375rem] text-ink-secondary">
-                Your first analysis is free, no card needed. Your chart is saved to your account so you can come back
+                Your first analysis is free, no card needed. Your report is saved to your account so you can come back
                 to the roadmap. Your answers are kept, so you won&apos;t have to start over.
               </p>
               <div className="mt-5 flex flex-col sm:flex-row gap-2">
@@ -405,10 +408,9 @@ function AnalyzeFlow() {
       {/* Paywall */}
       {showPaywall && (
         <div className="max-w-xl mx-auto w-full px-4 sm:px-6 pt-8">
-          <div className="chart-sheet rounded-[6px] overflow-hidden">
-            <div className="led-board px-4 py-2.5 text-[0.95rem]">PLAN LIMIT REACHED</div>
+          <div className="sheet rounded-[10px] overflow-hidden">
             <div className="p-5 sm:p-6">
-              <h2 className="text-xl font-[800] tracking-[-0.015em]">You&apos;ve used every analysis on your plan</h2>
+              <h2 className="text-xl font-semibold tracking-[-0.015em]">You&apos;ve used every analysis on your plan</h2>
               <p className="mt-2 text-[0.9375rem] text-ink-secondary">
                 All <strong>{monthlyLimit}</strong> analyses included in your {currentPlan} plan this month are used.
                 Upgrade for more and keep working through your roadmap. Limits reset on the 1st of each month.
@@ -429,7 +431,7 @@ function AnalyzeFlow() {
       {/* Error */}
       {loadingError && (
         <div className="max-w-xl mx-auto w-full px-4 sm:px-6 pt-8" role="alert">
-          <div className="chart-sheet rounded-[6px] overflow-hidden">
+          <div className="sheet rounded-[10px] overflow-hidden">
             <div className="px-5 py-3 bg-danger-bg border-b border-danger-border flex items-center gap-2 text-danger">
               <AlertCircle size={17} />
               <h3 className="text-sm font-bold">The analysis was interrupted</h3>
@@ -472,8 +474,10 @@ function AnalyzeFlow() {
       )}
 
       {/* Content */}
-      <div className="flex-1 px-4 sm:px-6 py-8 sm:py-12">
-        <div className="w-full max-w-xl mx-auto">
+      <div className="flex-1 px-3 sm:px-6 py-6 sm:py-12">
+        <div className="page w-full max-w-2xl mx-auto rounded-[10px] overflow-hidden">
+          <StepRoute steps={steps.map((st) => st.label)} current={currentIndex} />
+          <div className="px-5 sm:px-12 py-8 sm:py-11">
           <AnimatePresence mode="wait">
             {stage === "role" && (
               <motion.div key="role" {...stepMotion}>
@@ -520,7 +524,7 @@ function AnalyzeFlow() {
                 </p>
 
                 {fileError && (
-                  <div role="alert" className="mt-5 flex items-start gap-2 p-3 bg-danger-bg border border-danger-border rounded-[5px]">
+                  <div role="alert" className="mt-5 flex items-start gap-2 p-3 bg-danger-bg border border-danger-border rounded-[8px]">
                     <AlertCircle size={16} className="text-danger mt-0.5 shrink-0" />
                     <p className="text-sm text-danger leading-relaxed">{fileError}</p>
                   </div>
@@ -530,27 +534,27 @@ function AnalyzeFlow() {
                   <div
                     {...getRootProps()}
                     className={cn(
-                      "mt-5 rounded-[6px] border-2 border-dashed px-6 py-10 text-center cursor-pointer transition-colors",
+                      "mt-6 rounded-[12px] border-2 border-dashed px-6 py-10 text-center cursor-pointer transition-colors",
                       isDragActive
-                        ? "border-primary-600 bg-primary-50"
+                        ? "border-ink bg-highlight-soft"
                         : resumeFile
-                        ? "border-success bg-success-bg"
+                        ? "border-solid border-ink bg-highlight-soft/50"
                         : "border-border-strong bg-surface-DEFAULT hover:border-ink"
                     )}
                   >
                     <input {...getInputProps()} />
                     {resumeFile ? (
                       <div>
-                        <FileText size={28} className="mx-auto text-success" />
-                        <p className="mt-3 font-bold break-all">{resumeFile.name}</p>
-                        <p className="chart-data mt-1 text-xs text-ink-muted">
+                        <FileText size={28} className="mx-auto text-ink" />
+                        <p className="mt-3 font-semibold break-all">{resumeFile.name}</p>
+                        <p className="figure mt-1 text-xs text-ink-muted">
                           {(resumeFile.size / 1024).toFixed(0)} KB · tap to replace
                         </p>
                       </div>
                     ) : (
                       <div>
                         <Upload size={28} className="mx-auto text-ink-muted" />
-                        <p className="mt-3 font-bold">{isDragActive ? "Drop it here" : "Drag your resume here"}</p>
+                        <p className="mt-3 font-semibold">{isDragActive ? "Drop it here" : "Drag your resume here"}</p>
                         <p className="mt-1 text-sm text-ink-muted">PDF or TXT, up to 5 MB</p>
                         <Button
                           type="button"
@@ -574,7 +578,7 @@ function AnalyzeFlow() {
                     setShowPaste(!showPaste);
                     setResumeFile(null);
                   }}
-                  className="mt-3 w-full inline-flex items-center justify-center gap-2 py-2 text-sm font-semibold text-primary-600 hover:text-primary-700"
+                  className="mt-3 w-full inline-flex items-center justify-center gap-2 py-2 text-sm font-semibold text-primary-700 hover:text-primary-900"
                 >
                   <ClipboardPaste size={15} />
                   {showPaste ? "Upload a file instead" : "Paste resume text instead"}
@@ -595,7 +599,7 @@ function AnalyzeFlow() {
                       placeholder="Paste your full resume: Education, Skills, Experience, Projects…"
                       rows={12}
                       className={cn(
-                        "w-full px-4 py-3 rounded-[6px] border-[1.5px] bg-surface-DEFAULT text-[0.9375rem] text-ink focus:outline-none focus:ring-[3px] focus:ring-primary-600/15 focus:border-primary-600 resize-y",
+                        "w-full px-4 py-3 rounded-[10px] border bg-surface-DEFAULT text-[0.9375rem] text-ink focus:outline-none focus:ring-[3px] focus:ring-primary-600/20 focus:border-primary-600 resize-y",
                         pasteError ? "border-danger" : "border-border-strong"
                       )}
                     />
@@ -647,17 +651,18 @@ function AnalyzeFlow() {
                   onChange={(e) => setJdText(e.target.value)}
                   placeholder="Paste the job description…"
                   rows={9}
-                  className="mt-5 w-full px-4 py-3 rounded-[6px] border-[1.5px] border-border-strong bg-surface-DEFAULT text-[0.9375rem] text-ink focus:outline-none focus:ring-[3px] focus:ring-primary-600/15 focus:border-primary-600 resize-y"
+                  className="mt-5 w-full px-4 py-3 rounded-[10px] border border-border-strong bg-surface-DEFAULT text-[0.9375rem] text-ink focus:outline-none focus:ring-[3px] focus:ring-primary-600/20 focus:border-primary-600 resize-y"
                 />
                 <div className="flex gap-2 mt-5">
                   <Button variant="outline" size="lg" onClick={() => setStage("resume")}>Back</Button>
                   <Button size="lg" onClick={runAnalysis} className="flex-1">
-                    {jdText.trim() ? "Prepare my chart" : "Skip and prepare my chart"} <ChevronRight size={17} />
+                    {jdText.trim() ? "Read my resume" : "Skip and read my resume"} <ChevronRight size={17} />
                   </Button>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
+          </div>
         </div>
       </div>
     </div>
@@ -674,13 +679,13 @@ const STAGE_DETAILS = [
 
 function LoadingScreen({ loadingStep, role, tier }: { loadingStep: number; role: string; tier: string }) {
   return (
-    <DepartureBoard
+    <ReadingScreen
       kicker={`${role} · ${tier}`}
-      title="Preparing your chart"
+      title="Reading your resume"
       detail={`${STAGE_DETAILS[loadingStep] ?? "Finalizing your report"}…`}
       stages={ANALYSIS_STAGES.map((s) => s.label)}
       current={loadingStep}
-      footnote="Keep this tab open while the chart is prepared."
+      footnote="Keep this tab open. It usually takes under a minute."
     />
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { LoadingChart } from "@/components/ui/Sheet";
+import { Loading } from "@/components/ui/Sheet";
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -143,7 +143,7 @@ export default function AdminUsersPage() {
   if (loading) {
     return (
       <div className="h-[60vh] flex items-center justify-center">
-        <LoadingChart />
+        <Loading />
       </div>
     );
   }
@@ -436,7 +436,7 @@ function UserDetailDrawer({
         {/* Left column: Admin modifications controls */}
         <div className="space-y-6">
           <div>
-            <h2 className="text-lg font-[800] tracking-[-0.015em] text-ink">Manage User Profile</h2>
+            <h2 className="text-lg font-bold tracking-[-0.015em] text-ink">Manage User Profile</h2>
             <p className="text-xs text-ink-muted mt-0.5">{selectedUser.email}</p>
           </div>
 

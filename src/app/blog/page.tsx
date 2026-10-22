@@ -30,29 +30,27 @@ export default function BlogPage() {
   return (
     <>
       <Navbar />
-      <main className="pt-[59px] bg-surface-muted min-h-screen">
-        <header className="border-b-[1.5px] border-ink bg-surface-DEFAULT">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-10 sm:pt-14 pb-8 sm:pb-10">
-            <h1 className="display text-[clamp(2.2rem,5.5vw,3.75rem)]">Gapl blog</h1>
-            <p className="mt-4 text-lg sm:text-xl leading-relaxed text-ink-secondary max-w-[60ch]">
-              No fluff. Tactical advice on building strong engineering signals and getting shortlisted.
-            </p>
-          </div>
+      <main className="on-desk pt-16 min-h-screen">
+        <header className="max-w-4xl mx-auto px-4 sm:px-6 pt-12 sm:pt-16 pb-10">
+          <h1 className="display text-[clamp(2.2rem,5.5vw,3.75rem)]">Gapl blog</h1>
+          <p className="mt-4 text-lg sm:text-xl leading-relaxed text-desk-muted max-w-[60ch]">
+            No fluff. Tactical advice on building strong engineering signals and getting shortlisted.
+          </p>
         </header>
 
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
-          <ol className="border-t-[1.5px] border-ink">
+        <div className="max-w-4xl mx-auto px-0 sm:px-6 pb-16 sm:pb-24">
+          <ol className="page sm:rounded-[4px] px-5 sm:px-10 divide-y divide-border-DEFAULT">
             {POSTS.map((post) => (
-              <li key={post.slug} className="border-b border-border-strong">
-                <Link href={`/blog/${post.slug}`} className="group grid gap-x-8 gap-y-2 py-7 sm:grid-cols-[9rem_minmax(0,1fr)]">
-                  <p className="chart-data text-xs text-ink-muted pt-1.5">
+              <li key={post.slug}>
+                <Link href={`/blog/${post.slug}`} className="group grid gap-x-8 gap-y-2 py-8 sm:grid-cols-[9rem_minmax(0,1fr)]">
+                  <p className="tabular text-sm text-ink-muted pt-1">
                     {post.date}
                     <span className="block">{post.readTime}</span>
                   </p>
                   <div>
-                    <h2 className="text-2xl font-[800] tracking-[-0.02em] leading-tight group-hover:text-primary-600">{post.title}</h2>
+                    <h2 className="text-2xl font-semibold tracking-[-0.02em] leading-tight group-hover:text-primary-700">{post.title}</h2>
                     <p className="mt-2 text-[1.0625rem] leading-relaxed text-ink-secondary max-w-[62ch]">{post.excerpt}</p>
-                    <span className="mt-3 inline-flex items-center gap-1.5 text-sm font-bold text-primary-600">
+                    <span className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-primary-700">
                       Read the article <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
                     </span>
                   </div>

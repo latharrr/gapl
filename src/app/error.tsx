@@ -16,7 +16,7 @@ export default function ErrorBoundary({ error, reset }: ErrorProps) {
 
   return (
     <StatusScreen
-      led="SERVICE INTERRUPTED"
+      mark="Something broke"
       title="Something went wrong on this page."
       body="An unexpected error stopped it from loading. Try again; if it keeps happening, email hello@gapl.in."
       actions={

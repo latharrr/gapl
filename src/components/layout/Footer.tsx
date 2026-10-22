@@ -5,10 +5,10 @@ const COLUMNS = [
   {
     title: "Product",
     links: [
-      { label: "How it works", href: "/#how-it-works" },
+      { label: "How it reads", href: "/#how-it-reads" },
       { label: "Sample report", href: "/demo" },
       { label: "Pricing", href: "/pricing" },
-      { label: "Analyze my resume", href: "/analyze" },
+      { label: "Check my resume", href: "/analyze" },
     ],
   },
   {
@@ -31,23 +31,23 @@ const COLUMNS = [
 
 export function Footer() {
   return (
-    <footer className="bg-primary-600 text-primary-100 border-t-[3px] border-board">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-12 pb-8">
+    <footer className="on-desk border-t border-desk-line">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-14 pb-8">
         <div className="grid grid-cols-2 md:grid-cols-[1.4fr_1fr_1fr_1fr] gap-x-8 gap-y-10">
           <div className="col-span-2 md:col-span-1 max-w-xs">
             <Wordmark />
-            <p className="mt-4 text-sm leading-relaxed text-primary-100">
-              Application readiness for placement season. An honest verdict on your resume, and what to build next.
+            <p className="mt-4 text-sm leading-relaxed text-desk-muted">
+              Your resume, read the way a recruiter reads it. The verdict, the reason, and what to build next.
             </p>
           </div>
 
           {COLUMNS.map((col) => (
             <div key={col.title}>
-              <h4 className="text-xs font-bold uppercase tracking-[0.08em] text-board mb-3">{col.title}</h4>
-              <ul className="space-y-2">
+              <h2 className="text-sm font-semibold text-desk-ink mb-3">{col.title}</h2>
+              <ul className="space-y-2.5">
                 {col.links.map((link) => (
                   <li key={link.href}>
-                    <Link href={link.href} className="text-sm text-primary-100 hover:text-white hover:underline">
+                    <Link href={link.href} className="text-sm text-desk-muted hover:text-desk-ink">
                       {link.label}
                     </Link>
                   </li>
@@ -57,7 +57,7 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="mt-12 pt-5 border-t border-white/15 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-primary-100/80">
+        <div className="mt-14 pt-5 border-t border-desk-line flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-desk-faint">
           <p>© {new Date().getFullYear()} Gapl. All rights reserved.</p>
           <p>Scores are AI estimates. Every verdict comes with its reasons.</p>
         </div>

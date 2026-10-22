@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 
-/* Full-width radio rows on a chart sheet: label plus optional hint. */
+/* Full-width radio rows on paper: label plus optional hint. The chosen label is highlighted. */
 export function OptionList({
   name,
   value,
@@ -15,7 +15,7 @@ export function OptionList({
   className?: string;
 }) {
   return (
-    <div role="radiogroup" aria-label={name} className={cn("chart-sheet rounded-[6px] overflow-hidden divide-y divide-border-DEFAULT", className)}>
+    <div role="radiogroup" aria-label={name} className={cn("rounded-[10px] ring-1 ring-border-DEFAULT bg-surface-DEFAULT overflow-hidden divide-y divide-border-DEFAULT", className)}>
       {options.map((o) => {
         const selected = value === o.value;
         return (
@@ -25,13 +25,13 @@ export function OptionList({
             role="radio"
             aria-checked={selected}
             onClick={() => onChange(o.value)}
-            className={cn("w-full flex items-center gap-4 px-4 py-3.5 text-left transition-colors", selected ? "bg-board/30" : "hover:bg-surface-muted")}
+            className={cn("w-full flex items-center gap-4 px-4 py-4 text-left transition-colors duration-150", selected ? "bg-surface-muted/60" : "hover:bg-surface-muted")}
           >
-            <span className={cn("h-5 w-5 shrink-0 rounded-full border-[2px] grid place-items-center", selected ? "border-ink bg-ink" : "border-border-strong")}>
-              {selected && <span className="h-2 w-2 rounded-full bg-board" />}
+            <span className={cn("h-5 w-5 shrink-0 rounded-full border-2 grid place-items-center transition-colors", selected ? "border-ink bg-ink" : "border-border-strong")}>
+              {selected && <span className="h-2 w-2 rounded-full bg-highlight" />}
             </span>
             <span className="min-w-0">
-              <span className="block font-bold">{o.label}</span>
+              <span className="block font-semibold"><span className={cn(selected && "mark-hl")}>{o.label}</span></span>
               {o.hint && <span className="block text-sm text-ink-muted">{o.hint}</span>}
             </span>
           </button>
@@ -65,8 +65,8 @@ export function ChipGroup({
             aria-checked={selected}
             onClick={() => onChange(o.value)}
             className={cn(
-              "h-10 px-3.5 rounded-[5px] border-[1.5px] text-sm font-semibold transition-colors",
-              selected ? "bg-ink border-ink text-board" : "bg-surface-DEFAULT border-border-strong text-ink hover:border-ink"
+              "h-10 px-3.5 rounded-[8px] border text-sm font-semibold transition-colors duration-150",
+              selected ? "bg-ink border-ink text-highlight" : "bg-surface-DEFAULT border-border-strong text-ink hover:border-ink"
             )}
           >
             {o.label}
@@ -80,7 +80,7 @@ export function ChipGroup({
 /* Field label used above raw inputs, choice groups and textareas. */
 export function FieldLabel({ htmlFor, children, optional }: { htmlFor?: string; children: React.ReactNode; optional?: boolean }) {
   return (
-    <label htmlFor={htmlFor} className="block mb-2 text-[0.8125rem] font-bold text-ink-secondary">
+    <label htmlFor={htmlFor} className="block mb-2 text-[0.8125rem] font-semibold text-ink">
       {children}
       {optional && <span className="ml-1.5 font-normal text-ink-muted">(optional)</span>}
     </label>
@@ -88,4 +88,4 @@ export function FieldLabel({ htmlFor, children, optional }: { htmlFor?: string; 
 }
 
 export const fieldClass =
-  "w-full px-3 rounded-[5px] border-[1.5px] border-border-strong bg-surface-DEFAULT text-[0.9375rem] text-ink hover:border-ink-muted focus:outline-none focus:ring-[3px] focus:ring-primary-600/15 focus:border-primary-600";
+  "w-full px-3 rounded-[8px] border border-border-strong bg-surface-DEFAULT text-[0.9375rem] text-ink hover:border-ink-muted focus:outline-none focus:ring-[3px] focus:ring-primary-600/20 focus:border-primary-600";

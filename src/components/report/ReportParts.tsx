@@ -1,133 +1,109 @@
-import { Plus, Minus, ArrowRight, type LucideIcon } from "lucide-react";
-import { VerdictBadge, type Verdict } from "@/components/ui/Badge";
+import { Tag, VerdictBadge, type Verdict } from "@/components/ui/Badge";
 import { cn } from "@/lib/utils";
 
 export { Sheet } from "@/components/ui/Sheet";
 
-const ROW = "md:grid-cols-[1.3fr_1.1fr_4.5rem_6rem_6.5rem_minmax(0,1.6fr)]";
-
-/* The candidate's row on the reservation chart: the whole report in one line. */
-export function ChartRow({
+/*
+  The face of a report: the verdict the recruiter wrote, the two numbers, the reason,
+  and the three marks — what caught the eye (highlighter), what sank it (red pen),
+  and what would change it (blue ballpoint).
+*/
+export function ReportFace({
   role,
   tier,
   ats,
   readiness,
   verdict,
-  waitlist,
+  confidence,
+  reason,
+  strongestSignal,
   topGap,
+  whatWouldChange,
   tag,
+  meta,
 }: {
   role: string;
   tier: string;
   ats: number;
   readiness: number;
   verdict: Verdict;
-  waitlist: number;
-  topGap: string;
-  tag?: string;
-}) {
-  return (
-    <div>
-      <div
-        aria-hidden
-        className={cn(
-          "hidden md:grid gap-4 px-6 py-2 border-b border-border-DEFAULT text-[0.6875rem] font-bold uppercase tracking-[0.07em] text-ink-muted",
-          ROW
-        )}
-      >
-        <span>Applying for</span>
-        <span>Tier</span>
-        <span className="text-right">ATS</span>
-        <span className="text-right">Readiness</span>
-        <span>Status</span>
-        <span>Top gap</span>
-      </div>
-      <div className={cn("grid grid-cols-2 gap-x-4 gap-y-3 px-4 sm:px-6 py-5 md:items-center", ROW)}>
-        <p className="col-span-2 md:col-span-1 text-xl sm:text-2xl font-[800] tracking-[-0.02em] leading-tight">
-          {role}
-          {tag && (
-            <span className="ml-2 align-middle chart-data text-[0.625rem] font-semibold uppercase text-ink-muted border border-border-strong rounded-[2px] px-1 py-px">
-              {tag}
-            </span>
-          )}
-        </p>
-        <p className="col-span-2 md:col-span-1 text-[0.9375rem] text-ink-secondary">{tier}</p>
-        <Figure label="ATS" value={ats} />
-        <Figure label="Readiness" value={readiness} big />
-        <div className="col-span-2 md:col-span-1">
-          <VerdictBadge verdict={verdict} waitlist={waitlist} />
-        </div>
-        <p className="col-span-2 md:col-span-1 text-[0.9375rem] font-semibold">{topGap}</p>
-      </div>
-    </div>
-  );
-}
-
-function Figure({ label, value, big }: { label: string; value: number; big?: boolean }) {
-  return (
-    <p className="flex items-baseline gap-2 md:block md:text-right">
-      <span className="md:sr-only text-[0.6875rem] font-bold uppercase tracking-[0.07em] text-ink-muted">{label}</span>
-      <span className={cn("chart-data font-bold leading-none", big ? "text-4xl" : "text-2xl")}>{value}</span>
-    </p>
-  );
-}
-
-/* The recruiter's remark: reason, then the three printed continuation lines. */
-export function RecruiterRemark({
-  reason,
-  strongestSignal,
-  topGap,
-  whatWouldChange,
-  confidence,
-  verdict,
-}: {
+  confidence: number;
   reason: string;
   strongestSignal: string;
   topGap: string;
   whatWouldChange: string;
-  confidence: number;
-  verdict: Verdict;
+  tag?: string;
+  meta?: React.ReactNode;
 }) {
-  const tone = verdict === "Reject" ? "bg-danger" : verdict === "Shortlist" ? "bg-success" : "bg-warning";
   return (
-    <div className="px-4 sm:px-6 py-6 grid gap-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
-      <div>
-        <p className="text-xs font-bold uppercase tracking-[0.08em] text-ink-muted">Why this estimate</p>
-        <p className="mt-2 text-lg sm:text-xl leading-relaxed text-ink max-w-[62ch]">{reason}</p>
-        <div className="mt-6 max-w-sm">
-          <div className="flex items-baseline justify-between text-sm">
-            <span className="text-ink-muted">Recruiter confidence</span>
-            <span className="chart-data font-bold">{confidence}%</span>
-          </div>
-          <div className="mt-1.5 h-2 bg-surface-subtle rounded-[2px] overflow-hidden">
-            <div className={cn("h-full rounded-[2px]", tone)} style={{ width: `${confidence}%` }} />
-          </div>
-        </div>
+    <div>
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-5 sm:px-8 pt-5 pb-4 border-b border-border-DEFAULT">
+        <p className="text-[0.9375rem] font-semibold">
+          {role} <span className="font-normal text-ink-muted">· {tier}</span>
+          {tag && <Tag tone="muted" className="ml-2 align-[0.1em]">{tag}</Tag>}
+        </p>
+        {meta && <p className="tabular text-xs text-ink-muted">{meta}</p>}
       </div>
-      <dl className="grid gap-4 content-start lg:border-l lg:border-border-DEFAULT lg:pl-8">
-        <Remark icon={Plus} label="Strongest signal" tone="text-success">{strongestSignal}</Remark>
-        <Remark icon={Minus} label="Top gap" tone="text-danger">{topGap}</Remark>
-        <Remark icon={ArrowRight} label="What would change it" tone="text-primary-600">{whatWouldChange}</Remark>
-      </dl>
+
+      <div className="grid md:grid-cols-[minmax(0,1fr)_17rem]">
+        <div className="px-5 sm:px-8 py-7 sm:py-8">
+          <VerdictBadge verdict={verdict} size="xl" className="-rotate-2" />
+          <p className="mt-6 text-lg sm:text-xl leading-relaxed text-ink max-w-[58ch]">{reason}</p>
+
+          <dl className="mt-7 grid gap-5">
+            <Remark label="What caught the eye">
+              <span className="mark-hl">{strongestSignal}</span>
+            </Remark>
+            <Remark label="What sank it" tone="text-danger">
+              <span className="mark-under">{topGap}</span>
+            </Remark>
+            <Remark label="What would change it" tone="text-primary-700">
+              <span className="mark-fix font-medium">{whatWouldChange}</span>
+            </Remark>
+          </dl>
+        </div>
+
+        <dl className="grid grid-cols-2 md:grid-cols-1 md:content-start border-t md:border-t-0 md:border-l border-border-DEFAULT">
+          <Figure label="Readiness" value={readiness} big note="out of 100" />
+          <Figure label="ATS score" value={ats} note="keywords and format" />
+          <div className="col-span-2 md:col-span-1 px-5 sm:px-6 py-5 border-t border-border-DEFAULT">
+            <div className="flex items-baseline justify-between text-sm">
+              <dt className="text-ink-muted">Recruiter confidence</dt>
+              <dd className="figure font-semibold">{confidence}%</dd>
+            </div>
+            <div aria-hidden className="mt-2 h-1.5 rounded-full bg-surface-subtle overflow-hidden">
+              <div className="h-full rounded-full bg-ink" style={{ width: `${confidence}%` }} />
+            </div>
+            <p className="mt-2 text-xs leading-relaxed text-ink-muted">An AI estimate. The reasons above are what it rests on.</p>
+          </div>
+        </dl>
+      </div>
     </div>
   );
 }
 
-function Remark({ icon: Icon, label, tone, children }: { icon: LucideIcon; label: string; tone: string; children: React.ReactNode }) {
+function Remark({ label, tone = "text-ink-muted", children }: { label: string; tone?: string; children: React.ReactNode }) {
   return (
-    <div className="grid grid-cols-[1.25rem_minmax(0,1fr)] gap-x-2">
-      <Icon aria-hidden size={16} strokeWidth={2.75} className={cn("mt-px", tone)} />
-      <div>
-        <dt className={cn("text-xs font-bold uppercase tracking-[0.07em]", tone)}>{label}</dt>
-        <dd className="mt-1 text-[0.9375rem] leading-relaxed text-ink-secondary">{children}</dd>
-      </div>
+    <div>
+      <dt className={cn("field-label", tone)}>{label}</dt>
+      <dd className="mt-1.5 text-[0.9375rem] leading-relaxed text-ink">{children}</dd>
+    </div>
+  );
+}
+
+function Figure({ label, value, big, note }: { label: string; value: number; big?: boolean; note?: string }) {
+  return (
+    <div className="px-5 sm:px-6 py-5 [&+&]:border-l md:[&+&]:border-l-0 md:[&+&]:border-t border-border-DEFAULT">
+      <dt className="text-sm text-ink-muted">{label}</dt>
+      <dd className={cn("figure mt-1 font-semibold leading-none", big ? "text-[clamp(3.25rem,8vw,4.5rem)]" : "text-[2rem]")}>{value}</dd>
+      {note && <dd className="mt-1.5 text-xs text-ink-muted">{note}</dd>}
     </div>
   );
 }
 
 export type BreakdownItem = { label: string; score: number; weight?: string; note?: string };
 
-/* Readiness components; the weakest carries a leader line to what is pulling it down. */
+/* Readiness components; the weakest is marked in red with what is pulling it down. */
 export function Breakdown({ items, pulledBy }: { items: BreakdownItem[]; pulledBy?: string }) {
   const weakest = Math.min(...items.map((i) => i.score));
   return (
@@ -136,29 +112,26 @@ export function Breakdown({ items, pulledBy }: { items: BreakdownItem[]; pulledB
         const weak = b.score === weakest;
         const note = b.note ?? (weak ? pulledBy : undefined);
         return (
-          <li key={b.label} className="grid gap-x-5 gap-y-2 px-4 sm:px-6 py-4 @xl:grid-cols-[12rem_minmax(0,1fr)] @xl:items-center">
+          <li key={b.label} className="grid gap-x-6 gap-y-2 px-4 sm:px-6 py-4 @xl:grid-cols-[13rem_minmax(0,1fr)] @xl:items-center">
             <div className="flex items-baseline justify-between @xl:block">
-              <p className="font-bold">{b.label}</p>
+              <p className="font-semibold">{b.label}</p>
               <p className="text-xs text-ink-muted @xl:mt-0.5">
-                <span className={cn("chart-data font-bold", weak ? "text-danger" : "text-ink")}>{b.score}</span>/100
-                {b.weight && <span> · {b.weight} weight</span>}
+                <span className={cn("figure text-sm font-semibold", weak ? "text-danger" : "text-ink")}>{b.score}</span>/100
+                {b.weight && <span> · weighs {b.weight}</span>}
               </p>
             </div>
-            <div className="flex flex-col gap-2 @xl:flex-row @xl:items-center @xl:gap-3 min-w-0">
-              <div className="relative h-2.5 w-full @xl:w-48 shrink-0 bg-surface-subtle rounded-[2px] overflow-hidden">
+            <div className="flex flex-col gap-2 @xl:flex-row @xl:items-center @xl:gap-4 min-w-0">
+              <div aria-hidden className="relative h-2 w-full @xl:w-44 shrink-0 bg-surface-subtle rounded-full overflow-hidden">
                 <div
-                  className={cn("absolute inset-y-0 left-0 rounded-[2px]", weak ? "bg-danger" : "bg-primary-600")}
+                  className={cn("absolute inset-y-0 left-0 rounded-full", weak ? "bg-danger" : "bg-ink")}
                   style={{ width: `${b.score}%` }}
                 />
               </div>
               {note && (
-                <>
-                  <span aria-hidden className="hidden @xl:block h-px flex-1 min-w-4 border-t border-dashed border-ink-faint" />
-                  <p className={cn("text-sm @xl:max-w-[24rem] @xl:text-right", weak ? "font-semibold text-danger" : "text-ink-secondary")}>
-                    {weak && !b.note ? "Pulled down most by: " : ""}
-                    {note}
-                  </p>
-                </>
+                <p className={cn("text-sm", weak ? "text-danger" : "text-ink-secondary")}>
+                  {weak && !b.note ? <span className="font-semibold">Pulled down most by: </span> : null}
+                  <span className={cn(weak && "mark-under font-medium")}>{note}</span>
+                </p>
               )}
             </div>
           </li>
@@ -168,11 +141,11 @@ export function Breakdown({ items, pulledBy }: { items: BreakdownItem[]; pulledB
   );
 }
 
-const PRIORITY_TONE: Record<string, string> = {
-  Critical: "text-danger bg-danger-bg",
-  High: "text-warning bg-warning-bg",
-  Medium: "text-ink-secondary bg-surface-subtle",
-  Low: "text-ink-muted bg-surface-DEFAULT",
+const PRIORITY_TONE: Record<string, "danger" | "warning" | "neutral" | "muted"> = {
+  Critical: "danger",
+  High: "warning",
+  Medium: "neutral",
+  Low: "muted",
 };
 
 export type GapRow = {
@@ -185,15 +158,15 @@ export type GapRow = {
   expectedReadinessAfter?: number;
 };
 
-/* Career gaps as chart rows: priority, the gap, the build that closes it, the halt. */
+/* Career gaps: the gap in red-pen terms, the build that closes it in blue, the weeks and the gain. */
 export function GapsTable({ gaps, readiness }: { gaps: GapRow[]; readiness: number }) {
-  const cols = "md:grid-cols-[6.5rem_minmax(0,1fr)_minmax(0,1.2fr)_4.5rem_6.5rem]";
+  const cols = "md:grid-cols-[6rem_minmax(0,1fr)_minmax(0,1.25fr)_4rem_6.5rem]";
   return (
     <div>
       <div
         aria-hidden
         className={cn(
-          "hidden md:grid gap-4 px-6 py-2 border-b border-border-DEFAULT text-[0.6875rem] font-bold uppercase tracking-[0.07em] text-ink-muted",
+          "hidden md:grid gap-4 px-6 py-2.5 border-b border-border-DEFAULT text-xs font-medium text-ink-muted",
           cols
         )}
       >
@@ -203,31 +176,29 @@ export function GapsTable({ gaps, readiness }: { gaps: GapRow[]; readiness: numb
         <span className="text-right">Weeks</span>
         <span className="text-right">Readiness</span>
       </div>
-      <ol className="chart-rows">
+      <ol className="divide-y divide-border-DEFAULT">
         {gaps.map((gap) => (
           <li key={gap.skill} className={cn("grid gap-x-4 gap-y-2 px-4 sm:px-6 py-4 md:items-baseline", cols)}>
             <span>
-              <span className={cn("stamp text-[0.6875rem]", PRIORITY_TONE[gap.priority] ?? PRIORITY_TONE.Medium)}>
-                {gap.priority}
-              </span>
+              <Tag tone={PRIORITY_TONE[gap.priority] ?? "neutral"}>{gap.priority}</Tag>
             </span>
             <div>
-              <p className="font-bold">{gap.skill}</p>
-              {gap.currentLevel && <p className="text-sm text-ink-muted">Current level: {gap.currentLevel}</p>}
+              <p className="font-semibold">{gap.skill}</p>
+              {gap.currentLevel && <p className="text-sm text-ink-muted">Now: {gap.currentLevel}</p>}
             </div>
             <div>
-              <p className="font-semibold text-primary-600">{gap.recommendedProject}</p>
+              <p className="font-semibold text-primary-700">{gap.recommendedProject}</p>
               {gap.difficulty && <p className="text-sm text-ink-muted">{gap.difficulty} build</p>}
             </div>
-            <p className="chart-data text-sm md:text-right">
-              <span className="md:hidden text-ink-muted">Halt </span>
-              {gap.estimatedWeeks}w
+            <p className="figure text-sm md:text-right">
+              <span className="md:hidden text-ink-muted">Takes </span>
+              {gap.estimatedWeeks} {gap.estimatedWeeks === 1 ? "wk" : "wks"}
             </p>
-            <p className="chart-data text-sm md:text-right">
+            <p className="figure text-sm md:text-right">
               {typeof gap.expectedReadinessAfter === "number" ? (
                 <>
                   <span className="text-ink-muted">{readiness} → </span>
-                  <span className="font-bold text-success">{gap.expectedReadinessAfter}</span>
+                  <span className="font-semibold text-primary-700">{gap.expectedReadinessAfter}</span>
                 </>
               ) : (
                 <span className="text-ink-faint">—</span>
@@ -243,21 +214,27 @@ export function GapsTable({ gaps, readiness }: { gaps: GapRow[]; readiness: numb
 export function SkillsLedger({ strong, missing }: { strong: string[]; missing: string[] }) {
   return (
     <div className="grid md:grid-cols-2 md:divide-x divide-border-DEFAULT">
-      <SkillList title="Strong on your resume" mark="+" tone="text-success" skills={strong} />
-      <SkillList title="Missing for this tier" mark="−" tone="text-danger" skills={missing} />
+      <SkillList title="Strong on your resume" kind="seen" skills={strong} />
+      <SkillList title="Missing for this tier" kind="missing" skills={missing} />
     </div>
   );
 }
 
-function SkillList({ title, mark, tone, skills }: { title: string; mark: string; tone: string; skills: string[] }) {
+function SkillList({ title, kind, skills }: { title: string; kind: "seen" | "missing"; skills: string[] }) {
   return (
     <div className="px-4 sm:px-6 py-5">
-      <h3 className={cn("text-xs font-bold uppercase tracking-[0.08em]", tone)}>{title}</h3>
+      <h3 className={cn("field-label", kind === "seen" ? "text-ink-muted" : "text-danger")}>{title}</h3>
       {skills.length ? (
         <ul className="mt-3 flex flex-wrap gap-2">
           {skills.map((s) => (
-            <li key={s} className="chart-data inline-flex items-center gap-1.5 rounded-[3px] border border-border-strong bg-surface-DEFAULT px-2 py-1 text-xs">
-              <span aria-hidden className={cn("font-bold", tone)}>{mark}</span>
+            <li
+              key={s}
+              className={cn(
+                "inline-flex items-center rounded-[6px] px-2 py-1 text-[0.8125rem] font-medium",
+                kind === "seen" ? "bg-highlight-soft text-ink" : "text-danger ring-1 ring-inset ring-danger-border"
+              )}
+            >
+              {kind === "missing" && <span className="sr-only">Missing: </span>}
               {s}
             </li>
           ))}

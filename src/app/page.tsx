@@ -2,18 +2,17 @@ import type { Metadata } from "next";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { HeroSection } from "@/components/landing/HeroSection";
-import { HowItWorks } from "@/components/landing/HowItWorks";
-import { FeaturesSection } from "@/components/landing/FeaturesSection";
+import { ReadSection } from "@/components/landing/ReadSection";
+import { FixSection } from "@/components/landing/FixSection";
+import { ContentsSection } from "@/components/landing/ContentsSection";
 import { PricingSection } from "@/components/landing/PricingSection";
 import { FAQ } from "@/components/landing/FAQ";
 import { CTASection } from "@/components/landing/CTASection";
-import { ReportRemarks } from "@/components/landing/ReportRemarks";
-import { RouteSection } from "@/components/landing/RouteSection";
 
 export const metadata: Metadata = {
-  title: "Gapl — Application Readiness Engine for Job Seekers",
+  title: "Gapl — See what a recruiter sees in your resume",
   description:
-    "Know why you're not getting shortlisted. Gapl analyzes your resume, simulates recruiter review, identifies skill gaps, and tells you exactly what to build next.",
+    "Recruiters give your resume six seconds. Gapl reads it the same way for your role and company tier, shows the line that sank it, and tells you what to build next.",
   keywords: [
     "resume analyzer",
     "job readiness",
@@ -25,15 +24,15 @@ export const metadata: Metadata = {
     "placement preparation",
   ],
   openGraph: {
-    title: "Gapl — Application Readiness Engine",
-    description: "Know why you're not getting shortlisted. Fix it.",
+    title: "Gapl — Six seconds. Here's what they saw.",
+    description: "Your resume, read the way a recruiter reads it. The verdict, the reason, and what to build next.",
     type: "website",
     url: "https://gapl.in",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Gapl — Application Readiness Engine",
-    description: "Know why you're not getting shortlisted. Fix it.",
+    title: "Gapl — Six seconds. Here's what they saw.",
+    description: "Your resume, read the way a recruiter reads it. The verdict, the reason, and what to build next.",
   },
 };
 
@@ -42,10 +41,9 @@ export default function HomePage() {
     <main>
       <Navbar />
       <HeroSection />
-      <HowItWorks />
-      <ReportRemarks />
-      <RouteSection />
-      <FeaturesSection />
+      <ReadSection />
+      <FixSection />
+      <ContentsSection />
       <PricingSection />
       <FAQ />
       <CTASection />

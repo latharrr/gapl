@@ -1,6 +1,6 @@
 "use client";
 
-import { LoadingChart } from "@/components/ui/Sheet";
+import { Loading } from "@/components/ui/Sheet";
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -126,7 +126,7 @@ export default function AdminEmailInsightsPage() {
   if (loading) {
     return (
       <div className="h-[60vh] flex items-center justify-center">
-        <LoadingChart />
+        <Loading />
       </div>
     );
   }
@@ -135,7 +135,7 @@ export default function AdminEmailInsightsPage() {
     return (
       <div className="text-center py-20 max-w-sm mx-auto space-y-4">
         <AlertTriangle size={32} className="text-warning mx-auto" />
-        <h2 className="text-lg font-[800] tracking-[-0.015em] text-ink">Failed to Compile Email Insights</h2>
+        <h2 className="text-lg font-bold tracking-[-0.015em] text-ink">Failed to Compile Email Insights</h2>
         <p className="text-xs text-ink-muted leading-relaxed">{error}</p>
         <Button variant="primary" size="sm" onClick={() => fetchInsights()}>
           Retry Fetch
@@ -255,7 +255,7 @@ export default function AdminEmailInsightsPage() {
         
         <div className="flex items-center gap-2">
           <Sparkles size={16} className="text-primary-600" />
-          <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">Weekly Email Intelligence Report</h2>
+          <h2 className="text-sm font-bold uppercase tracking-[0.06em] text-ink">Weekly Email Intelligence Report</h2>
         </div>
         <div className="prose prose-invert max-w-none text-xs text-ink-muted leading-relaxed space-y-4 font-normal whitespace-pre-wrap">
           {aiSummary}
@@ -268,7 +268,7 @@ export default function AdminEmailInsightsPage() {
         <div className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] overflow-hidden">
           <div className="px-6 py-4 border-b border-border-DEFAULT flex items-center gap-2">
             <UserCheck size={16} className="text-success" />
-            <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">Highly Engaged Cohort</h2>
+            <h2 className="text-sm font-bold uppercase tracking-[0.06em] text-ink">Highly Engaged Cohort</h2>
           </div>
           <div className="overflow-y-auto max-h-[300px]">
             <table className="w-full text-left text-xs text-ink-muted">
@@ -311,7 +311,7 @@ export default function AdminEmailInsightsPage() {
         <div className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] overflow-hidden">
           <div className="px-6 py-4 border-b border-border-DEFAULT flex items-center gap-2">
             <UserMinus size={16} className="text-warning" />
-            <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">High Churn Risk Cohort</h2>
+            <h2 className="text-sm font-bold uppercase tracking-[0.06em] text-ink">High Churn Risk Cohort</h2>
           </div>
           <div className="overflow-y-auto max-h-[300px]">
             <table className="w-full text-left text-xs text-ink-muted">

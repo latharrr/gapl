@@ -1,6 +1,6 @@
 "use client";
 
-import { LoadingChart } from "@/components/ui/Sheet";
+import { Loading } from "@/components/ui/Sheet";
 
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/Card";
@@ -94,7 +94,7 @@ export default function AdminSettingsPage() {
   if (loading) {
     return (
       <div className="h-[60vh] flex items-center justify-center">
-        <LoadingChart />
+        <Loading />
       </div>
     );
   }
@@ -123,7 +123,7 @@ export default function AdminSettingsPage() {
         <div className="space-y-6">
           <Card variant="default" padding="md" className="bg-surface-DEFAULT border-border-DEFAULT space-y-6">
             <div>
-              <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">System Feature Flags</h2>
+              <h2 className="text-sm font-bold uppercase tracking-[0.06em] text-ink">System Feature Flags</h2>
               <p className="text-[0.6875rem] text-ink-muted">Instantly toggle critical routes and portal access</p>
             </div>
 
@@ -152,7 +152,7 @@ export default function AdminSettingsPage() {
 
           <Card variant="default" padding="md" className="bg-surface-DEFAULT border-border-DEFAULT space-y-4">
             <div>
-              <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">ATS Evaluations Settings</h2>
+              <h2 className="text-sm font-bold uppercase tracking-[0.06em] text-ink">ATS Evaluations Settings</h2>
               <p className="text-[0.6875rem] text-ink-muted">Define cutoff ranges for shortlist verdicts</p>
             </div>
 
@@ -167,7 +167,7 @@ export default function AdminSettingsPage() {
                   max="95"
                   value={shortlistCutoff}
                   onChange={(e) => setShortlistCutoff(parseInt(e.target.value))}
-                  className="flex-1 accent-[#1d2b6b]"
+                  className="flex-1 accent-[#16171b]"
                 />
                 <span className="font-mono text-xs font-bold text-ink bg-surface-muted border border-border-DEFAULT px-3 py-1.5 rounded-[5px] shrink-0">
                   {shortlistCutoff}%
@@ -183,7 +183,7 @@ export default function AdminSettingsPage() {
         {/* Smart Model Routing Table */}
         <Card variant="default" padding="md" className="bg-surface-DEFAULT border-border-DEFAULT space-y-6">
           <div>
-            <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">Smart Model Routing</h2>
+            <h2 className="text-sm font-bold uppercase tracking-[0.06em] text-ink">Smart Model Routing</h2>
             <p className="text-[0.6875rem] text-ink-muted">Map platform parser features to specialized LLM configurations</p>
           </div>
 

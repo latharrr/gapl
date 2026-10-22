@@ -1,6 +1,6 @@
 "use client";
 
-import { LoadingChart } from "@/components/ui/Sheet";
+import { Loading } from "@/components/ui/Sheet";
 
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -219,7 +219,7 @@ export default function AdminPromptsPage() {
   if (loading) {
     return (
       <div className="h-[60vh] flex items-center justify-center">
-        <LoadingChart />
+        <Loading />
       </div>
     );
   }
@@ -275,7 +275,7 @@ export default function AdminPromptsPage() {
             <Card variant="default" padding="md" className="bg-surface-DEFAULT border-border-DEFAULT space-y-4">
               <div className="flex justify-between items-start gap-4 flex-wrap">
                 <div>
-                  <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">{selectedPrompt.name}</h2>
+                  <h2 className="text-sm font-bold uppercase tracking-[0.06em] text-ink">{selectedPrompt.name}</h2>
                   <span className="text-[0.6875rem] text-ink-muted">
                     Active Version: v{selectedPrompt.version} · Last updated: {new Date(selectedPrompt.lastUpdated).toLocaleString()}
                   </span>

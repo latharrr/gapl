@@ -6,7 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { getUserCVs, type SavedCV } from "@/lib/firebase";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
-import { Sheet, PageHeader, EmptyChart, LoadingChart, APP_PAGE } from "@/components/ui/Sheet";
+import { Sheet, PageHeader, EmptyState, Loading, APP_PAGE } from "@/components/ui/Sheet";
 import { Plus, PenLine, ArrowRight } from "lucide-react";
 
 function formatDate(val: SavedCV["createdAt"]): string {
@@ -46,11 +46,10 @@ export default function MyCVsPage() {
       />
 
       {loading ? (
-        <LoadingChart text="LOADING CVS" />
+        <Loading text="Loading your CVs" />
       ) : cvs.length === 0 ? (
         <Sheet>
-          <EmptyChart
-            led="NO CVS YET"
+          <EmptyState
             title="Build your first CV"
             action={
               <Link href="/cv-builder">
@@ -59,11 +58,11 @@ export default function MyCVsPage() {
             }
           >
             Gapl rewrites your bullets around evidence and ATS fit, then saves every version here.
-          </EmptyChart>
+          </EmptyState>
         </Sheet>
       ) : (
         <Sheet title="Saved CVs" aside={`${cvs.length} saved`}>
-          <ul className="chart-rows">
+          <ul className="divide-y divide-border-DEFAULT">
             {cvs.map((cv) => {
               const improvement = cv.atsScore - cv.originalAtsScore;
               return (
@@ -76,14 +75,14 @@ export default function MyCVsPage() {
                     <p className="text-sm text-ink-muted truncate">{cv.role}</p>
                   </div>
                   <p className="text-sm text-ink-secondary">{cv.companyType}</p>
-                  <p className="chart-data text-sm">
+                  <p className="figure text-sm">
                     <span className={cn("font-bold", cv.atsScore >= 90 ? "text-success" : "text-warning")}>ATS {cv.atsScore}</span>
                     <span className="block text-xs text-ink-muted">
                       {improvement >= 0 ? "+" : ""}
                       {improvement} from original
                     </span>
                   </p>
-                  <p className="chart-data text-xs text-ink-muted">{formatDate(cv.createdAt)}</p>
+                  <p className="figure text-xs text-ink-muted">{formatDate(cv.createdAt)}</p>
                   <Link
                     href="/cv-builder"
                     className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary-600 hover:text-primary-700 hover:underline whitespace-nowrap"

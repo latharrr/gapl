@@ -28,7 +28,7 @@ Two things together, equally weighted: (1) a blunt recruiter verdict followed by
 ## Capabilities and Constraints
 
 - Next.js 16 App Router, React 19, Tailwind v4, framer-motion, lucide-react, Firebase auth/Firestore, Razorpay payments, Resend email.
-- Plans (INR, one-time): Free (1 analysis), Basic ₹49 (5), Pro ₹149 (20/month), Premium ₹299 (50) exists in code but not on the public pricing grid.
+- Plans (INR), all on the public pricing grid: Free (1 analysis a month), Basic ₹49 (5 a month), Pro ₹149 (20 a month), Premium ₹299 (50 a month). Credits reset on the 1st of each month. Payment is a one-off Razorpay order; there is no auto-renewal or plan expiry in code yet, so copy must not say "billed monthly".
 - Scores are AI estimates; product copy must say so and explain the gaps behind them.
 - Domain: gapl.in. Contact: hello@gapl.in.
 

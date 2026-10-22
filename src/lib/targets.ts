@@ -1,4 +1,4 @@
-// Roles and company tiers a resume can be charted against. Shared by the landing enquiry and /analyze.
+// Roles and company tiers a resume can be read against. Shared by the landing hero and /analyze.
 export const ROLES = ["SDE Intern", "SDE Full Time", "Data Analyst", "AI/ML Engineer", "Product Manager"];
 
 export const TIERS = [

@@ -1,74 +1,54 @@
-"use client";
-
 import { cn } from "@/lib/utils";
 import { type ButtonHTMLAttributes, forwardRef } from "react";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "ghost" | "danger" | "outline";
+  variant?: "primary" | "secondary" | "ghost" | "danger" | "outline" | "desk";
   size?: "sm" | "md" | "lg" | "icon";
   loading?: boolean;
 }
 
+/*
+  primary   — highlighter yellow: the one action per view
+  secondary — ink: a firm second action on paper
+  outline   — paper with a ruled edge
+  ghost     — text only
+  danger    — red pen, destructive acts only
+  desk      — outlined in light ink, for second actions on the charcoal desk
+*/
+export const buttonVariants = {
+  primary:
+    "bg-highlight text-ink hover:bg-highlight-deep shadow-[0_1px_0_0_rgb(22_23_27/0.18),inset_0_-1px_0_0_rgb(22_23_27/0.12)] disabled:bg-surface-subtle disabled:text-ink-faint disabled:shadow-none disabled:opacity-100",
+  secondary: "bg-ink text-white hover:bg-ink-secondary",
+  outline: "bg-surface-DEFAULT text-ink border border-border-strong hover:border-ink",
+  ghost: "text-ink-secondary hover:bg-surface-subtle hover:text-ink",
+  danger: "bg-danger text-white hover:bg-danger-deep",
+  desk: "text-desk-ink border border-desk-line hover:border-desk-muted hover:bg-desk-raised",
+};
+
+export const buttonSizes = {
+  sm: "h-9 px-3.5 text-[0.8125rem] rounded-[7px]",
+  md: "h-10 px-4 text-sm rounded-[8px]",
+  lg: "h-12 px-5 text-[0.9375rem] rounded-[9px]",
+  icon: "h-10 w-10 rounded-[8px]",
+};
+
+export const buttonBase =
+  "inline-flex items-center justify-center gap-2 font-semibold tracking-[-0.005em] whitespace-nowrap transition-[background-color,border-color,color,box-shadow,transform] duration-150 ease-out active:translate-y-px disabled:opacity-45 disabled:pointer-events-none select-none";
+
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = "primary", size = "md", loading, disabled, children, ...props }, ref) => {
-    const base =
-      "inline-flex items-center justify-center gap-2 font-semibold tracking-[-0.005em] transition-[background-color,border-color,color,box-shadow,transform] duration-150 ease-out focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 active:translate-y-px disabled:opacity-45 disabled:pointer-events-none select-none";
-
-    // primary = station-board yellow (the action); secondary = rail navy (structure)
-    const variants = {
-      primary:
-        "bg-board text-board-ink border-2 border-board-ink hover:bg-board-deep hover:shadow-md shadow-sm",
-      secondary:
-        "bg-primary-600 text-primary-foreground border-2 border-primary-600 hover:bg-primary-700 hover:border-primary-700",
-      outline:
-        "border-[1.5px] border-border-strong bg-surface-DEFAULT text-ink hover:border-ink hover:bg-surface-DEFAULT",
-      ghost:
-        "text-ink-secondary hover:bg-surface-subtle hover:text-ink",
-      danger:
-        "bg-danger text-white border-2 border-danger hover:bg-danger-deep hover:border-danger-deep",
-    };
-
-    const sizes = {
-      sm: "h-8 px-3 text-[0.8125rem] rounded-[4px]",
-      md: "h-10 px-4 text-sm rounded-[5px]",
-      lg: "h-12 px-6 text-[0.9375rem] rounded-[6px]",
-      icon: "h-10 w-10 rounded-[5px]",
-    };
-
     return (
       <button
         ref={ref}
         disabled={disabled || loading}
-        className={cn(base, variants[variant], sizes[size], className)}
+        aria-busy={loading || undefined}
+        className={cn(buttonBase, buttonVariants[variant], buttonSizes[size], className)}
         {...props}
       >
-        {loading ? (
-          <>
-            <svg
-              className="animate-spin h-4 w-4"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-              />
-            </svg>
-            {children}
-          </>
-        ) : (
-          children
+        {loading && (
+          <span aria-hidden className="h-3.5 w-3.5 rounded-full border-2 border-current border-r-transparent animate-spin" />
         )}
+        {children}
       </button>
     );
   }

@@ -1,89 +1,99 @@
 @import "tailwindcss";
 
 /*
-  Gapl — PNR Status world.
-  Indian Railways print + signage: chart paper, greenbar rows, IR-navy rail ink,
-  station-board yellow, amber LED departure boards, status stamps (WL / RAC / CNF).
+  Gapl — The Recruiter's Read.
+  A charcoal desk with white paper on it. Three marks carry every meaning:
+  highlighter (what caught the eye, and the one action), red pen (what sank it),
+  blue ballpoint (the fix). Marks are precise, never hand-drawn.
 */
 
 @theme {
-  /* Ink — rail-ink near-black, blue-tinted greys (never neutral zinc) */
-  --color-ink: #17181f;
-  --color-ink-secondary: #383b47;
-  --color-ink-muted: #595c69;
-  --color-ink-faint: #8a8c96;
+  /* Desk — the ground the paper lies on */
+  --color-desk: #141519;
+  --color-desk-raised: #1c1d23;
+  --color-desk-line: #2d2f37;
+  --color-desk-ink: #f4f3ef;
+  --color-desk-muted: #a7a9b2;
+  --color-desk-faint: #80838d;
 
-  /* Paper — chart sheet, platform ground, pasted chart backing */
-  --color-surface-DEFAULT: #fcfcf7;
-  --color-surface-muted: #f0f0e8;
-  --color-surface-subtle: #e6e6dc;
+  /* Paper and the pad it sits on in the app */
+  --color-surface-DEFAULT: #ffffff;
+  --color-surface-muted: #f2f2ee;
+  --color-surface-subtle: #e8e8e3;
 
-  --color-border-DEFAULT: #d2d1c4;
-  --color-border-strong: #a9a89a;
+  --color-border-DEFAULT: #e1e1db;
+  --color-border-strong: #c3c3bb;
 
-  /* Rail navy — coach livery, enquiry screens, nav */
-  --color-primary-DEFAULT: #1d2b6b;
-  --color-primary-foreground: #fcfcf7;
-  --color-primary-50: #eceef6;
-  --color-primary-100: #d8dcee;
-  --color-primary-400: #6676bd;
-  --color-primary-500: #2d3d8c;
-  --color-primary-600: #1d2b6b;
-  --color-primary-700: #131d4f;
-  --color-primary-900: #0c1236;
+  /* Ink on paper */
+  --color-ink: #16171b;
+  --color-ink-secondary: #3b3d45;
+  --color-ink-muted: #5e616a;
+  --color-ink-faint: #75787f;
 
-  /* Station signboard */
-  --color-board: #f5c518;
-  --color-board-deep: #e2b106;
-  --color-board-ink: #14140f;
+  /* Highlighter — what the recruiter saw; also the one primary action */
+  --color-highlight: #ffe14d;
+  --color-highlight-deep: #f4cd16;
+  --color-highlight-soft: #fff0a3;
 
-  /* LED departure board */
-  --color-led: #ffb01f;
-  --color-led-dim: #4a3a17;
-  --color-led-ground: #141412;
+  /* Blue ballpoint — the fix, links, focus */
+  --color-primary-DEFAULT: #2856d4;
+  --color-primary-foreground: #ffffff;
+  --color-primary-50: #eef2fd;
+  --color-primary-100: #dbe4fb;
+  --color-primary-400: #6d8ee8;
+  --color-primary-500: #3a66dc;
+  --color-primary-600: #2856d4;
+  --color-primary-700: #1f44a8;
+  --color-primary-900: #142c6e;
 
-  /* Greenbar continuous stationery */
-  --color-greenbar: #e3ecdc;
+  /* Verdicts — always written as words: Shortlist, Maybe, Reject */
+  --color-success: #17784a;
+  --color-success-bg: #e3f2e9;
+  --color-success-border: #a8d5bb;
 
-  /* Status: CNF / RAC / WL — always written out, never colour alone */
-  --color-success: #1d7337;
-  --color-success-bg: #e3efe3;
-  --color-success-border: #a9cfb1;
+  --color-warning: #94600a;
+  --color-warning-bg: #fbf0d6;
+  --color-warning-border: #ecd08f;
 
-  --color-warning: #8f5300;
-  --color-warning-bg: #f8edd4;
-  --color-warning-border: #e3c483;
+  /* Red pen */
+  --color-danger: #c8302a;
+  --color-danger-bg: #fbeae8;
+  --color-danger-border: #f0bcb7;
+  --color-danger-deep: #a32520;
+  --color-danger-on-desk: #ff7b6f;
 
-  --color-danger: #b0241c;
-  --color-danger-bg: #f6e1dd;
-  --color-danger-border: #e4aea7;
-  --color-danger-deep: #8f1b15;
-
-  /* Type */
-  --font-sans: var(--font-archivo), "Archivo", system-ui, sans-serif;
-  --font-mono: var(--font-martian), "Martian Mono", ui-monospace, monospace;
-  --font-led: var(--font-doto), "Doto", ui-monospace, monospace;
+  /* Type: Mona Sans for every UI word and figure; CMU Serif only for resume text */
+  --font-sans: var(--font-mona), "Mona Sans", system-ui, sans-serif;
+  --font-serif: var(--font-cmu), "CMU Serif", "Latin Modern Roman", Georgia, serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
 
   --font-size-2xs: 0.6875rem;
   --line-height-2xs: 1rem;
 
-  /* Depth — paper on paper: short offset, soft blur */
-  --shadow-xs: 0 1px 1px 0 rgb(23 24 31 / 0.06);
-  --shadow-sm: 0 1px 2px 0 rgb(23 24 31 / 0.08), 0 1px 1px -1px rgb(23 24 31 / 0.05);
-  --shadow-DEFAULT: 0 2px 6px -1px rgb(23 24 31 / 0.1), 0 1px 2px -1px rgb(23 24 31 / 0.06);
-  --shadow-md: 0 6px 16px -4px rgb(23 24 31 / 0.14), 0 2px 4px -2px rgb(23 24 31 / 0.06);
-  --shadow-lg: 0 14px 32px -8px rgb(23 24 31 / 0.18), 0 4px 8px -4px rgb(23 24 31 / 0.06);
-  --shadow-xl: 0 24px 48px -12px rgb(23 24 31 / 0.22), 0 8px 16px -8px rgb(23 24 31 / 0.08);
-  --shadow-card: 0 1px 2px 0 rgb(23 24 31 / 0.08), 0 4px 14px -6px rgb(23 24 31 / 0.12);
+  /* Depth — paper lifting off a surface: offset, soft blur */
+  --shadow-xs: 0 1px 1px 0 rgb(22 23 27 / 0.05);
+  --shadow-sm: 0 1px 2px 0 rgb(22 23 27 / 0.07), 0 1px 1px -1px rgb(22 23 27 / 0.05);
+  --shadow-DEFAULT: 0 2px 6px -1px rgb(22 23 27 / 0.09), 0 1px 2px -1px rgb(22 23 27 / 0.05);
+  --shadow-md: 0 8px 20px -6px rgb(22 23 27 / 0.14), 0 2px 4px -2px rgb(22 23 27 / 0.06);
+  --shadow-lg: 0 18px 40px -12px rgb(22 23 27 / 0.2), 0 4px 8px -4px rgb(22 23 27 / 0.06);
+  --shadow-xl: 0 28px 56px -16px rgb(22 23 27 / 0.24), 0 8px 16px -8px rgb(22 23 27 / 0.08);
+  --shadow-card: 0 1px 2px 0 rgb(22 23 27 / 0.06), 0 6px 18px -10px rgb(22 23 27 / 0.14);
+  --shadow-page: 0 2px 3px 0 rgb(0 0 0 / 0.35), 0 30px 60px -28px rgb(0 0 0 / 0.75);
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
-  --animate-led-blink: led-blink 1.1s steps(2, jump-none) infinite;
+  --animate-blink: blink 1.1s steps(2, jump-none) infinite;
 
-  @keyframes led-blink {
+  @keyframes blink {
     0% { opacity: 1; }
-    100% { opacity: 0.25; }
+    100% { opacity: 0.3; }
   }
+}
+
+@keyframes sweep {
+  0% { transform: scaleX(0); opacity: 1; }
+  70% { transform: scaleX(1); opacity: 1; }
+  100% { transform: scaleX(1); opacity: 0; }
 }
 
 @layer base {
@@ -92,6 +102,7 @@
   }
 
   html {
+    background-color: var(--color-desk);
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -115,18 +126,22 @@
   }
 
   a {
-    text-underline-offset: 0.2em;
+    text-underline-offset: 0.22em;
     text-decoration-thickness: 1px;
   }
 
   ::selection {
-    background: var(--color-board);
-    color: var(--color-board-ink);
+    background: var(--color-highlight);
+    color: var(--color-ink);
   }
 
   :focus-visible {
     outline: 2px solid var(--color-primary-600);
     outline-offset: 2px;
+  }
+
+  .on-desk :focus-visible {
+    outline-color: var(--color-highlight);
   }
 
   ::placeholder {
@@ -150,7 +165,7 @@
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--color-primary-400);
+    background: var(--color-ink-faint);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -159,6 +174,7 @@
     }
     *, *::before, *::after {
       animation-duration: 0.01ms !important;
+      animation-delay: 0ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
     }
@@ -166,71 +182,117 @@
 }
 
 @layer components {
-  /* Station signboard: yellow field, black rim, heavy grotesque */
-  .signboard {
-    background: var(--color-board);
-    color: var(--color-board-ink);
-    border: 3px solid var(--color-board-ink);
-    box-shadow:
-      inset 0 0 0 5px var(--color-board),
-      inset 0 0 0 6px rgb(20 20 15 / 0.85),
-      0 2px 0 0 rgb(20 20 15 / 0.08);
-    border-radius: 6px;
+  /* The desk: charcoal ground with light type */
+  .on-desk {
+    background-color: var(--color-desk);
+    color: var(--color-desk-ink);
+    color-scheme: dark;
   }
 
-  .signboard-sm {
-    box-shadow: inset 0 0 0 2px var(--color-board), inset 0 0 0 3px rgb(20 20 15 / 0.85);
-    border-width: 2px;
-    border-radius: 4px;
-  }
-
-  /* LED departure board: unlit dot matrix ground, amber dots */
-  .led-ground,
-  .led-board {
-    background-color: var(--color-led-ground);
-    background-image: radial-gradient(circle at center, rgb(255 176 31 / 0.07) 0.9px, transparent 1.4px);
-    background-size: 5px 5px;
-  }
-
-  .led-board {
-    color: var(--color-led);
-    font-family: var(--font-led);
-    font-weight: 900;
-    letter-spacing: 0.04em;
-  }
-
-  /* Reservation chart sheet: rows banded like greenbar stationery */
-  .chart-sheet {
+  /* A sheet of paper lying on the desk */
+  .page {
     background: var(--color-surface-DEFAULT);
+    color: var(--color-ink);
+    box-shadow: var(--shadow-page);
+    color-scheme: light;
+  }
+
+  /* A sheet on the light pad (app screens) */
+  .sheet {
+    background: var(--color-surface-DEFAULT);
+    color: var(--color-ink);
     box-shadow: var(--shadow-card);
+    color-scheme: light;
   }
 
-  .chart-rows > :nth-child(even) {
-    background: var(--color-greenbar);
+  .on-desk .sheet {
+    box-shadow: var(--shadow-page);
   }
 
-  .chart-data {
-    font-family: var(--font-mono);
-    font-variation-settings: "wdth" 85;
+  /* Headline voice: Mona Sans, heavy and a touch wide */
+  .display {
+    font-family: var(--font-sans);
+    font-weight: 780;
+    font-variation-settings: "wdth" 108;
+    letter-spacing: -0.03em;
+    line-height: 0.98;
+  }
+
+  .resume-text {
+    font-family: var(--font-serif);
+    font-feature-settings: normal;
+  }
+
+  .tabular {
     font-variant-numeric: tabular-nums;
-    letter-spacing: 0;
   }
 
-  /* Status stamp */
-  .stamp {
+  /* Figures: tabular, slightly condensed so columns sit tight */
+  .figure {
+    font-variant-numeric: tabular-nums;
+    font-variation-settings: "wdth" 96;
+    letter-spacing: -0.02em;
+  }
+
+  /* ── The three marks ─────────────────────────────── */
+
+  /* Highlighter: a crisp block behind the words, swept left to right */
+  .mark-hl {
+    background-image: linear-gradient(var(--color-highlight-soft), var(--color-highlight-soft));
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+    padding: 0.04em 0.18em;
+    margin: 0 -0.18em;
+    border-radius: 2px;
+    color: inherit;
+  }
+
+  /* Red pen: a straight underline */
+  .mark-under {
+    text-decoration-line: underline;
+    text-decoration-color: var(--color-danger);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.2em;
+  }
+
+  /* Red pen: struck out */
+  .mark-strike {
+    text-decoration-line: line-through;
+    text-decoration-color: var(--color-danger);
+    text-decoration-thickness: 2px;
+  }
+
+  /* Blue ballpoint: the fix */
+  .mark-fix {
+    color: var(--color-primary-600);
+  }
+
+  /* The verdict, written as a word inside a ruled box */
+  .verdict {
     display: inline-flex;
     align-items: center;
-    gap: 0.4em;
-    font-family: var(--font-mono);
-    font-variation-settings: "wdth" 85;
-    font-weight: 700;
+    gap: 0.45em;
+    font-family: var(--font-sans);
+    font-weight: 750;
+    font-variation-settings: "wdth" 110;
     text-transform: uppercase;
-    letter-spacing: 0.02em;
-    border: 1.5px solid currentColor;
-    border-radius: 3px;
-    padding: 0.15em 0.5em;
-    line-height: 1.3;
+    letter-spacing: 0.07em;
+    border: 2px solid currentColor;
+    border-radius: 4px;
+    padding: 0.2em 0.55em 0.18em;
+    line-height: 1.2;
     white-space: nowrap;
+  }
+
+  /* Small uppercase field label (Remarks, Strongest signal…) */
+  .field-label {
+    font-size: 0.6875rem;
+    line-height: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
   /* Long-form reading column */
@@ -245,7 +307,7 @@
     margin-top: 2.2em;
     font-size: 1.375rem;
     line-height: 1.25;
-    font-weight: 800;
+    font-weight: 750;
     letter-spacing: -0.015em;
     color: var(--color-ink);
   }
@@ -257,16 +319,6 @@
   .reading ol { list-style: decimal; padding-left: 1.25em; }
   .reading li + li { margin-top: 0.4em; }
   .reading li::marker { color: var(--color-ink-muted); }
-
-  /* Signage display face — wide-ish, heavy */
-  .display {
-    font-family: var(--font-sans);
-    font-weight: 850;
-    font-variation-settings: "wdth" 94;
-    letter-spacing: -0.02em;
-    word-spacing: 0.05em;
-    line-height: 0.98;
-  }
 }
 
 @layer utilities {
@@ -279,12 +331,141 @@
     line-height: 1rem;
   }
 
-  .tabular {
-    font-variant-numeric: tabular-nums;
-  }
-
   .shadow-card {
     box-shadow: var(--shadow-card);
   }
+}
 
+/* ── The six-second read (SampleResume) ─────────────── */
+@layer components {
+  .read-hl {
+    background-image: linear-gradient(var(--color-highlight-soft), var(--color-highlight-soft));
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+    padding: 0 0.16em;
+    margin: 0 -0.16em;
+    border-radius: 1px;
+  }
+
+  .read-under {
+    background-image: linear-gradient(var(--color-danger), var(--color-danger));
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 100% max(1.5px, 0.3cqw);
+    padding-bottom: 0.12em;
+  }
+
+  .read-ring {
+    border: max(1.5px, 0.3cqw) solid var(--color-danger);
+    border-radius: 999px / 40%;
+  }
+
+  /* Waiting to be read (JS present, not yet in view): marks held back */
+  .js .read[data-play="pending"] .read-hl { background-size: 0% 100%; }
+  .js .read[data-play="pending"] .read-under { background-size: 0% max(1.5px, 0.3cqw); }
+  .js .read[data-play="pending"] .read-ring { clip-path: inset(0 100% 0 0); }
+  .js .read[data-play="pending"] .read-note,
+  .js .read[data-play="pending"] .read-verdict { opacity: 0; }
+  .js .read[data-play="pending"] .read-clock { transform: scaleX(0); }
+
+  .read[data-play="play"] .read-hl { animation: read-hl 650ms var(--ease-out-expo) var(--d, 0s) both; }
+  .read[data-play="play"] .read-under { animation: read-under 500ms var(--ease-out-expo) var(--d, 0s) both; }
+  .read[data-play="play"] .read-ring { animation: read-ring 800ms var(--ease-out-expo) var(--d, 0s) both; }
+  .read[data-play="play"] .read-note { animation: read-note 450ms var(--ease-out-expo) var(--d, 0s) both; }
+  .read[data-play="play"] .read-verdict { animation: read-verdict 380ms var(--ease-out-expo) var(--d, 0s) both; }
+  .read[data-play="play"] .read-clock { animation: read-clock 6s linear both; }
+}
+
+@keyframes read-hl {
+  from { background-size: 0% 100%; }
+  to { background-size: 100% 100%; }
+}
+
+@keyframes hero-hl {
+  from { background-size: 0% 80%; }
+  to { background-size: 100% 80%; }
+}
+
+@keyframes read-under {
+  from { background-size: 0% max(1.5px, 0.3cqw); }
+  to { background-size: 100% max(1.5px, 0.3cqw); }
+}
+
+@keyframes read-ring {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes read-note {
+  from { opacity: 0; transform: translateX(-4px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes read-verdict {
+  from { opacity: 0; transform: scale(1.35); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes read-clock {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+/* The hero's highlighted sentence: a full-strength highlighter block behind ink type */
+@layer components {
+  .hero-hl {
+    color: var(--color-ink);
+    background-image: linear-gradient(var(--color-highlight), var(--color-highlight));
+    background-repeat: no-repeat;
+    /* Sized to the letters, not the font's taller content box, so it never covers the line above */
+    background-size: 100% 80%;
+    background-position: 0 72%;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+    padding: 0 0.08em;
+    margin: 0 -0.04em;
+    border-radius: 3px;
+    animation: hero-hl 900ms var(--ease-out-expo) 150ms both;
+  }
+}
+
+/* ── The fix being written back (FixSection) ─────────── */
+@layer components {
+  .fix-strike {
+    background-image: linear-gradient(var(--color-danger), var(--color-danger));
+    background-repeat: no-repeat;
+    background-position: 0 58%;
+    background-size: 100% 2px;
+    color: var(--color-ink-muted);
+  }
+
+  .fix[data-play="armed"] .fix-strike { background-size: 0% 2px; color: var(--color-ink); }
+  .fix[data-play="armed"] .fix-in { opacity: 0; }
+  .fix[data-play="play"] .fix-strike { animation: fix-strike 700ms var(--ease-out-expo) 150ms both; }
+  .fix[data-play="play"] .fix-in { animation: read-note 500ms var(--ease-out-expo) var(--d, 0s) both; }
+}
+
+@keyframes fix-strike {
+  from { background-size: 0% 2px; color: var(--color-ink); }
+  to { background-size: 100% 2px; color: var(--color-ink-muted); }
+}
+
+/* A small ruled tag for inline status words (priority, plan, state). Colour comes from the text colour. */
+@layer components {
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    border-radius: 4px;
+    padding: 0.28em 0.5em 0.24em;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 32%, transparent);
+  }
 }

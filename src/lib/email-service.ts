@@ -170,23 +170,23 @@ async function dispatchEmail({
 
 // ── Welcome Email ─────────────────────────────────────────────────────────────
 const h2 = (text: string) =>
-  `<h1 style="margin:0 0 12px 0;font-family:${EMAIL.font};font-size:24px;line-height:1.2;font-weight:800;letter-spacing:-0.02em;color:${EMAIL.ink};">${text}</h1>`;
+  `<h1 style="margin:0 0 12px 0;font-family:${EMAIL.font};font-size:26px;line-height:1.15;font-weight:800;letter-spacing:-0.025em;color:${EMAIL.ink};">${text}</h1>`;
 const para = (text: string) => `<p style="margin:0 0 14px 0;">${text}</p>`;
 const label = (text: string, color: string = EMAIL.muted) =>
   `<p style="margin:0 0 4px 0;font-size:11px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:${color};">${text}</p>`;
 const cta = (href: string, text: string) => `<div style="margin:28px 0 8px 0;">${emailButton(href, text)}</div>`;
 
-/** A row of figures printed like a reservation chart. */
+/** A row of figures on a ruled strip. */
 function figures(items: { label: string; value: string; color?: string }[]): string {
   const cells = items
     .map(
       (it) => `<td style="padding:14px 16px;border-right:1px solid ${EMAIL.rule};vertical-align:top;">
         ${label(escapeHtml(it.label))}
-        <span style="font-family:${EMAIL.mono};font-size:26px;font-weight:700;color:${it.color ?? EMAIL.ink};">${escapeHtml(it.value)}</span>
+        <span style="font-size:28px;font-weight:700;letter-spacing:-0.02em;color:${it.color ?? EMAIL.ink};">${escapeHtml(it.value)}</span>
       </td>`
     )
     .join("");
-  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;border:1px solid ${EMAIL.rule};border-top:2px solid ${EMAIL.ink};background-color:#ffffff;"><tr>${cells}</tr></table>`;
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;border:1px solid ${EMAIL.rule};border-radius:8px;background-color:#ffffff;"><tr>${cells}</tr></table>`;
 }
 
 export async function sendWelcomeEmail(userId: string, email: string, name: string) {
@@ -199,10 +199,10 @@ export async function sendWelcomeEmail(userId: string, email: string, name: stri
     `<ul style="margin:0 0 14px 0;padding-left:20px;">
       <li style="margin-bottom:6px;"><strong>Why you're being filtered out:</strong> an honest recruiter verdict with the reasons.</li>
       <li style="margin-bottom:6px;"><strong>Which skills are missing:</strong> gaps ranked by impact for your role and tier.</li>
-      <li><strong>What to build next:</strong> a week-by-week route to close them.</li>
+      <li><strong>What to build next:</strong> a week-by-week roadmap to close them.</li>
     </ul>` +
     para("Your first analysis is free.") +
-    cta(`${appUrl}/analyze`, "Check my status");
+    cta(`${appUrl}/analyze`, "Read my resume");
 
   return dispatchEmail({
     userId,
@@ -226,13 +226,13 @@ export async function sendReportReadyEmail(
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.in";
 
   const bodyHtml =
-    h2("Your chart is ready.") +
+    h2("Your read is ready.") +
     para("Gapl has finished reading your resume. Here's where it stands:") +
     figures([
       { label: "ATS", value: String(atsScore) },
       { label: "Readiness", value: String(readiness) },
     ]) +
-    para("Your report has the recruiter's verdict, the gaps behind it, and a week-by-week route to close them.") +
+    para("Your report has the recruiter's verdict, the gaps behind it, and a week-by-week roadmap to close them.") +
     cta(`${appUrl}/report/${encodeURIComponent(reportId)}`, "Open my report");
 
   return dispatchEmail({
@@ -242,7 +242,7 @@ export async function sendReportReadyEmail(
     campaignName: "Analysis Finished Notification",
     subject: "Your Gapl report is ready",
     bodyHtml,
-    preheader: `Readiness ${readiness}, ATS ${atsScore}. See the reasons and your route.`,
+    preheader: `Readiness ${readiness}, ATS ${atsScore}. See the reasons and what to build.`,
   });
 }
 
@@ -261,11 +261,11 @@ export async function sendPaymentSuccessEmail(
   const bodyHtml =
     h2("Payment received.") +
     para("Thanks for upgrading. Your plan is active now.") +
-    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;border:1px solid ${EMAIL.rule};border-top:2px solid ${EMAIL.ink};background-color:#ffffff;font-size:14px;">
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;border:1px solid ${EMAIL.rule};border-radius:8px;background-color:#ffffff;font-size:14px;">
       <tr><td style="padding:10px 16px;color:${EMAIL.muted};">Plan</td><td style="padding:10px 16px;font-weight:700;text-align:right;">${escapeHtml(planName)}</td></tr>
-      <tr><td style="padding:10px 16px;color:${EMAIL.muted};background-color:#e3ecdc;">Amount paid</td><td style="padding:10px 16px;font-family:${EMAIL.mono};font-weight:700;text-align:right;background-color:#e3ecdc;">${escapeHtml(rupees)}</td></tr>
-      <tr><td style="padding:10px 16px;color:${EMAIL.muted};">Payment ID</td><td style="padding:10px 16px;font-family:${EMAIL.mono};text-align:right;">${escapeHtml(paymentId)}</td></tr>
-      <tr><td style="padding:10px 16px;color:${EMAIL.muted};background-color:#e3ecdc;">Status</td><td style="padding:10px 16px;font-weight:700;color:${EMAIL.success};text-align:right;background-color:#e3ecdc;">Captured · credits added</td></tr>
+      <tr><td style="padding:10px 16px;color:${EMAIL.muted};background-color:${EMAIL.band};">Amount paid</td><td style="padding:10px 16px;font-weight:700;text-align:right;background-color:${EMAIL.band};">${escapeHtml(rupees)}</td></tr>
+      <tr><td style="padding:10px 16px;color:${EMAIL.muted};">Payment ID</td><td style="padding:10px 16px;text-align:right;font-size:13px;">${escapeHtml(paymentId)}</td></tr>
+      <tr><td style="padding:10px 16px;color:${EMAIL.muted};background-color:${EMAIL.band};">Status</td><td style="padding:10px 16px;font-weight:700;color:${EMAIL.success};text-align:right;background-color:${EMAIL.band};">Captured · credits added</td></tr>
     </table>` +
     para("Keep this email as your receipt.") +
     cta(`${appUrl}/dashboard`, "Go to my dashboard");
@@ -292,14 +292,14 @@ export async function sendDay1ReminderEmail(
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.in";
 
   const bodyHtml =
-    h2("Your route hasn't started yet.") +
+    h2("Your roadmap hasn't started yet.") +
     para("One build closes the gap that's costing you the most:") +
-    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;border:1px solid ${EMAIL.rule};border-top:2px solid ${EMAIL.ink};background-color:#ffffff;">
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;border:1px solid ${EMAIL.rule};border-radius:8px;background-color:#ffffff;">
       <tr><td style="padding:14px 16px;">${label("Top gap", EMAIL.danger)}<span style="font-size:16px;font-weight:700;">${escapeHtml(topGap)}</span></td></tr>
-      <tr><td style="padding:14px 16px;background-color:#e3ecdc;">${label("Build next", EMAIL.navy)}<span style="font-size:16px;font-weight:700;">${escapeHtml(recommendedProject)}</span></td></tr>
+      <tr><td style="padding:14px 16px;background-color:${EMAIL.band};">${label("Build next", EMAIL.fix)}<span style="font-size:16px;font-weight:700;color:${EMAIL.fix};">${escapeHtml(recommendedProject)}</span></td></tr>
     </table>` +
     para("Tick off the first task today and your readiness starts moving.") +
-    cta(`${appUrl}/report/${encodeURIComponent(reportId)}#roadmap`, "Start my route");
+    cta(`${appUrl}/report/${encodeURIComponent(reportId)}#roadmap`, "Start my roadmap");
 
   return dispatchEmail({
     userId,
@@ -324,13 +324,13 @@ export async function sendRoadmapMilestoneEmail(
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.in";
 
   const bodyHtml =
-    h2(`You're ${escapeHtml(percentage)}% through your route.`) +
+    h2(`You're ${escapeHtml(percentage)}% through your roadmap.`) +
     para("You're closing your gaps. Here's where your projected readiness stands:") +
     figures([
       { label: "Now", value: String(currentReadiness) },
       { label: "Target", value: String(targetReadiness), color: EMAIL.success },
     ]) +
-    para("Finish the remaining tasks, then re-analyze your updated resume to get a fresh chart.") +
+    para("Finish the remaining tasks, then re-analyze your updated resume for a fresh read.") +
     cta(`${appUrl}/report/${encodeURIComponent(reportId)}#roadmap`, "Keep going");
 
   return dispatchEmail({
@@ -354,10 +354,10 @@ export async function sendDay7ReminderEmail(
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.in";
 
   const bodyHtml =
-    h2("A week on your route.") +
+    h2("A week into your roadmap.") +
     para(`It's been a week since Gapl prepared your roadmap. You've completed <strong>${escapeHtml(completedTasksCount)}</strong> ${completedTasksCount === 1 ? "task" : "tasks"} so far.`) +
-    para("Steady weekly progress is what turns a waitlist into a shortlist. Pick up the next task.") +
-    cta(`${appUrl}/report/${encodeURIComponent(reportId)}#roadmap`, "Resume my route");
+    para("Steady weekly progress is what turns a reject into a shortlist. Pick up the next task.") +
+    cta(`${appUrl}/report/${encodeURIComponent(reportId)}#roadmap`, "Pick up the next task");
 
   return dispatchEmail({
     userId,
@@ -375,9 +375,9 @@ export async function sendReanalysisReminderEmail(userId: string, email: string)
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.in";
 
   const bodyHtml =
-    h2("Time to re-check your status?") +
+    h2("Time for a fresh read?") +
     para("If you've finished roadmap tasks or built new projects, your resume has changed.") +
-    para("Upload the updated version to get a fresh chart and see which gaps you've closed.") +
+    para("Upload the updated version for a fresh read and see which gaps you've closed.") +
     cta(`${appUrl}/analyze`, "Re-analyze my resume");
 
   return dispatchEmail({
@@ -387,6 +387,6 @@ export async function sendReanalysisReminderEmail(userId: string, email: string)
     campaignName: "Two-Week Reanalysis Trigger",
     subject: "Time to check your score improvement?",
     bodyHtml,
-    preheader: "Upload your updated resume for a fresh chart.",
+    preheader: "Upload your updated resume for a fresh read.",
   });
 }

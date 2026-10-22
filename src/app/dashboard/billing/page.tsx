@@ -134,7 +134,7 @@ export default function BillingPage() {
 
   return (
     <div className={APP_PAGE}>
-      <PageHeader title="Billing" description="Your plan and what it includes. Paid plans are billed monthly." />
+      <PageHeader title="Billing" description="Your plan and what it includes. Credits refresh on the 1st of each month." />
 
       {successPlan && (
         <div role="status" className="flex items-start gap-3 p-4 bg-success-bg border border-success-border rounded-[6px]">
@@ -153,7 +153,7 @@ export default function BillingPage() {
         </div>
       )}
 
-      <Sheet title="Current plan" aside={<span className="stamp text-[0.625rem] text-success bg-success-bg">Active</span>}>
+      <Sheet title="Current plan" aside={<span className="tag text-[0.625rem] text-success bg-success-bg">Active</span>}>
         <FigureStrip
           items={[
             { label: "Plan", value: <span className="capitalize">{shownPlan}</span> },
@@ -164,8 +164,8 @@ export default function BillingPage() {
       </Sheet>
 
       {availablePlans.length > 0 ? (
-        <Sheet title="Upgrade" aside="Monthly · Razorpay">
-          <ul className="chart-rows">
+        <Sheet title="Upgrade" aside="Razorpay · credits reset monthly">
+          <ul className="divide-y divide-border-DEFAULT">
             {availablePlans.map((plan) => {
               const isLoading = loadingPlan === plan.name;
               const isSuccess = successPlan === plan.name;
@@ -175,9 +175,9 @@ export default function BillingPage() {
                   className="grid gap-x-6 gap-y-4 px-4 sm:px-6 py-5 lg:grid-cols-[11rem_minmax(0,1fr)_7rem_10rem] lg:items-center"
                 >
                   <div>
-                    <h3 className="text-lg font-[800] tracking-[-0.015em]">{plan.name}</h3>
+                    <h3 className="text-lg font-bold tracking-[-0.015em]">{plan.name}</h3>
                     <p className="text-sm text-ink-muted">{plan.description}</p>
-                    {plan.highlighted && <span className="stamp mt-2 text-[0.625rem] text-ink bg-board">Recommended</span>}
+                    {plan.highlighted && <span className="tag mt-2 text-[0.625rem] text-ink bg-highlight">Recommended</span>}
                   </div>
                   <ul className="grid gap-x-6 gap-y-1.5 sm:grid-cols-2">
                     {plan.features.map((f) => (
@@ -188,7 +188,7 @@ export default function BillingPage() {
                     ))}
                   </ul>
                   <p className="lg:text-right">
-                    <span className="chart-data text-2xl font-bold">₹{plan.price}</span>
+                    <span className="figure text-2xl font-bold">₹{plan.price}</span>
                     <span className="block text-xs text-ink-muted">per month</span>
                   </p>
                   <Button
@@ -209,8 +209,8 @@ export default function BillingPage() {
       ) : (
         <Sheet>
           <div className="px-5 sm:px-8 py-10">
-            <span className="stamp text-xs text-success bg-success-bg">Highest plan</span>
-            <h2 className="mt-3 text-xl font-[800] tracking-[-0.015em]">You&apos;re on the highest plan</h2>
+            <span className="tag text-xs text-success bg-success-bg">Highest plan</span>
+            <h2 className="mt-3 text-xl font-bold tracking-[-0.015em]">You&apos;re on the highest plan</h2>
             <p className="mt-2 max-w-lg text-[0.9375rem] text-ink-secondary">
               Thank you for supporting Gapl. You have access to every analysis, roadmap and CV feature.
             </p>

@@ -1,6 +1,6 @@
 "use client";
 
-import { LoadingChart } from "@/components/ui/Sheet";
+import { Loading } from "@/components/ui/Sheet";
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -106,7 +106,7 @@ export default function AdminAnalyticsPage() {
   if (loading) {
     return (
       <div className="h-[60vh] flex items-center justify-center">
-        <LoadingChart />
+        <Loading />
       </div>
     );
   }
@@ -165,7 +165,7 @@ export default function AdminAnalyticsPage() {
       {/* Unit Economics Section */}
       <Card variant="default" padding="md" className="bg-surface-DEFAULT border-border-DEFAULT space-y-6">
         <div>
-          <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">Unit Economics (Average Cost Per Report)</h2>
+          <h2 className="text-sm font-bold uppercase tracking-[0.06em] text-ink">Unit Economics (Average Cost Per Report)</h2>
           <p className="text-[0.6875rem] text-ink-muted">Detailed revenue, infrastructure, and margin profile breakdown per analysis cycle</p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
@@ -212,7 +212,7 @@ export default function AdminAnalyticsPage() {
         {/* Onboarding Funnel Progress */}
         <Card variant="default" padding="md" className="bg-surface-DEFAULT border-border-DEFAULT space-y-6">
           <div>
-            <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">Conversion Funnel Dropoffs</h2>
+            <h2 className="text-sm font-bold uppercase tracking-[0.06em] text-ink">Conversion Funnel Dropoffs</h2>
             <p className="text-[0.6875rem] text-ink-muted">Weekly aggregate onboarding milestones</p>
           </div>
           <div className="space-y-4">
@@ -235,7 +235,7 @@ export default function AdminAnalyticsPage() {
         {/* User Retention curve */}
         <Card variant="default" padding="md" className="bg-surface-DEFAULT border-border-DEFAULT space-y-6">
           <div>
-            <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">Weekly User Retention Cohort</h2>
+            <h2 className="text-sm font-bold uppercase tracking-[0.06em] text-ink">Weekly User Retention Cohort</h2>
             <p className="text-[0.6875rem] text-ink-muted">Proportion of active users returning weekly</p>
           </div>
           <div className="text-center py-12 text-ink-muted text-xs border border-dashed border-border-DEFAULT rounded-[6px]">
@@ -246,7 +246,7 @@ export default function AdminAnalyticsPage() {
         {/* AI Cost by Task */}
         <Card variant="default" padding="md" className="bg-surface-DEFAULT border-border-DEFAULT space-y-4">
           <div>
-            <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">AI Gateway Cost By Feature</h2>
+            <h2 className="text-sm font-bold uppercase tracking-[0.06em] text-ink">AI Gateway Cost By Feature</h2>
             <p className="text-[0.6875rem] text-ink-muted">Spend categorized by gateway task mappings</p>
           </div>
           <div className="h-60 w-full">
@@ -255,7 +255,7 @@ export default function AdminAnalyticsPage() {
                 <XAxis type="number" stroke="#595c69" fontSize={10} tickLine={false} />
                 <YAxis dataKey="name" type="category" stroke="#595c69" fontSize={9} tickLine={false} width={130} />
                 <Tooltip contentStyle={{ background: "#fcfcf7", border: "1px solid #d2d1c4", fontSize: "10px" }} labelClassName="text-ink-muted" />
-                <Bar dataKey="cost" fill="#1d2b6b" radius={[0, 4, 4, 0]} />
+                <Bar dataKey="cost" fill="#16171b" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -264,7 +264,7 @@ export default function AdminAnalyticsPage() {
         {/* Common Skill Gaps Chart */}
         <Card variant="default" padding="md" className="bg-surface-DEFAULT border-border-DEFAULT space-y-4">
           <div>
-            <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">Most Common Skill Deficits</h2>
+            <h2 className="text-sm font-bold uppercase tracking-[0.06em] text-ink">Most Common Skill Deficits</h2>
             <p className="text-[0.6875rem] text-ink-muted">Top missing topics parsed from evaluated resumes</p>
           </div>
           <div className="h-60 w-full">
@@ -273,7 +273,7 @@ export default function AdminAnalyticsPage() {
                 <XAxis type="number" stroke="#595c69" fontSize={10} tickLine={false} />
                 <YAxis dataKey="skill" type="category" stroke="#595c69" fontSize={9} tickLine={false} width={130} />
                 <Tooltip contentStyle={{ background: "#fcfcf7", border: "1px solid #d2d1c4", fontSize: "10px" }} labelClassName="text-ink-muted" />
-                <Bar dataKey="count" fill="#1d2b6b" radius={[0, 4, 4, 0]} />
+                <Bar dataKey="count" fill="#16171b" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -282,7 +282,7 @@ export default function AdminAnalyticsPage() {
         {/* Top 10 Expensive Users */}
         <Card variant="default" padding="md" className="bg-surface-DEFAULT border-border-DEFAULT space-y-4">
           <div>
-            <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">Top 10 Most Expensive Users</h2>
+            <h2 className="text-sm font-bold uppercase tracking-[0.06em] text-ink">Top 10 Most Expensive Users</h2>
             <p className="text-[0.6875rem] text-ink-muted">Total gateway API costs incurred by user profiles</p>
           </div>
           <div className="space-y-2.5 max-h-72 overflow-y-auto">
@@ -298,7 +298,7 @@ export default function AdminAnalyticsPage() {
         {/* Top 10 Expensive Prompts/Tasks */}
         <Card variant="default" padding="md" className="bg-surface-DEFAULT border-border-DEFAULT space-y-4">
           <div>
-            <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">Top Expensive Prompts & Tasks</h2>
+            <h2 className="text-sm font-bold uppercase tracking-[0.06em] text-ink">Top Expensive Prompts & Tasks</h2>
             <p className="text-[0.6875rem] text-ink-muted">Ranking tasks consuming the largest token budgets</p>
           </div>
           <div className="space-y-2.5 max-h-72 overflow-y-auto">

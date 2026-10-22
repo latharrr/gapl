@@ -82,7 +82,7 @@ export default function SettingsPage() {
     }
   };
 
-  const soon = <span className="stamp text-[0.625rem] text-ink-muted border-dashed">Coming soon</span>;
+  const soon = <span className="tag text-ink-muted">Coming soon</span>;
 
   return (
     <div className={APP_PAGE}>
@@ -144,7 +144,7 @@ export default function SettingsPage() {
 
       <section className="rounded-[6px] border-[1.5px] border-danger overflow-hidden bg-surface-DEFAULT">
         <header className="px-4 sm:px-6 py-3 bg-danger-bg border-b border-danger-border">
-          <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-danger">Danger zone</h2>
+          <h2 className="text-[0.9375rem] font-semibold text-danger">Danger zone</h2>
         </header>
         <div className="divide-y divide-border-DEFAULT">
           {(reportsSuccess || error) && (

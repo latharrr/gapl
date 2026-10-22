@@ -1,6 +1,6 @@
 "use client";
 
-import { LoadingChart } from "@/components/ui/Sheet";
+import { Loading } from "@/components/ui/Sheet";
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -168,7 +168,7 @@ export default function AdminLinksPage() {
   if (loading) {
     return (
       <div className="h-[60vh] flex items-center justify-center">
-        <LoadingChart />
+        <Loading />
       </div>
     );
   }
@@ -177,7 +177,7 @@ export default function AdminLinksPage() {
     return (
       <div className="text-center py-20 max-w-sm mx-auto space-y-4">
         <AlertTriangle size={32} className="text-warning mx-auto" />
-        <h2 className="text-lg font-[800] tracking-[-0.015em] text-ink">Failed to Compile Shortlink Metrics</h2>
+        <h2 className="text-lg font-bold tracking-[-0.015em] text-ink">Failed to Compile Shortlink Metrics</h2>
         <p className="text-xs text-ink-muted leading-relaxed">{error}</p>
         <div className="flex gap-2 justify-center">
           <Button variant="primary" size="sm" onClick={() => fetchLinks()}>
@@ -220,7 +220,7 @@ export default function AdminLinksPage() {
         <div className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] p-6 h-fit space-y-5">
           <div className="flex items-center gap-2">
             <Plus size={16} className="text-primary-600" />
-            <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">Create Shortlink</h2>
+            <h2 className="text-sm font-bold uppercase tracking-[0.06em] text-ink">Create Shortlink</h2>
           </div>
           <form onSubmit={handleCreate} className="space-y-4">
             <div className="space-y-1.5">
@@ -297,7 +297,7 @@ export default function AdminLinksPage() {
 
           {/* Campaigns Click breakdown */}
           <div className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] p-5 space-y-4">
-            <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">Clicks by Campaign Source</h2>
+            <h2 className="text-sm font-bold uppercase tracking-[0.06em] text-ink">Clicks by Campaign Source</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {campaigns.length === 0 ? (
                 <div className="text-xs text-ink-muted col-span-2">No campaigns loaded.</div>
@@ -323,7 +323,7 @@ export default function AdminLinksPage() {
       {/* Tracked Shortlinks Directory */}
       <div className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] overflow-hidden">
         <div className="px-6 py-4 border-b border-border-DEFAULT flex items-center justify-between">
-          <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">Shortlinks Directory</h2>
+          <h2 className="text-sm font-bold uppercase tracking-[0.06em] text-ink">Shortlinks Directory</h2>
           <Badge variant="primary">{links.length} total active</Badge>
         </div>
         <div className="overflow-x-auto">

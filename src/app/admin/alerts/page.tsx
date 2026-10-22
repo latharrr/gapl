@@ -1,6 +1,6 @@
 "use client";
 
-import { LoadingChart } from "@/components/ui/Sheet";
+import { Loading } from "@/components/ui/Sheet";
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -104,7 +104,7 @@ export default function AdminAlertsPage() {
   if (loading) {
     return (
       <div className="h-[60vh] flex items-center justify-center">
-        <LoadingChart />
+        <Loading />
       </div>
     );
   }
@@ -113,7 +113,7 @@ export default function AdminAlertsPage() {
     return (
       <div className="text-center py-20 max-w-sm mx-auto space-y-4">
         <AlertTriangle size={32} className="text-warning mx-auto" />
-        <h2 className="text-lg font-[800] tracking-[-0.015em] text-ink">Failed to Compile Founder Alerts</h2>
+        <h2 className="text-lg font-bold tracking-[-0.015em] text-ink">Failed to Compile Founder Alerts</h2>
         <p className="text-xs text-ink-muted leading-relaxed">{error}</p>
         <Button variant="primary" size="sm" onClick={() => fetchAlerts()}>
           Retry Fetch
@@ -169,7 +169,7 @@ export default function AdminAlertsPage() {
             ) : (
               <ShieldCheck className="text-success" size={18} />
             )}
-            <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">
+            <h2 className="text-sm font-bold uppercase tracking-[0.06em] text-ink">
               {alerts.length > 0 ? `${alerts.length} Actionable Alerts Triggered` : "All Systems Operational"}
             </h2>
           </div>
@@ -186,7 +186,7 @@ export default function AdminAlertsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Triggered Alerts List */}
         <div className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] p-6 space-y-4">
-          <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">Triggered Anomaly Logs</h2>
+          <h2 className="text-sm font-bold uppercase tracking-[0.06em] text-ink">Triggered Anomaly Logs</h2>
           {alerts.length === 0 ? (
             <div className="flex flex-col items-center justify-center text-center py-10 space-y-3 bg-surface-muted border border-border-DEFAULT rounded-[5px]">
               <CheckCircle size={28} className="text-success" />
@@ -236,7 +236,7 @@ export default function AdminAlertsPage() {
 
         {/* Alerts Configuration Rules */}
         <div className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] p-6 space-y-4">
-          <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">System Alert Rules Configurations</h2>
+          <h2 className="text-sm font-bold uppercase tracking-[0.06em] text-ink">System Alert Rules Configurations</h2>
           <div className="space-y-3 text-xs">
             <div className="bg-surface-muted border border-border-DEFAULT rounded-[5px] p-3 flex items-center justify-between">
               <div className="flex items-center gap-2">

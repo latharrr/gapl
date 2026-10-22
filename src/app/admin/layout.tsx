@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { Wordmark } from "@/components/brand/Wordmark";
-import { LoadingChart } from "@/components/ui/Sheet";
+import { Loading } from "@/components/ui/Sheet";
 import {
   LayoutDashboard,
   Users,
@@ -59,7 +59,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (loading) {
     return (
       <div className="min-h-screen bg-surface-muted grid place-items-center">
-        <LoadingChart text="LOADING CONTROL ROOM" />
+        <Loading text="Loading control room" />
       </div>
     );
   }
@@ -72,10 +72,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (!isAdmin) {
     return (
       <div className="min-h-screen bg-surface-muted grid place-items-center p-4">
-        <div className="chart-sheet rounded-[6px] overflow-hidden max-w-md w-full">
-          <div className="led-board px-4 py-2.5 text-[1rem]">ACCESS DENIED</div>
+        <div className="sheet rounded-[10px] overflow-hidden max-w-md w-full">
           <div className="p-6 space-y-3">
-            <h1 className="text-xl font-[800] tracking-[-0.015em]">This area is for the Gapl team</h1>
+            <span className="verdict text-danger text-xs">No access</span>
+            <h1 className="text-xl font-bold tracking-[-0.015em]">This area is for the Gapl team</h1>
             <p className="text-[0.9375rem] text-ink-secondary">
               Your account (<strong className="text-ink">{user.email}</strong>) doesn&apos;t have admin access.
             </p>
@@ -90,13 +90,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const nav = (
     <>
-      <div className="h-14 px-4 flex items-center justify-between border-b border-white/15">
+      <div className="h-16 px-4 flex items-center justify-between border-b border-desk-line">
         <Link href="/admin" className="flex items-center gap-2.5" aria-label="Gapl admin home">
           <Wordmark size="sm" />
-          <span className="chart-data text-[0.6875rem] font-bold uppercase text-board">Control room</span>
+          <span className="text-xs font-semibold text-desk-muted">Control room</span>
         </Link>
         <button
-          className="md:hidden p-1.5 rounded-[4px] text-primary-100 hover:bg-white/10"
+          className="md:hidden p-1.5 rounded-[4px] text-desk-muted hover:bg-desk-raised"
           onClick={() => setMenuOpen(false)}
           aria-label="Close menu"
         >
@@ -113,20 +113,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               href={item.href}
               onClick={() => setMenuOpen(false)}
               aria-current={isActive ? "page" : undefined}
-              className={`flex items-center gap-3 h-9 px-3 rounded-[4px] text-sm transition-colors ${
-                isActive ? "bg-white/12 text-white font-semibold" : "text-primary-100 hover:text-white hover:bg-white/8"
+              className={`flex items-center gap-3 h-9 px-3 rounded-[7px] text-sm transition-colors ${
+                isActive ? "bg-desk-raised text-desk-ink font-semibold" : "text-desk-muted hover:text-desk-ink hover:bg-desk-raised/60"
               }`}
             >
-              <Icon size={16} className={isActive ? "text-board" : "text-primary-400"} />
+              <Icon size={16} className={isActive ? "text-highlight" : "text-desk-faint"} />
               {item.label}
             </Link>
           );
         })}
       </nav>
-      <div className="p-3 border-t border-white/15">
+      <div className="p-3 border-t border-desk-line">
         <Link
           href="/dashboard"
-          className="flex items-center justify-between h-9 px-3 rounded-[4px] text-sm text-primary-100 hover:text-white hover:bg-white/8"
+          className="flex items-center justify-between h-9 px-3 rounded-[4px] text-sm text-desk-muted hover:text-desk-ink hover:bg-desk-raised/60"
         >
           <span>User dashboard</span>
           <ExternalLink size={14} />
@@ -137,26 +137,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="min-h-screen bg-surface-muted text-ink flex">
-      <aside className="hidden md:flex flex-col w-60 shrink-0 bg-primary-600 border-r-[3px] border-board h-screen sticky top-0">
+      <aside className="hidden md:flex flex-col w-60 shrink-0 on-desk border-r border-desk-line h-screen sticky top-0">
         {nav}
       </aside>
 
       {menuOpen && (
         <>
-          <div className="fixed inset-0 z-40 bg-primary-900/50 md:hidden" onClick={() => setMenuOpen(false)} />
-          <aside className="fixed inset-y-0 left-0 z-50 w-64 flex flex-col bg-primary-600 border-r-[3px] border-board md:hidden">
+          <div className="fixed inset-0 z-40 bg-desk/60 md:hidden" onClick={() => setMenuOpen(false)} />
+          <aside className="fixed inset-y-0 left-0 z-50 w-64 flex flex-col on-desk border-r border-desk-line md:hidden">
             {nav}
           </aside>
         </>
       )}
 
       <div className="flex-1 min-w-0 flex flex-col">
-        <header className="md:hidden h-14 px-4 flex items-center gap-3 bg-primary-600 border-b-[3px] border-board">
-          <button onClick={() => setMenuOpen(true)} aria-label="Open menu" className="p-1.5 -ml-1.5 rounded-[4px] text-white hover:bg-white/10">
+        <header className="md:hidden h-14 px-4 flex items-center gap-3 on-desk border-b border-desk-line">
+          <button onClick={() => setMenuOpen(true)} aria-label="Open menu" className="p-1.5 -ml-1.5 rounded-[4px] text-desk-ink hover:bg-desk-raised">
             <Menu size={20} />
           </button>
           <Wordmark size="sm" />
-          <span className="chart-data text-[0.6875rem] font-bold uppercase text-board">Control room</span>
+          <span className="text-xs font-semibold text-desk-muted">Control room</span>
         </header>
         <main className="flex-1 min-w-0 px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           <div className="max-w-7xl mx-auto">{children}</div>

@@ -4,9 +4,8 @@ import { useEffect, useState } from "react";
 import { type AnalysisResult } from "@/types/analysis";
 import { Button } from "@/components/ui/Button";
 import { VerdictBadge } from "@/components/ui/Badge";
-import { Sheet, PageHeader, EmptyChart, LoadingChart, FigureStrip, APP_PAGE } from "@/components/ui/Sheet";
+import { Sheet, PageHeader, EmptyState, Loading, FigureStrip, APP_PAGE } from "@/components/ui/Sheet";
 import { Breakdown, SkillsLedger } from "@/components/report/ReportParts";
-import { waitlistCount } from "@/lib/sample-report";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
@@ -49,15 +48,14 @@ export default function ProgressPage() {
     };
   }, [user]);
 
-  if (loading) return <LoadingChart text="LOADING PROGRESS" />;
+  if (loading) return <Loading text="Loading progress" />;
 
   if (!result) {
     return (
       <div className={APP_PAGE}>
         <PageHeader title="Progress" />
         <Sheet>
-          <EmptyChart
-            led="NO PROGRESS YET"
+          <EmptyState
             title="Nothing to track yet"
             action={
               <Link href="/analyze">
@@ -66,7 +64,7 @@ export default function ProgressPage() {
             }
           >
             Run your first analysis to start tracking your readiness.
-          </EmptyChart>
+          </EmptyState>
         </Sheet>
       </div>
     );
@@ -76,11 +74,11 @@ export default function ProgressPage() {
     <div className={APP_PAGE}>
       <PageHeader
         title="Progress"
-        description="Where your latest chart stands, and what to build to move it."
+        description="Where your latest read stands, and what moves it."
         meta={`${result.role} · ${result.companyTier}`}
       />
 
-      <Sheet title="Latest chart" aside={<VerdictBadge verdict={result.recruiterVerdict.verdict} waitlist={waitlistCount(result.careerGaps)} size="sm" />}>
+      <Sheet title="Latest read" aside={<VerdictBadge verdict={result.recruiterVerdict.verdict} size="sm" />}>
         <FigureStrip
           items={[
             { label: "Readiness", value: result.readiness },
@@ -106,10 +104,10 @@ export default function ProgressPage() {
         <SkillsLedger strong={result.strongSkills} missing={result.missingSkills} />
       </Sheet>
 
-      <div className="led-ground rounded-[6px] px-5 sm:px-8 py-8 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+      <div className="on-desk rounded-[12px] px-5 sm:px-8 py-8 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
         <div>
-          <h2 className="text-xl font-[800] tracking-[-0.015em] text-surface-muted">Worked on your gaps?</h2>
-          <p className="mt-1 text-surface-muted/70">Re-analyze your updated resume to see your readiness move.</p>
+          <h2 className="text-xl font-semibold tracking-[-0.015em]">Built something since?</h2>
+          <p className="mt-1 text-desk-muted">Re-analyze your updated resume and watch the readiness move.</p>
         </div>
         <Link href="/analyze" className="shrink-0">
           <Button size="lg"><Plus size={17} strokeWidth={2.5} /> Re-analyze</Button>

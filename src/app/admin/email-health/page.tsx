@@ -1,6 +1,6 @@
 "use client";
 
-import { LoadingChart } from "@/components/ui/Sheet";
+import { Loading } from "@/components/ui/Sheet";
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -102,7 +102,7 @@ export default function AdminEmailHealthPage() {
   if (loading) {
     return (
       <div className="h-[60vh] flex items-center justify-center">
-        <LoadingChart />
+        <Loading />
       </div>
     );
   }
@@ -111,7 +111,7 @@ export default function AdminEmailHealthPage() {
     return (
       <div className="text-center py-20 max-w-sm mx-auto space-y-4">
         <AlertTriangle size={32} className="text-warning mx-auto" />
-        <h2 className="text-lg font-[800] tracking-[-0.015em] text-ink">Failed to Compile Email Health Metrics</h2>
+        <h2 className="text-lg font-bold tracking-[-0.015em] text-ink">Failed to Compile Email Health Metrics</h2>
         <p className="text-xs text-ink-muted leading-relaxed">{error}</p>
         <Button variant="primary" size="sm" onClick={() => fetchHealthData()}>
           Retry Fetch
@@ -227,7 +227,7 @@ export default function AdminEmailHealthPage() {
       <div className="bg-surface-DEFAULT border border-border-DEFAULT rounded-[6px] p-6 space-y-4">
         <div className="flex items-center gap-2">
           <Server size={16} className="text-primary-600" />
-          <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">DNS Records & Authentication Status</h2>
+          <h2 className="text-sm font-bold uppercase tracking-[0.06em] text-ink">DNS Records & Authentication Status</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
           <div className="bg-surface-muted border border-border-DEFAULT rounded-[5px] p-4 space-y-2">
@@ -266,7 +266,7 @@ export default function AdminEmailHealthPage() {
         <div className="px-6 py-4 border-b border-border-DEFAULT flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ShieldAlert size={16} className="text-danger" />
-            <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">Delivery Failures & Bounce Log</h2>
+            <h2 className="text-sm font-bold uppercase tracking-[0.06em] text-ink">Delivery Failures & Bounce Log</h2>
           </div>
           <Badge variant="danger">{healthIssues.length} issues logged</Badge>
         </div>

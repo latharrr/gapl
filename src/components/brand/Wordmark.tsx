@@ -5,13 +5,13 @@ interface WordmarkProps {
   size?: "sm" | "md";
 }
 
-// The name set as a station nameboard: yellow plate, black rim, heavy grotesque.
+// The name as a highlighted word: what the recruiter's eye caught.
 export function Wordmark({ className, size = "md" }: WordmarkProps) {
   return (
     <span
       className={cn(
-        "signboard signboard-sm inline-flex items-center font-[850] leading-none tracking-[-0.02em] [font-variation-settings:'wdth'_100]",
-        size === "md" ? "h-8 px-3.5 text-[1.0625rem]" : "h-7 px-2.5 text-[0.9375rem]",
+        "inline-flex items-center bg-highlight text-ink font-[820] leading-none tracking-[-0.035em] [font-variation-settings:'wdth'_112] rounded-[3px]",
+        size === "md" ? "h-8 px-2 text-[1.3125rem]" : "h-7 px-1.5 text-[1.125rem]",
         className
       )}
     >

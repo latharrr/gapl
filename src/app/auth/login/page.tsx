@@ -76,19 +76,19 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-surface-muted flex flex-col lg:flex-row">
+    <div className="min-h-screen on-desk flex flex-col lg:flex-row">
       <AuthMobileBar />
       <AuthPanel
-        headline="Your chart is waiting."
-        lines={['See the evidence gaps behind your applications.', 'Work through the next most valuable improvement.', 'Re-check and watch your status move.']}
+        headline="Your read is waiting."
+        lines={['See what a recruiter sees in your resume.', 'Work through the next build that matters most.', 'Re-check and watch your readiness move.']}
       />
 
       {/* Right panel */}
-      <div className="flex-1 flex items-center justify-center px-4 py-10 sm:p-6">
+      <div className="flex-1 flex items-center justify-center px-3 py-8 sm:p-6">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-sm"
+          className="page w-full max-w-md rounded-[12px] px-5 py-8 sm:px-10 sm:py-10"
         >
           {resetMode ? (
             <>

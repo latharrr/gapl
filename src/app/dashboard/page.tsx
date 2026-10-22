@@ -6,10 +6,10 @@ import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/context/AuthContext";
 import { getUserReports } from "@/lib/firebase";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { Plus, ArrowRight, Loader2 } from "lucide-react";
+import { Plus, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { Sheet, ChartRow, RecruiterRemark, Breakdown, GapsTable } from "@/components/report/ReportParts";
-import { waitlistCount } from "@/lib/sample-report";
+import { Sheet, ReportFace, Breakdown, GapsTable } from "@/components/report/ReportParts";
+import { EmptyState as EmptyNote, Loading, PageHeader, APP_PAGE } from "@/components/ui/Sheet";
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -51,9 +51,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex h-full w-full items-center justify-center py-20">
-        <Loader2 className="h-6 w-6 animate-spin text-primary-600" aria-label="Loading" />
-      </div>
+      <Loading text="Loading your reports" />
     );
   }
 
@@ -69,42 +67,37 @@ export default function DashboardPage() {
 
 function EmptyState({ loadError = false }: { loadError?: boolean }) {
   return (
-    <div className="px-4 sm:px-6 md:px-8 pt-[5.25rem] md:pt-10 pb-12 max-w-5xl mx-auto">
-      <h1 className="display text-[clamp(2rem,4.5vw,3rem)]">Your status</h1>
-      <p className="mt-1 text-ink-muted">Your application readiness hub</p>
-
-      <div className="mt-8 chart-sheet rounded-[6px] overflow-hidden">
-        <div className="led-board px-4 py-2.5 text-[1rem]">{loadError ? "COULD NOT LOAD" : "NO CHART PREPARED YET"}</div>
+    <div className={APP_PAGE}>
+      <PageHeader title="Dashboard" description="Your reports, roadmaps and CVs live here." />
+      <Sheet>
         {loadError ? (
-          <div className="px-5 sm:px-8 py-10 sm:py-14 max-w-2xl">
-            <h2 className="text-2xl font-[800] tracking-[-0.015em]">Your charts didn&apos;t load</h2>
-            <p className="mt-2 text-[0.9375rem] leading-relaxed text-ink-secondary">
-              This is on our side, not yours. Your reports are safe; reload to try again.
-            </p>
-            <div className="mt-6">
-              <Button size="lg" onClick={() => window.location.reload()}>Try again</Button>
-            </div>
-          </div>
+          <EmptyNote
+            title="Your reports didn't load"
+            action={<Button size="lg" onClick={() => window.location.reload()}>Try again</Button>}
+          >
+            This is on our side, not yours. Your reports are safe; reload to try again.
+          </EmptyNote>
         ) : (
-        <div className="px-5 sm:px-8 py-10 sm:py-14 max-w-2xl">
-          <h2 className="text-2xl font-[800] tracking-[-0.015em]">Run your first analysis</h2>
-          <p className="mt-2 text-[0.9375rem] leading-relaxed text-ink-secondary">
-            Upload your resume, pick a role and tier, and Gapl tells you exactly why you&apos;re not getting
-            shortlisted, and what to build to fix it.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Link href="/analyze">
-              <Button size="lg">
-                <Plus size={17} strokeWidth={2.5} /> Check my status
-              </Button>
-            </Link>
-            <Link href="/demo">
-              <Button variant="outline" size="lg">See a sample report</Button>
-            </Link>
-          </div>
-        </div>
+          <EmptyNote
+            title="Get your first read"
+            action={
+              <>
+                <Link href="/analyze">
+                  <Button size="lg">
+                    <Plus size={17} strokeWidth={2.5} /> Read my resume
+                  </Button>
+                </Link>
+                <Link href="/demo">
+                  <Button variant="outline" size="lg">See a sample report</Button>
+                </Link>
+              </>
+            }
+          >
+            Upload your resume, pick a role and tier, and Gapl tells you why it isn&apos;t getting shortlisted and what to
+            build to change that.
+          </EmptyNote>
         )}
-      </div>
+      </Sheet>
     </div>
   );
 }
@@ -125,53 +118,43 @@ function DashboardWithData({
   const created = new Date(r.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 
   return (
-    <div className="px-4 sm:px-6 md:px-8 pt-[5.25rem] md:pt-10 pb-12 max-w-5xl mx-auto space-y-5">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="display text-[clamp(2rem,4.5vw,3rem)]">Your status</h1>
-          <p className="chart-data mt-1 text-xs text-ink-muted">
-            Latest chart {created} · {allReports.length} {allReports.length === 1 ? "analysis" : "analyses"} so far
-          </p>
-        </div>
-        <Link href="/analyze">
-          <Button size="md">
-            <Plus size={16} strokeWidth={2.5} /> New analysis
-          </Button>
-        </Link>
-      </div>
+    <div className={APP_PAGE}>
+      <PageHeader
+        title="Dashboard"
+        meta={`Last read ${created} · ${allReports.length} ${allReports.length === 1 ? "analysis" : "analyses"} so far`}
+        actions={
+          <Link href="/analyze">
+            <Button size="md">
+              <Plus size={16} strokeWidth={2.5} /> New analysis
+            </Button>
+          </Link>
+        }
+      />
 
       <Sheet
-        title="Latest chart"
+        title="Latest read"
         aside={
-          <Link href={`/report/${r.id}`} className="font-sans text-xs font-bold text-primary-600 hover:underline inline-flex items-center gap-1">
-            Full report <ArrowRight size={13} />
+          <Link href={`/report/${r.id}`} className="font-sans text-sm font-semibold text-primary-700 hover:underline inline-flex items-center gap-1">
+            Full report <ArrowRight size={14} />
           </Link>
         }
       >
-        <ChartRow
+        <ReportFace
           role={r.role}
           tier={r.companyTier}
           ats={r.atsScore}
           readiness={r.readiness}
           verdict={r.recruiterVerdict.verdict}
-          waitlist={waitlistCount(r.careerGaps)}
-          topGap={r.recruiterVerdict.topGap}
-        />
-      </Sheet>
-
-      <Sheet title="Recruiter's remark">
-        <RecruiterRemark
+          confidence={r.recruiterVerdict.confidence}
           reason={r.recruiterVerdict.reason}
           strongestSignal={r.recruiterVerdict.strongestSignal}
           topGap={r.recruiterVerdict.topGap}
           whatWouldChange={r.recruiterVerdict.whatWouldChangeDecision}
-          confidence={r.recruiterVerdict.confidence}
-          verdict={r.recruiterVerdict.verdict}
         />
       </Sheet>
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
-        <Sheet title="Readiness breakdown" aside={`${r.readiness}/100`}>
+        <Sheet title="Where the readiness comes from" aside={`${r.readiness}/100`}>
           <Breakdown
             pulledBy={r.recruiterVerdict.topGap}
             items={[
@@ -188,22 +171,22 @@ function DashboardWithData({
             {progressData.length > 1 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={progressData} margin={{ top: 8, right: 8, bottom: 0, left: -24 }}>
-                  <CartesianGrid stroke="#e6e6dc" vertical={false} />
-                  <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#595c69", fontFamily: "var(--font-martian)" }} tickLine={false} axisLine={{ stroke: "#a9a89a" }} />
-                  <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: "#595c69", fontFamily: "var(--font-martian)" }} tickLine={false} axisLine={false} />
+                  <CartesianGrid stroke="#e8e8e3" vertical={false} />
+                  <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#5e616a" }} tickLine={false} axisLine={{ stroke: "#c3c3bb" }} />
+                  <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: "#5e616a" }} tickLine={false} axisLine={false} />
                   <Tooltip
-                    contentStyle={{ background: "#1d2b6b", borderRadius: 4, border: "none", color: "#fcfcf7", fontSize: 12 }}
-                    labelStyle={{ color: "#f5c518", fontSize: 11 }}
-                    itemStyle={{ color: "#fcfcf7" }}
+                    contentStyle={{ background: "#ffffff", borderRadius: 8, border: "1px solid #e1e1db", color: "#16171b", fontSize: 12, boxShadow: "0 8px 20px -6px rgb(22 23 27 / 0.14)" }}
+                    labelStyle={{ color: "#5e616a", fontSize: 11 }}
+                    itemStyle={{ color: "#16171b" }}
                   />
-                  <Line type="linear" dataKey="readiness" name="Readiness" stroke="#1d2b6b" strokeWidth={2.5} dot={{ r: 4, fill: "#f5c518", stroke: "#14140f", strokeWidth: 1.5 }} activeDot={{ r: 6 }} />
+                  <Line type="linear" dataKey="readiness" name="Readiness" stroke="#16171b" strokeWidth={2} dot={{ r: 4, fill: "#ffe14d", stroke: "#16171b", strokeWidth: 1.5 }} activeDot={{ r: 6 }} />
                 </LineChart>
               </ResponsiveContainer>
             ) : (
               <div className="h-full flex flex-col justify-center">
-                <p className="chart-data text-6xl font-bold leading-none">{r.readiness}</p>
+                <p className="figure text-6xl font-semibold leading-none">{r.readiness}</p>
                 <p className="mt-3 text-sm text-ink-secondary max-w-[30ch]">
-                  One chart so far. Re-analyze your updated resume to start a trend line.
+                  One read so far. Re-analyze your updated resume to start a trend line.
                 </p>
               </div>
             )}
@@ -211,7 +194,7 @@ function DashboardWithData({
         </Sheet>
       </div>
 
-      <Sheet title="Next builds" aside="Top gaps by impact">
+      <Sheet title="Build next" aside="Top gaps by impact">
         <GapsTable gaps={r.careerGaps.slice(0, 3)} readiness={r.readiness} />
       </Sheet>
     </div>

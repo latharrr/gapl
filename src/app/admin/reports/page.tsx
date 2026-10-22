@@ -1,6 +1,6 @@
 "use client";
 
-import { LoadingChart } from "@/components/ui/Sheet";
+import { Loading } from "@/components/ui/Sheet";
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -110,7 +110,7 @@ export default function AdminReportsPage() {
   if (loading) {
     return (
       <div className="h-[60vh] flex items-center justify-center">
-        <LoadingChart />
+        <Loading />
       </div>
     );
   }
@@ -241,7 +241,7 @@ export default function AdminReportsPage() {
                 <span className="text-[0.6875rem] text-ink-muted font-semibold uppercase tracking-wider block mb-1">
                   Report Inspector
                 </span>
-                <h2 className="text-sm font-[800] uppercase tracking-[0.06em] text-ink">{selectedReport.role}</h2>
+                <h2 className="text-sm font-bold uppercase tracking-[0.06em] text-ink">{selectedReport.role}</h2>
                 <span className="text-[0.6875rem] text-ink-muted">ID: {selectedReport.id}</span>
               </div>
 

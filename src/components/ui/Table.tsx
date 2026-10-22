@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 
-/* Chart-style data table: ruled header, greenbar body rows, mono for figures. */
+/* Data table: a ruled header in small caps, hairline rows, tabular figures. */
 export function Table({ className, children }: { className?: string; children: React.ReactNode }) {
   return (
     <div className="overflow-x-auto">
@@ -18,7 +18,7 @@ export function THead({ children }: { children: React.ReactNode }) {
 }
 
 export function TBody({ children }: { children: React.ReactNode }) {
-  return <tbody className="chart-rows">{children}</tbody>;
+  return <tbody className="divide-y divide-border-DEFAULT">{children}</tbody>;
 }
 
 export function Th({ className, children }: { className?: string; children?: React.ReactNode }) {
@@ -37,7 +37,7 @@ export function Td({
   colSpan?: number;
 }) {
   return (
-    <td colSpan={colSpan} className={cn("px-4 sm:px-5 py-3 align-middle", mono && "chart-data text-[0.8125rem]", className)}>
+    <td colSpan={colSpan} className={cn("px-4 sm:px-5 py-3 align-middle", mono && "figure text-[0.8125rem]", className)}>
       {children}
     </td>
   );

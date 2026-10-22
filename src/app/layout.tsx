@@ -1,37 +1,36 @@
 import type { Metadata, Viewport } from "next";
-import { Archivo, Martian_Mono, Doto } from "next/font/google";
+import { Mona_Sans } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
+import { Toasts } from "@/components/brand/Toasts";
 
-// Archivo: signage + UI voice. Martian Mono: chart data only. Doto: LED boards only.
-const archivo = Archivo({
+// Mona Sans: every UI word and figure. CMU Serif: resume text only (the LaTeX resume students know).
+const mona = Mona_Sans({
   subsets: ["latin"],
-  variable: "--font-archivo",
+  variable: "--font-mona",
   axes: ["wdth"],
   display: "swap",
 });
 
-const martian = Martian_Mono({
-  subsets: ["latin"],
-  variable: "--font-martian",
-  axes: ["wdth"],
+const cmu = localFont({
+  src: [
+    { path: "../fonts/cmu/cmu-serif-500-roman.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/cmu/cmu-serif-700-roman.woff2", weight: "700", style: "normal" },
+    { path: "../fonts/cmu/cmu-serif-500-italic.woff2", weight: "400", style: "italic" },
+  ],
+  variable: "--font-cmu",
   display: "swap",
-});
-
-const doto = Doto({
-  subsets: ["latin"],
-  variable: "--font-doto",
-  weight: ["700", "900"],
-  display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {
   title: {
     template: "%s | Gapl",
-    default: "Gapl — Application Readiness Engine",
+    default: "Gapl — See what a recruiter sees in your resume",
   },
   description:
-    "Know why you're not getting shortlisted. Gapl analyzes your resume, identifies skill gaps, and gives you a week-by-week roadmap.",
+    "Recruiters give your resume six seconds. Gapl shows what they saw, the line that sank it, and what to build to get shortlisted.",
   metadataBase: new URL("https://gapl.in"),
   robots: {
     index: true,
@@ -40,7 +39,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#1D2B6B",
+  themeColor: "#141519",
 };
 
 export default function RootLayout({
@@ -49,13 +48,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="en"
-      className={`${archivo.variable} ${martian.variable} ${doto.variable}`}
-      suppressHydrationWarning
-    >
+    <html lang="en" className={`${mona.variable} ${cmu.variable}`} suppressHydrationWarning>
+      <head>
+        {/* Lets CSS hold the sample resume's marks until it scrolls into view; without JS they simply show. */}
+        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
+      </head>
       <body className="bg-surface-muted text-ink antialiased">
         <AuthProvider>{children}</AuthProvider>
+        <Toasts />
       </body>
     </html>
   );

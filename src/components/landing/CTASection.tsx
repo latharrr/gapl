@@ -1,35 +1,24 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/Button";
-import { LedBoard } from "@/components/brand/LedBoard";
+import { buttonBase, buttonSizes, buttonVariants } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
 
 export function CTASection() {
   return (
-    <section className="led-ground">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
-        <h2 className="display max-w-4xl text-[clamp(2.4rem,5.6vw,4.75rem)] text-surface-muted">
-          Stop guessing why you&apos;re not getting called back.
+    <section className="on-desk">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-24 sm:py-32">
+        <h2 className="display max-w-5xl text-[clamp(2.6rem,6vw,5rem)] leading-[1.04]">
+          Your next application gets six seconds too. <span className="hero-hl [animation:none]">Spend them well.</span>
         </h2>
         <div className="mt-10 flex flex-col sm:flex-row gap-3">
-          <Link href="/analyze">
-            <Button size="lg" className="w-full sm:w-auto">
-              Check my status
-              <ArrowRight size={17} strokeWidth={2.5} />
-            </Button>
+          <Link href="/analyze" className={cn(buttonBase, buttonVariants.primary, buttonSizes.lg, "sm:px-7")}>
+            Read my resume <ArrowRight size={17} strokeWidth={2.5} />
           </Link>
-          <Link
-            href="/demo"
-            className="h-12 px-6 inline-flex items-center justify-center rounded-[6px] border-[1.5px] border-surface-muted/30 text-[0.9375rem] font-semibold text-surface-muted hover:border-surface-muted/70"
-          >
-            View the sample report
+          <Link href="/demo" className={cn(buttonBase, buttonVariants.desk, buttonSizes.lg)}>
+            See the sample report
           </Link>
         </div>
-        <LedBoard
-          tag="GAPL"
-          messages={["FIRST ANALYSIS FREE", "NO CARD NEEDED", "EVERY SCORE COMES WITH ITS REASONS"]}
-          interval={2800}
-          className="mt-12 h-12 px-4 text-lg bg-black/30 border border-led-dim max-w-xl"
-        />
+        <p className="mt-5 text-sm text-desk-muted">First read is free. No card needed.</p>
       </div>
     </section>
   );

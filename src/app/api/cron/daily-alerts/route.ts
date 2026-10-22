@@ -44,11 +44,11 @@ export async function GET(req: NextRequest) {
     const alertsHtmlList = activeAlerts
       .map(
         (alert, i) => `
-      <tr style="${i % 2 ? "background-color:#e3ecdc;" : ""}">
-        <td style="padding:10px 12px;font-family:${EMAIL.mono};font-weight:700;color:${alert.type === "danger" ? EMAIL.danger : "#8f5300"};">${escapeHtml(alert.type.toUpperCase())}</td>
+      <tr style="${i % 2 ? "background-color:${EMAIL.band};" : ""}">
+        <td style="padding:10px 12px;font-weight:700;color:${alert.type === "danger" ? EMAIL.danger : "#94600a"};">${escapeHtml(alert.type.toUpperCase())}</td>
         <td style="padding:10px 12px;font-weight:700;">${escapeHtml(alert.title)}</td>
         <td style="padding:10px 12px;color:${EMAIL.muted};line-height:1.4;">${escapeHtml(alert.message)}</td>
-        <td style="padding:10px 12px;font-family:${EMAIL.mono};font-weight:700;white-space:nowrap;">${escapeHtml(alert.metric)}</td>
+        <td style="padding:10px 12px;font-weight:700;white-space:nowrap;">${escapeHtml(alert.metric)}</td>
       </tr>`
       )
       .join("");

@@ -30,7 +30,7 @@ export function Progress({
   };
 
   const colors = {
-    primary: "bg-primary-600",
+    primary: "bg-ink",
     success: "bg-success",
     warning: "bg-warning",
     danger: "bg-danger",
@@ -38,7 +38,7 @@ export function Progress({
 
   return (
     <div
-      className={cn("w-full bg-surface-subtle rounded-[2px] overflow-hidden", sizes[size], className)}
+      className={cn("w-full bg-surface-subtle rounded-full overflow-hidden", sizes[size], className)}
       role="progressbar"
       aria-valuenow={value}
       aria-valuemin={0}
@@ -46,7 +46,7 @@ export function Progress({
     >
       <div
         className={cn(
-          "h-full rounded-[2px]",
+          "h-full rounded-full",
           colors[color],
           animated && "transition-[width] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]",
           barClassName

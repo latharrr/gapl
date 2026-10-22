@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Navbar } from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/Button";
 import { StepRoute } from "@/components/brand/StepRoute";
-import { DepartureBoard } from "@/components/brand/DepartureBoard";
+import { ReadingScreen } from "@/components/brand/ReadingScreen";
 import { OptionList, ChipGroup, FieldLabel, fieldClass } from "@/components/ui/Choice";
 import { Sheet, FigureStrip } from "@/components/ui/Sheet";
 import { ResumePreview, CV_PRINT_CSS, type CVData } from "@/components/cv/ResumePreview";
@@ -206,7 +206,7 @@ export default function CVBuilderPage() {
   // ── Loading ────────────────────────────────────────────────────────────────
   if (step === 3) {
     return (
-      <DepartureBoard
+      <ReadingScreen
         kicker={`${finalRole} · ${companyType}`}
         title="Building your CV"
         detail={`${STAGES[loadingStage]}…`}
@@ -225,7 +225,7 @@ export default function CVBuilderPage() {
         <div className="print:hidden">
           <Navbar />
         </div>
-        <main className="pt-[59px] bg-surface-muted min-h-screen print:hidden">
+        <main className="pt-16 bg-surface-muted min-h-screen print:hidden">
           <StepRoute steps={STEP_LABELS} current={stepIndex} />
           <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-5">
             <div className="flex flex-wrap items-end justify-between gap-4">
@@ -240,7 +240,7 @@ export default function CVBuilderPage() {
                   </Link>
                 </div>
                 <h1 className="display text-[clamp(2rem,4.5vw,3rem)]">Your improved CV</h1>
-                <p className="chart-data mt-1.5 text-xs text-ink-muted">
+                <p className="figure mt-1.5 text-xs text-ink-muted">
                   {finalRole} · {companyType}
                   {savedId && (
                     <span className="ml-2 inline-flex items-center gap-1 text-success">
@@ -299,7 +299,7 @@ export default function CVBuilderPage() {
                 <Sheet title="Keywords added" aside={`${result.keywordsInjected?.length ?? 0}`}>
                   <ul className="px-4 sm:px-6 py-4 flex flex-wrap gap-2">
                     {result.keywordsInjected?.map((kw) => (
-                      <li key={kw} className="chart-data inline-flex items-center gap-1.5 rounded-[3px] border border-border-strong bg-surface-DEFAULT px-2 py-1 text-xs">
+                      <li key={kw} className="figure inline-flex items-center gap-1.5 rounded-[3px] border border-border-strong bg-surface-DEFAULT px-2 py-1 text-xs">
                         <span aria-hidden className="font-bold text-success">+</span>
                         {kw}
                       </li>
@@ -356,7 +356,7 @@ export default function CVBuilderPage() {
   return (
     <>
       <Navbar />
-      <main className="pt-[59px] bg-surface-muted min-h-screen">
+      <main className="pt-16 bg-surface-muted min-h-screen">
         <StepRoute steps={STEP_LABELS} current={stepIndex} />
         <div className="max-w-xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
           <AnimatePresence mode="wait">
@@ -473,18 +473,18 @@ export default function CVBuilderPage() {
                     <div
                       {...getRootProps()}
                       className={cn(
-                        "rounded-[6px] border-2 border-dashed px-6 py-10 text-center cursor-pointer transition-colors",
+                        "rounded-[12px] border-2 border-dashed px-6 py-10 text-center cursor-pointer transition-colors",
                         isDragActive
-                          ? "border-primary-600 bg-primary-50"
+                          ? "border-ink bg-highlight-soft"
                           : resumeFile
-                          ? "border-success bg-success-bg"
+                          ? "border-solid border-ink bg-highlight-soft/50"
                           : "border-border-strong bg-surface-DEFAULT hover:border-ink"
                       )}
                     >
                       <input {...getInputProps()} />
                       {resumeFile ? (
                         <>
-                          <FileText size={28} className="text-success mx-auto" />
+                          <FileText size={28} className="text-ink mx-auto" />
                           <p className="mt-3 font-bold break-all">{resumeFile.name}</p>
                           <p className="mt-1 text-sm text-ink-muted">Tap to replace</p>
                         </>

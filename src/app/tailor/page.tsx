@@ -4,7 +4,7 @@ import { useState } from "react";
 import { type AnalysisResult } from "@/types/analysis";
 import { Navbar } from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/Button";
-import { DepartureBoard } from "@/components/brand/DepartureBoard";
+import { ReadingScreen } from "@/components/brand/ReadingScreen";
 import { Sheet, FigureStrip } from "@/components/ui/Sheet";
 import { fieldClass } from "@/components/ui/Choice";
 import { CV_PRINT_CSS } from "@/components/cv/ResumePreview";
@@ -228,7 +228,7 @@ export default function TailorPage() {
   // Loading
   if (step === "loading") {
     return (
-      <DepartureBoard
+      <ReadingScreen
         kicker={`${analysis?.role ?? "Your role"} · ${analysis?.companyTier ?? "Your tier"}`}
         title="Tailoring your CV"
         detail={`${TAILOR_STAGES[tailorStage]}…`}
@@ -248,7 +248,7 @@ export default function TailorPage() {
           <Navbar />
         </div>
 
-        <main className="pt-[59px] bg-surface-muted min-h-screen print:hidden">
+        <main className="pt-16 bg-surface-muted min-h-screen print:hidden">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-5">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
@@ -256,7 +256,7 @@ export default function TailorPage() {
                   <ArrowLeft size={14} /> Re-tailor
                 </button>
                 <h1 className="display text-[clamp(2rem,4.5vw,3rem)]">Your tailored CV</h1>
-                <p className="chart-data mt-1.5 text-xs text-ink-muted">
+                <p className="figure mt-1.5 text-xs text-ink-muted">
                   {analysis?.role} · {analysis?.companyTier}
                 </p>
               </div>
@@ -302,12 +302,12 @@ export default function TailorPage() {
 
               <div className="space-y-5">
                 <Sheet title="What changed" aside={`${result.changes.length}`}>
-                  <ul className="chart-rows">
+                  <ul className="divide-y divide-border-DEFAULT">
                     {result.changes.map((c, i) => (
                       <li key={i} className="grid grid-cols-[1.25rem_minmax(0,1fr)] gap-x-2.5 px-4 sm:px-5 py-3">
                         <span className={cn("mt-0.5", CHANGE_META[c.type].color)}>{CHANGE_META[c.type].icon}</span>
                         <div>
-                          <p className={cn("chart-data text-[0.6875rem] font-bold uppercase", CHANGE_META[c.type].color)}>
+                          <p className={cn("figure text-[0.6875rem] font-bold uppercase", CHANGE_META[c.type].color)}>
                             {c.type} · {c.section}
                           </p>
                           <p className="mt-0.5 text-sm text-ink-secondary">{c.description}</p>
@@ -320,7 +320,7 @@ export default function TailorPage() {
                 <Sheet title="Keywords added" aside={`${result.keywordsAdded.length}`}>
                   <ul className="px-4 sm:px-5 py-4 flex flex-wrap gap-2">
                     {result.keywordsAdded.map((kw) => (
-                      <li key={kw} className="chart-data inline-flex items-center gap-1.5 rounded-[3px] border border-border-strong bg-surface-DEFAULT px-2 py-1 text-xs">
+                      <li key={kw} className="figure inline-flex items-center gap-1.5 rounded-[3px] border border-border-strong bg-surface-DEFAULT px-2 py-1 text-xs">
                         <span aria-hidden className="font-bold text-success">+</span>
                         {kw}
                       </li>
@@ -359,7 +359,7 @@ export default function TailorPage() {
   return (
     <>
       <Navbar />
-      <main className="pt-[59px] bg-surface-muted min-h-screen">
+      <main className="pt-16 bg-surface-muted min-h-screen">
         <div className="max-w-xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
           <Link
             href={analysis ? `/report/${analysis.id}` : "/analyze"}

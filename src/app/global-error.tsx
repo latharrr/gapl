@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect } from "react";
-import { Archivo, Doto } from "next/font/google";
+import { Mona_Sans } from "next/font/google";
 import "./globals.css";
 import { StatusScreen, ghostOnDark } from "@/components/brand/StatusScreen";
+import { buttonBase, buttonSizes, buttonVariants } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
 
-const archivo = Archivo({ subsets: ["latin"], variable: "--font-archivo", axes: ["wdth"], display: "swap" });
-const doto = Doto({ subsets: ["latin"], variable: "--font-doto", weight: ["900"], display: "swap" });
+const mona = Mona_Sans({ subsets: ["latin"], variable: "--font-mona", axes: ["wdth"], display: "swap" });
 
 interface GlobalErrorProps {
   error: Error & { digest?: string };
@@ -19,17 +20,17 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
   }, [error]);
 
   return (
-    <html lang="en" className={`${archivo.variable} ${doto.variable}`}>
+    <html lang="en" className={mona.variable}>
       <body className="antialiased">
         <StatusScreen
-          led="SYSTEM FAULT"
+          mark="Something broke"
           title="Gapl hit a critical error."
           body="Reload the page or try again. If it keeps happening, email hello@gapl.in."
           actions={
             <>
               <button
                 onClick={() => reset()}
-                className="h-12 px-6 inline-flex items-center justify-center rounded-[6px] border-2 border-board-ink bg-board text-board-ink font-semibold"
+                className={cn(buttonBase, buttonVariants.primary, buttonSizes.lg)}
               >
                 Try again
               </button>

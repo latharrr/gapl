@@ -5,22 +5,22 @@ primary_target: "src/app/page.tsx"
 related_targets: ["src/app/analyze/page.tsx","src/app/report/[id]/page.tsx","src/app/demo/page.tsx"]
 ---
 
-Scope: Gapl landing (/) as the first surface of a replacement world that also reaches pricing, auth, analyze, report, demo, CV builder, tailor and the candidate dashboard. Mode: Persuade (landing, pricing); app routes are Operate and inherit the world.
+Scope: Gapl landing (/) as the first surface of a replacement world (replacing "PNR Status") that reaches every user-facing route: pricing, auth, analyze, report, demo, dashboard, CV builder, tailor, reading pages, status pages and emails. Admin inherits the tokens. Mode: Persuade (landing, pricing); app routes are Operate and inherit the world.
 
-Audience: Indian CS students in placement season, on mid-range Android phones. Action: start an analysis (role + tier → /analyze). Proof: the real report structure, shown as a labelled sample. No testimonials, stats or outcomes.
+Audience: Indian CS students in placement season, on mid-range Android phones, often late at night. Action: upload a resume and get a verdict (role + tier → /analyze). Proof: the real report structure and a labelled sample resume. No testimonials, stats or outcomes.
+
+User feedback on the old world (2026-10-22): too themed/gimmicky, dated/not premium, too dense on phones, did not convert. The new world must read premium and calm; the marks are precise, never cartoon hand-drawing.
 
 ## Direction contract
 
-THESIS: Readiness is reservation status. Gapl prints your row on the chart: the verdict as a status code (Reject = WL, Maybe = RAC, Shortlist = CNF, with the WL number equal to the gaps ahead of you) and the remark that explains it. This replaces the category's split hero with a report-card mock.
+THESIS: Your resume, read the way a recruiter reads it. The page shows the six-second read itself: what caught the eye (highlighter), what sank it (red pen, circled, with a margin note), the verdict written on the page, and the fix written back in blue. It refuses the category's centred headline + upload box + dashboard screenshot.
 
-OWN-WORLD: Indian Railways print and signage. A pale chart-paper ground with greenbar row bands, IR-navy rail ink, a station-signboard yellow for headlines and the primary action (black heavy grotesque Archivo with a black rim), an amber-dot LED departure board (Doto on black) for live and loading states, Martian Mono for chart data only, and status stamps in WL red, RAC ochre and CNF green, always written out and never shown by colour alone.
+OWN-WORLD: A charcoal desk ground (#16171b family) with bright white A4 paper as the only other material. Three marks carry all meaning: highlighter yellow (seen, strengths, the primary action), red pen (gaps, Reject), blue ballpoint (what to build, your fix). Marks are geometrically precise: crisp highlight blocks, straight 2px underlines, rounded-rect circles, margin notes set in the UI face with a thin leader. Mona Sans for every UI word and figure (tabular), a Computer Modern-style serif only for resume text, the LaTeX resume every CS student knows.
 
-STORY: The visitor sees the honest verdict printed on a chart, understands that every status has a printed remark and a route to CNF, trusts it because the sample is the real report, and checks their own status.
+STORY: The visitor sees a resume like theirs being read in six seconds, recognises the line that sinks it, understands Gapl writes the fix back with a readiness change, and drops their own PDF.
 
-FIRST VIEWPORT: Navy rail bar nav. A full-width yellow station signboard carries the headline "Know why you're not getting shortlisted." at display scale. Directly under it is a PNR-enquiry strip holding working Role + Tier selects and a yellow "Check my status" button that goes to /analyze with params. Then the reservation chart sheet with a header row and a highlighted sample row (SDE Intern · Product Startup · ATS 68 · Readiness 65 · WL 3 / REJECT · remark), with an amber LED strip at the bottom of the viewport announcing the next build.
+FIRST VIEWPORT: Desk-ground nav (wordmark with a highlighter block, three links, small yellow action). Left 5 columns: headline "Six seconds. Here's what they saw." at display scale, the second sentence highlighted; one-line lead; a working drop zone with role and tier and a yellow "Read my resume" button. Right 7 columns: a full-height white sample resume page (labelled sample) cropped by the fold, carrying the recruiter's marks, a red-ruled "Reject · 6 sec" verdict and one red margin note: "No deployed project."
 
-FORM: Railway reservation chart / PNR status, my top-ranked grounded candidate (#1 of 7), taken as IMPECCABLE'S PICK over the roll's assigned #4. Seed key 98ffa349. Signature interaction: the roadmap set as a train schedule. As you scroll, a marker runs down the route and the status code steps WL 3 → WL 2 → RAC → CNF at each station. Motion grammar: dot-matrix print-in and LED flips, eased out, with a reduced-motion fallback that is static.
-
-Raised lines kept: every number has a leader line to its reason; states read without colour; one giant scale move per viewport; total colour commitment, so sections are paper, navy or LED with no grey template sections; one control (tier) re-sets the hero chart; roadmap state is a mark (tick / dot / flag), not a hue.
+FORM: The Recruiter's Read, my top-ranked grounded candidate (#1 of 7), chosen by the user as IMPECCABLE'S PICK over the roll's assigned #6 (The Shortlist). Seed key 98ffa349, re-roll 1. Signature interaction: the six-second read. On first view a 0.0→6.0s timer runs while highlight blocks draw left to right in reading order, the red circle strokes on, the margin note lands and the verdict prints last. Below, a struck red resume line flips to the blue rewritten line with readiness 65 → 78. Motion grammar: ink drawing on, ease-out-expo, nothing bounces; reduced motion shows the final marked page.
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance

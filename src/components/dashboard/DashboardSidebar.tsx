@@ -51,12 +51,12 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
   return (
     <div className="flex flex-col h-full">
       {/* Logo */}
-      <div className="h-14 px-4 flex items-center justify-between border-b border-white/15">
+      <div className="h-16 px-4 flex items-center justify-between border-b border-desk-line">
         <Link href="/" aria-label="Gapl home">
           <Wordmark size="sm" />
         </Link>
         {onClose && (
-          <button onClick={onClose} aria-label="Close menu" className="p-1.5 rounded-[4px] hover:bg-white/10 text-primary-100">
+          <button onClick={onClose} aria-label="Close menu" className="p-2 rounded-[7px] hover:bg-desk-raised text-desk-muted hover:text-desk-ink">
             <X size={16} />
           </button>
         )}
@@ -83,12 +83,12 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
               href={item.href}
               onClick={onClose}
               className={cn(
-                "flex items-center gap-3 h-10 px-3 rounded-[4px] text-sm font-medium transition-colors",
-                active ? "bg-white/12 text-white font-semibold" : "text-primary-100 hover:text-white hover:bg-white/8"
+                "flex items-center gap-3 h-10 px-3 rounded-[7px] text-sm font-medium transition-colors",
+                active ? "bg-desk-raised text-desk-ink font-semibold" : "text-desk-muted hover:text-desk-ink hover:bg-desk-raised/60"
               )}
               aria-current={active ? "page" : undefined}
             >
-              <Icon size={17} className={active ? "text-board" : "text-primary-400"} />
+              <Icon size={17} className={active ? "text-highlight" : "text-desk-faint"} />
               {item.label}
             </Link>
           );
@@ -96,18 +96,18 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
       </nav>
 
       {/* User */}
-      <div className="px-3 pb-4 pt-3 border-t border-white/15 mt-auto">
+      <div className="px-3 pb-4 pt-3 border-t border-desk-line mt-auto">
         <div className="flex items-center gap-3 p-2">
-          <div className="w-8 h-8 rounded-[4px] bg-board text-board-ink grid place-items-center text-sm font-[800] flex-shrink-0">
+          <div className="w-8 h-8 rounded-full bg-desk-raised text-desk-ink ring-1 ring-desk-line grid place-items-center text-sm font-semibold flex-shrink-0">
             {name[0]?.toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-white truncate">{name}</p>
-            <p className="chart-data text-[0.6875rem] text-primary-100 truncate uppercase">{plan} plan</p>
+            <p className="text-sm font-semibold text-desk-ink truncate">{name}</p>
+            <p className="text-xs text-desk-muted truncate capitalize">{plan} plan</p>
           </div>
           <button
             onClick={handleLogout}
-            className="p-2 rounded-[4px] text-primary-100 hover:text-white hover:bg-white/10"
+            className="p-2 rounded-[7px] text-desk-muted hover:text-desk-ink hover:bg-desk-raised"
             title="Sign out"
             aria-label="Sign out"
           >
@@ -125,14 +125,14 @@ export function DashboardSidebar() {
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex flex-col w-60 flex-shrink-0 bg-primary-600 border-r-[3px] border-board h-screen sticky top-0">
+      <aside className="on-desk hidden md:flex flex-col w-60 flex-shrink-0 border-r border-desk-line h-screen sticky top-0">
         <SidebarContent />
       </aside>
 
-      {/* Mobile rail bar */}
-      <header className="md:hidden fixed top-0 inset-x-0 z-40 h-14 px-4 flex items-center gap-3 bg-primary-600 border-b-[3px] border-board">
+      {/* Mobile top bar */}
+      <header className="on-desk md:hidden fixed top-0 inset-x-0 z-40 h-14 px-4 flex items-center gap-3 border-b border-desk-line">
         <button
-          className="p-1.5 -ml-1.5 rounded-[4px] text-white hover:bg-white/10"
+          className="p-2 -ml-2 rounded-[7px] text-desk-ink hover:bg-desk-raised"
           onClick={() => setMobileOpen(true)}
           aria-label="Open menu"
         >
@@ -151,15 +151,15 @@ export function DashboardSidebar() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-primary-900/50 z-40 md:hidden"
+              className="fixed inset-0 bg-desk/60 z-40 md:hidden"
               onClick={() => setMobileOpen(false)}
             />
             <motion.aside
-              initial={{ x: -240 }}
+              initial={{ x: -256 }}
               animate={{ x: 0 }}
-              exit={{ x: -240 }}
+              exit={{ x: -256 }}
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="fixed left-0 top-0 bottom-0 w-64 bg-primary-600 z-50 md:hidden border-r-[3px] border-board"
+              className="on-desk fixed left-0 top-0 bottom-0 w-64 z-50 md:hidden border-r border-desk-line"
             >
               <SidebarContent onClose={() => setMobileOpen(false)} />
             </motion.aside>
