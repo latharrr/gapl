@@ -54,9 +54,11 @@ export async function createTrackableLink({
     await docRef.set(linkDoc);
   }
 
-  // Tracking shortlinks target the sub-domain links.gapl.in or custom env domain
-  const trackingDomain = process.env.NEXT_PUBLIC_TRACKING_DOMAIN || "links.gapl.in";
-  return `https://${trackingDomain}/${shortId}`;
+  // A dedicated links.* domain (routed by src/proxy.ts) when one is configured; otherwise the app's own /api/t route.
+  const trackingDomain = process.env.NEXT_PUBLIC_TRACKING_DOMAIN;
+  if (trackingDomain) return `https://${trackingDomain}/${shortId}`;
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.vercel.app";
+  return `${appUrl}/api/t/${shortId}`;
 }
 
 export async function getLastTouchAttribution(userId: string) {

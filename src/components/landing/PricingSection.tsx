@@ -4,7 +4,7 @@ import { PRICING_PLANS } from "@/lib/mock-data";
 import { buttonBase, buttonSizes, buttonVariants } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
-// Plans on one sheet, side by side. They differ only in monthly credits.
+// Free plus the one-time credit packs, side by side. They differ only in how many credits you get.
 export function PricingSection({ heading = true }: { heading?: boolean }) {
   return (
     <section id="pricing" className="on-desk scroll-mt-16">
@@ -13,8 +13,8 @@ export function PricingSection({ heading = true }: { heading?: boolean }) {
           <div className="grid gap-6 lg:grid-cols-12 lg:items-end">
             <h2 className="display lg:col-span-6 text-[clamp(2.25rem,4.2vw,3.5rem)]">Start free. Pay when you&apos;re re-checking.</h2>
             <p className="lg:col-span-5 lg:col-start-8 text-lg leading-relaxed text-desk-muted">
-              Every plan gets the full report, roadmap and CV tools. Plans differ only in how many analyses you get each
-              month.
+              Every pack gets the full report, roadmap and CV tools. Pay once, no subscription, and your credits never
+              expire.
             </p>
           </div>
         )}
@@ -40,7 +40,7 @@ export function PricingSection({ heading = true }: { heading?: boolean }) {
 
               <p className="mt-6 flex items-baseline gap-1.5">
                 <span className="figure text-[2.75rem] font-semibold leading-none">₹{plan.price}</span>
-                <span className="text-sm text-ink-muted">{plan.price === 0 ? "no card needed" : "/ month"}</span>
+                <span className="text-sm text-ink-muted">{plan.price === 0 ? "no card needed" : "one-time"}</span>
               </p>
 
               <Link
@@ -62,8 +62,8 @@ export function PricingSection({ heading = true }: { heading?: boolean }) {
           ))}
         </ul>
         <p className="mt-4 text-sm text-desk-muted">
-          Prices in INR, paid through Razorpay. Credits reset on the 1st of each month; an analysis, a CV build and a
-          tailoring each use one.
+          Prices in INR, paid once through Razorpay. No subscription and no auto-renewal. An analysis, a CV build and a
+          tailoring each use one credit.
         </p>
       </div>
     </section>

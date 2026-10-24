@@ -30,8 +30,8 @@ export default function AboutPage() {
             <h2>Contact the Team</h2>
             <p>
               Have feedback, questions, or ideas? We are always listening. Drop us a line at{" "}
-              <a href="mailto:hello@gapl.in">
-                hello@gapl.in
+              <a href="mailto:deepanshulathar@gmail.com">
+                deepanshulathar@gmail.com
               </a>.
             </p>
           </ReadingPage>

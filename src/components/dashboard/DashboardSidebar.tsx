@@ -9,6 +9,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Wordmark } from "@/components/brand/Wordmark";
 import { Button } from "@/components/ui/Button";
 import { logOut } from "@/lib/firebase";
+import { creditBalance } from "@/lib/plans";
 import {
   LayoutDashboard,
   FileText,
@@ -46,7 +47,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
   };
 
   const name = user?.displayName || "User";
-  const plan = (userDoc?.plan as string) || "free";
+  const credits = creditBalance(userDoc ?? {});
 
   return (
     <div className="flex flex-col h-full">
@@ -103,7 +104,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-desk-ink truncate">{name}</p>
-            <p className="text-xs text-desk-muted truncate capitalize">{plan} plan</p>
+            <p className="text-xs text-desk-muted truncate">{credits} credit{credits === 1 ? "" : "s"} left</p>
           </div>
           <button
             onClick={handleLogout}

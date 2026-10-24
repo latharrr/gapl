@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ sent: false, error: "ADMIN_ALERT_EMAIL is not configured." });
     }
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.in";
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.vercel.app";
     const alertsDashboardUrl = `${appUrl}/admin/alerts`;
 
     // Construct HTML table rows for active alerts

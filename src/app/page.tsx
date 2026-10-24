@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     title: "Gapl — Six seconds. Here's what they saw.",
     description: "Your resume, read the way a recruiter reads it. The verdict, the reason, and what to build next.",
     type: "website",
-    url: "https://gapl.in",
+    url: "https://gapl.vercel.app",
   },
   twitter: {
     card: "summary_large_image",

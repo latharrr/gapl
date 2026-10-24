@@ -1,61 +1,35 @@
+import { CREDIT_PACKS, pricePerCredit } from "./plans";
 // Static content for landing page, pricing, and UI — no mock analysis data
 
-// Every plan gets the full product; plans differ only in monthly analysis credits
+// Every pack gets the full product; packs differ only in how many credits they hold
 // (PLAN_LIMITS in src/lib/plans.ts). Analyses, CV builds and tailoring each use one.
+// Public price list: the free signup credit, then the one-time packs from lib/plans.
 export const PRICING_PLANS = [
   {
     name: "Free",
     price: 0,
-    period: "free",
     description: "Check where you stand.",
     features: [
-      "1 analysis a month",
+      "1 free credit when you sign up",
       "Recruiter verdict with reasons",
       "Career gaps and roadmap",
-      "CV builder and tailoring (each uses your 1 credit)",
+      "CV builder and tailoring",
     ],
     cta: "Start free",
     highlighted: false,
   },
-  {
-    name: "Basic",
-    price: 49,
-    period: "per month",
-    description: "For a focused application sprint.",
+  ...CREDIT_PACKS.map((pack) => ({
+    name: pack.name,
+    price: pack.priceInr,
+    description: pack.description,
     features: [
-      "5 analyses a month",
+      `${pack.credits} credits · ₹${pricePerCredit(pack)} each`,
+      "Credits never expire",
       "Everything in Free",
-      "Re-check after each build",
     ],
-    cta: "Get Basic",
-    highlighted: false,
-  },
-  {
-    name: "Pro",
-    price: 149,
-    period: "per month",
-    description: "For an active placement season.",
-    features: [
-      "20 analyses a month",
-      "Everything in Free",
-      "Check several roles and tiers",
-    ],
-    cta: "Get Pro",
-    highlighted: true,
-  },
-  {
-    name: "Premium",
-    price: 299,
-    period: "per month",
-    description: "For heavy tailoring across many applications.",
-    features: [
-      "50 analyses a month",
-      "Everything in Free",
-      "Tailor a CV for every application",
-    ],
-    cta: "Get Premium",
-    highlighted: false,
-  },
+    cta: `Get ${pack.credits} credits`,
+    highlighted: pack.highlighted,
+  })),
 ];
 
 export const HOW_IT_WORKS_STEPS = [

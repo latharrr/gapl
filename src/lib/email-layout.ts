@@ -34,7 +34,7 @@ export function emailButton(href: string, label: string): string {
 
 /** Wraps an inner HTML fragment in the branded frame. */
 export function emailLayout(inner: string, opts: { preheader?: string } = {}): string {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.in";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.vercel.app";
   const preheader = opts.preheader
     ? `<div style="display:none;max-height:0;overflow:hidden;opacity:0;">${escapeHtml(opts.preheader)}</div>`
     : "";

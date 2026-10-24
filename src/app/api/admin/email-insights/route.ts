@@ -177,7 +177,6 @@ Write your response in clean Markdown formatting without markdown code fences in
     try {
       // Try invoking Groq/FreeModel through our ai-gateway
       const aiResponse = await generateAICall("email-insights", aiPrompt, {
-        temperature: 0.7,
       });
       aiSummary = aiResponse.text;
     } catch (err) {

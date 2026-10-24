@@ -28,9 +28,9 @@ export default function TermsOfServicePage() {
               Gapl provides AI-powered resume and readiness intelligence tools. You agree to use the services only for lawful purposes and in accordance with these Terms. You shall not upload any malicious files, attempt to bypass restrictions, or scrape the platform.
             </p>
 
-            <h2>4. Payment and Subscriptions</h2>
+            <h2>4. Payments and Credits</h2>
             <p>
-              Certain features require payment or subscription plans. All payments are processed securely via Razorpay. You agree to pay all fees associated with your chosen plan.
+              Each analysis, CV build or tailoring uses one credit. New accounts get one free credit; more are sold in one-time packs. There is no subscription and nothing renews automatically. Payments are processed securely via Razorpay. Credits do not expire, are tied to your account and cannot be transferred or exchanged for cash, except as described in the Refund Policy.
             </p>
 
             <h2>5. Disclaimer of Warranties</h2>
@@ -51,8 +51,8 @@ export default function TermsOfServicePage() {
             <h2>8. Contact Information</h2>
             <p>
               If you have any questions regarding these Terms of Service, please reach out to us at{" "}
-              <a href="mailto:hello@gapl.in" className="text-primary-600 font-medium hover:underline">
-                hello@gapl.in
+              <a href="mailto:deepanshulathar@gmail.com" className="text-primary-600 font-medium hover:underline">
+                deepanshulathar@gmail.com
               </a>.
             </p>
           </ReadingPage>

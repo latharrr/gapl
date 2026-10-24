@@ -1,8 +1,7 @@
 import crypto from "crypto";
-import { FieldValue } from "firebase-admin/firestore";
 import { NextRequest, NextResponse, after } from "next/server";
-import { getAdminDb, requireUser } from "@/lib/firebase-admin";
-import { normalizePlan, PLAN_PRICES_INR } from "@/lib/plans";
+import { requireUser } from "@/lib/firebase-admin";
+import { applyCapturedPayment, PaymentMismatchError } from "@/lib/payments";
 import { takeRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
@@ -36,70 +35,30 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Payment signature verification failed." }, { status: 400 });
     }
 
-    const db = getAdminDb();
-    const orderRef = db.collection("payment_orders").doc(orderId);
-    const paymentRef = db.collection("payments").doc(paymentId);
-    const userRef = db.collection("users").doc(user.uid);
-
-    const { getLastTouchAttribution } = await import("@/lib/link-tracker");
-    const attribution = await getLastTouchAttribution(user.uid);
-
-    let verifiedPlan = "";
-    let alreadyProcessed = false;
-    await db.runTransaction(async (transaction) => {
-      const orderSnapshot = await transaction.get(orderRef);
-      if (!orderSnapshot.exists) throw new Error("Payment order was not found.");
-
-      const order = orderSnapshot.data() ?? {};
-      const plan = normalizePlan(order.plan);
-      if (!plan || plan === "free" || order.userId !== user.uid || order.amount !== PLAN_PRICES_INR[plan]) {
-        throw new Error("Payment order details do not match this account.");
-      }
-
-      verifiedPlan = plan;
-      // The webhook may have captured this order first: confirm, don't double-process.
-      if (order.status === "captured" || order.status === "verified") {
-        alreadyProcessed = true;
-        return;
-      }
-      transaction.set(paymentRef, {
-        paymentId,
-        orderId,
-        userId: user.uid,
-        plan,
-        amount: order.amount,
-        currency: order.currency || "INR",
-        status: "captured",
-        refunded: false,
-        source: "checkout-verification",
-        createdAt: FieldValue.serverTimestamp(),
-        timestamp: new Date().toISOString(),
-        ...(attribution ? {
-          attributedCampaignId: attribution.campaignId,
-          attributedEmailId: attribution.emailId,
-          attributedAt: new Date().toISOString(),
-        } : {}),
-      }, { merge: true });
-      transaction.set(orderRef, { status: "verified", paymentId, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
-      transaction.set(userRef, { plan, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
+    const { pack, alreadyProcessed } = await applyCapturedPayment({
+      orderId,
+      paymentId,
+      source: "checkout-verification",
+      expectedUserId: user.uid,
     });
 
-    // Trigger Payment Success Email (once per order)
+    // Receipt goes out once per order, from whichever of verify/webhook captured it.
     if (user.email && !alreadyProcessed) {
       const email = user.email;
       after(async () => {
         try {
           const { sendPaymentSuccessEmail } = await import("@/lib/email-service");
-          await sendPaymentSuccessEmail(user.uid, email, paymentId, verifiedPlan, PLAN_PRICES_INR[verifiedPlan] || 0);
+          await sendPaymentSuccessEmail(user.uid, email, paymentId, pack.name, pack.credits, pack.priceInr);
         } catch (err) {
           console.error("Failed to send Payment Success email:", err);
         }
       });
     }
 
-    return NextResponse.json({ success: true, plan: verifiedPlan });
+    return NextResponse.json({ success: true, pack: pack.id, credits: pack.credits });
   } catch (error) {
     console.error("Payment verification error:", error);
-    return NextResponse.json({ error: error instanceof Error ? error.message : "Payment verification failed." }, { status: 400 });
+    const message = error instanceof PaymentMismatchError ? error.message : "Payment verification failed. If money left your account, email deepanshulathar@gmail.com with your payment ID.";
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 }

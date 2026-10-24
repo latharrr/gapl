@@ -23,12 +23,12 @@ export default function AdminSettingsPage() {
   const [shortlistCutoff, setShortlistCutoff] = useState(80);
 
   // Per-task routing configurations
-  const [modelParsing, setModelParsing] = useState("openai/gpt-oss-120b");
-  const [modelJd, setModelJd] = useState("openai/gpt-oss-120b");
-  const [modelOptimization, setModelOptimization] = useState("openai/gpt-oss-120b");
-  const [modelAts, setModelAts] = useState("openai/gpt-oss-120b");
-  const [modelRecruiter, setModelRecruiter] = useState("openai/gpt-oss-120b");
-  const [modelGap, setModelGap] = useState("openai/gpt-oss-120b");
+  const [modelParsing, setModelParsing] = useState("claude-opus-5-5");
+  const [modelJd, setModelJd] = useState("claude-opus-5-5");
+  const [modelOptimization, setModelOptimization] = useState("claude-opus-5-5");
+  const [modelAts, setModelAts] = useState("claude-opus-5-5");
+  const [modelRecruiter, setModelRecruiter] = useState("claude-opus-5-5");
+  const [modelGap, setModelGap] = useState("claude-opus-5-5");
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -184,7 +184,7 @@ export default function AdminSettingsPage() {
         <Card variant="default" padding="md" className="bg-surface-DEFAULT border-border-DEFAULT space-y-6">
           <div>
             <h2 className="text-sm font-bold uppercase tracking-[0.06em] text-ink">Smart Model Routing</h2>
-            <p className="text-[0.6875rem] text-ink-muted">Map platform parser features to specialized LLM configurations</p>
+            <p className="text-[0.6875rem] text-ink-muted">Claude model per task. Sonnet 5.5 is always the automatic backup.</p>
           </div>
 
           <div className="space-y-4">
@@ -196,9 +196,8 @@ export default function AdminSettingsPage() {
                 onChange={(e) => setModelParsing(e.target.value)}
                 className="bg-surface-muted border border-border-DEFAULT rounded-[5px] px-3 py-1.5 text-xs text-ink w-full cursor-pointer focus:outline-none"
               >
-                <option value="openai/gpt-oss-120b">openai/gpt-oss-120b (Production Default)</option>
-                <option value="gpt-4o">gpt-4o (High Precision)</option>
-                <option value="gemini-1.5-pro">gemini-1.5-pro</option>
+                <option value="claude-opus-5-5">claude-opus-5-5 (Default · best quality)</option>
+                <option value="claude-sonnet-5-5">claude-sonnet-5-5 (Half the cost)</option>
               </select>
             </div>
 
@@ -210,8 +209,8 @@ export default function AdminSettingsPage() {
                 onChange={(e) => setModelJd(e.target.value)}
                 className="bg-surface-muted border border-border-DEFAULT rounded-[5px] px-3 py-1.5 text-xs text-ink w-full cursor-pointer focus:outline-none"
               >
-                <option value="openai/gpt-oss-120b">openai/gpt-oss-120b (Production Default)</option>
-                <option value="gpt-4o">gpt-4o (High Precision)</option>
+                <option value="claude-opus-5-5">claude-opus-5-5 (Default · best quality)</option>
+                <option value="claude-sonnet-5-5">claude-sonnet-5-5 (Half the cost)</option>
               </select>
             </div>
 
@@ -223,8 +222,8 @@ export default function AdminSettingsPage() {
                 onChange={(e) => setModelOptimization(e.target.value)}
                 className="bg-surface-muted border border-border-DEFAULT rounded-[5px] px-3 py-1.5 text-xs text-ink w-full cursor-pointer focus:outline-none"
               >
-                <option value="claude-3-5-sonnet">claude-3-5-sonnet (High Precision)</option>
-                <option value="openai/gpt-oss-120b">openai/gpt-oss-120b</option>
+                <option value="claude-opus-5-5">claude-opus-5-5 (Default · best quality)</option>
+                <option value="claude-sonnet-5-5">claude-sonnet-5-5 (Half the cost)</option>
               </select>
             </div>
 
@@ -236,8 +235,8 @@ export default function AdminSettingsPage() {
                 onChange={(e) => setModelAts(e.target.value)}
                 className="bg-surface-muted border border-border-DEFAULT rounded-[5px] px-3 py-1.5 text-xs text-ink w-full cursor-pointer focus:outline-none"
               >
-                <option value="openai/gpt-oss-120b">openai/gpt-oss-120b (Production Default)</option>
-                <option value="gpt-4o">gpt-4o</option>
+                <option value="claude-opus-5-5">claude-opus-5-5 (Default · best quality)</option>
+                <option value="claude-sonnet-5-5">claude-sonnet-5-5 (Half the cost)</option>
               </select>
             </div>
 
@@ -249,8 +248,8 @@ export default function AdminSettingsPage() {
                 onChange={(e) => setModelRecruiter(e.target.value)}
                 className="bg-surface-muted border border-border-DEFAULT rounded-[5px] px-3 py-1.5 text-xs text-ink w-full cursor-pointer focus:outline-none"
               >
-                <option value="claude-3-opus">claude-3-opus (High Precision)</option>
-                <option value="openai/gpt-oss-120b">openai/gpt-oss-120b</option>
+                <option value="claude-opus-5-5">claude-opus-5-5 (Default · best quality)</option>
+                <option value="claude-sonnet-5-5">claude-sonnet-5-5 (Half the cost)</option>
               </select>
             </div>
 
@@ -262,8 +261,8 @@ export default function AdminSettingsPage() {
                 onChange={(e) => setModelGap(e.target.value)}
                 className="bg-surface-muted border border-border-DEFAULT rounded-[5px] px-3 py-1.5 text-xs text-ink w-full cursor-pointer focus:outline-none"
               >
-                <option value="claude-3-opus">claude-3-opus (High Precision)</option>
-                <option value="openai/gpt-oss-120b">openai/gpt-oss-120b</option>
+                <option value="claude-opus-5-5">claude-opus-5-5 (Default · best quality)</option>
+                <option value="claude-sonnet-5-5">claude-sonnet-5-5 (Half the cost)</option>
               </select>
             </div>
           </div>

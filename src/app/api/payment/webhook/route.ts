@@ -1,8 +1,7 @@
 import crypto from "crypto";
-import { FieldValue } from "firebase-admin/firestore";
 import { NextRequest, NextResponse, after } from "next/server";
 import { getAdminDb } from "@/lib/firebase-admin";
-import { normalizePlan, PLAN_PRICES_INR } from "@/lib/plans";
+import { applyCapturedPayment, PaymentMismatchError } from "@/lib/payments";
 
 export const runtime = "nodejs";
 
@@ -11,7 +10,6 @@ interface RazorpayPaymentEntity {
   order_id?: string;
   amount?: number;
   currency?: string;
-  notes?: { plan?: string; userId?: string };
 }
 
 function signaturesMatch(received: string, expected: string) {
@@ -37,83 +35,43 @@ export async function POST(req: NextRequest) {
     if (event.event !== "payment.captured") return NextResponse.json({ received: true });
 
     const payment = event.payload?.payment?.entity;
-    const plan = normalizePlan(payment?.notes?.plan);
-    const userId = payment?.notes?.userId;
     const paymentId = payment?.id;
     const orderId = payment?.order_id;
+    if (!paymentId || !orderId) return NextResponse.json({ received: true, ignored: "missing ids" });
 
-    if (!paymentId || !orderId || !userId || !plan || plan === "free" || payment.amount !== PLAN_PRICES_INR[plan] * 100) {
-      return NextResponse.json({ error: "Webhook payment details are invalid." }, { status: 400 });
-    }
-
-    const db = getAdminDb();
-    const orderRef = db.collection("payment_orders").doc(orderId);
-    const paymentRef = db.collection("payments").doc(paymentId);
-    const userRef = db.collection("users").doc(userId);
-
-    const { getLastTouchAttribution } = await import("@/lib/link-tracker");
-    const attribution = await getLastTouchAttribution(userId);
-
-    const alreadyProcessed = await db.runTransaction(async (transaction) => {
-      const orderSnapshot = await transaction.get(orderRef);
-      if (!orderSnapshot.exists) throw new Error("Webhook order was not created by Gapl.");
-
-      const order = orderSnapshot.data() ?? {};
-      if (order.userId !== userId || order.plan !== plan || order.amount !== PLAN_PRICES_INR[plan]) {
-        throw new Error("Webhook order does not match its server-side record.");
-      }
-
-      if (order.status === "captured" || order.status === "verified") {
-        return true;
-      }
-
-      transaction.set(paymentRef, {
-        paymentId,
-        orderId,
-        userId,
-        plan,
-        amount: PLAN_PRICES_INR[plan],
-        currency: payment.currency || "INR",
-        status: "captured",
-        refunded: false,
-        source: "webhook",
-        createdAt: FieldValue.serverTimestamp(),
-        timestamp: new Date().toISOString(),
-        ...(attribution ? {
-          attributedCampaignId: attribution.campaignId,
-          attributedEmailId: attribution.emailId,
-          attributedAt: new Date().toISOString(),
-        } : {}),
-      }, { merge: true });
-      transaction.set(orderRef, { status: "captured", paymentId, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
-      transaction.set(userRef, { plan, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
-      return false;
-    });
-
-    if (alreadyProcessed) {
-      return NextResponse.json({ received: true });
-    }
-
-    // Send Payment Success Email
+    let result;
     try {
-      const userSnap = await db.collection("users").doc(userId).get();
-      if (userSnap.exists) {
-        const userData = userSnap.data() || {};
-        const email = userData.email;
-        if (email) {
-          after(async () => {
-            try {
-              const { sendPaymentSuccessEmail } = await import("@/lib/email-service");
-              await sendPaymentSuccessEmail(userId, email, paymentId, plan, PLAN_PRICES_INR[plan] || 0);
-            } catch (err) {
-              console.error("Webhook payment success email failed to send:", err);
-            }
-          });
-        }
+      result = await applyCapturedPayment({
+        orderId,
+        paymentId,
+        source: "webhook",
+        amountPaise: payment.amount,
+        currency: payment.currency,
+      });
+    } catch (err) {
+      // Not ours, or not a pack order (e.g. another app on the same Razorpay account).
+      // Acknowledge so Razorpay stops retrying; a 5xx here would eventually disable the webhook.
+      if (err instanceof PaymentMismatchError) {
+        console.error(`Webhook ignored payment ${paymentId} for order ${orderId}: ${err.message}`);
+        return NextResponse.json({ received: true, ignored: err.message });
       }
-    } catch (emailErr) {
-      console.error("Webhook payment success email failed to send:", emailErr);
+      throw err;
     }
+
+    if (result.alreadyProcessed) return NextResponse.json({ received: true });
+
+    const { userId, pack } = result;
+    after(async () => {
+      try {
+        const userSnap = await getAdminDb().collection("users").doc(userId).get();
+        const email = userSnap.data()?.email;
+        if (!email) return;
+        const { sendPaymentSuccessEmail } = await import("@/lib/email-service");
+        await sendPaymentSuccessEmail(userId, email, paymentId, pack.name, pack.credits, pack.priceInr);
+      } catch (err) {
+        console.error("Webhook payment success email failed to send:", err);
+      }
+    });
 
     return NextResponse.json({ received: true });
   } catch (error) {

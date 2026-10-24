@@ -497,7 +497,7 @@ export default function ReportPage() {
               </div>
 
               <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-t border-border-DEFAULT">
-                <span className="text-xs text-ink-muted">gapl.in</span>
+                <span className="text-xs text-ink-muted">gapl.vercel.app</span>
                 <Button size="sm" onClick={shareSummary}>
                   <Share2 size={14} /> {shared ? "Copied" : "Share"}
                 </Button>

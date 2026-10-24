@@ -5,10 +5,10 @@ import { requireUser } from "@/lib/firebase-admin";
 import { takeRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
-export const maxDuration = 60;
+export const maxDuration = 300;
 
-const MAX_RESUME_CHARS = 3500;
-const MAX_JD_CHARS = 1200;
+const MAX_RESUME_CHARS = 12_000;
+const MAX_JD_CHARS = 6_000;
 
 function truncate(text: string, max: number): string {
   return text.length <= max ? text : text.slice(0, max) + "\n[truncated]";
@@ -190,11 +190,10 @@ export async function POST(req: NextRequest) {
     const prompt = buildCVPrompt(resumeText, role, seniority, companyType, companyName, jdText);
 
     try {
-      await reserveAnalysis(user.uid, user.plan);
+      await reserveAnalysis(user.uid);
       reserved = true;
       const { parsed } = await generateAICall("resume-optimization", prompt, {
         userId: user.uid,
-        temperature: 0.6,
       });
 
       return NextResponse.json({ result: parsed });

@@ -18,6 +18,8 @@ interface Payment {
   paymentId: string;
   userId?: string;
   plan?: string;
+  pack?: string;
+  credits?: number;
   amount?: number;
   status?: string;
   refunded?: boolean;
@@ -93,7 +95,7 @@ export default function AdminPaymentsPage() {
 
   const handleRefund = async (paymentId: string) => {
     if (!user) return;
-    if (!confirm("Are you sure you want to refund this payment? The user's account plan will immediately revert to Free.")) return;
+    if (!confirm("Refund this payment through Razorpay? The money goes back to the buyer and the pack's unused credits are removed from their account.")) return;
 
     setProcessingId(paymentId);
     try {
@@ -141,7 +143,7 @@ export default function AdminPaymentsPage() {
       {/* Header */}
       <div>
         <h1 className="display text-[clamp(1.9rem,4vw,2.6rem)]">Payments</h1>
-        <p className="mt-1.5 text-[0.9375rem] text-ink-secondary">Monitor client transactions, subscription orders, and execute billing refunds</p>
+        <p className="mt-1.5 text-[0.9375rem] text-ink-secondary">Credit pack payments and Razorpay refunds</p>
       </div>
 
       {error && (
@@ -182,7 +184,7 @@ export default function AdminPaymentsPage() {
               <tr className="border-b border-border-DEFAULT bg-surface-subtle text-ink-muted font-semibold uppercase tracking-wider">
                 <th className="px-5 py-3.5">Payment ID</th>
                 <th className="px-5 py-3.5">User UID</th>
-                <th className="px-5 py-3.5">Upgrade Plan</th>
+                <th className="px-5 py-3.5">Pack</th>
                 <th className="px-5 py-3.5">Amount</th>
                 <th className="px-5 py-3.5">Status</th>
                 <th className="px-5 py-3.5">Created Date</th>
@@ -204,7 +206,7 @@ export default function AdminPaymentsPage() {
                       {p.userId || "anonymous"}
                     </td>
                     <td className="px-5 py-4 font-semibold uppercase text-primary-600 text-[0.6875rem]">
-                      {p.plan}
+                      {p.pack ? `${p.pack} · ${p.credits ?? "?"} credits` : p.plan}
                     </td>
                     <td className="px-5 py-4 font-mono font-bold text-ink text-[0.6875rem]">
                       ₹{p.amount}

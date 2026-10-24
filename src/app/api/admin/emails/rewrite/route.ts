@@ -22,7 +22,6 @@ Original Message:
 ${message}`;
 
     const aiRes = await generateAICall("email_rewrite", prompt, {
-      temperature: 0.7,
       isJson: false,
     });
 

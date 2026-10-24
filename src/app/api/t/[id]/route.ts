@@ -126,7 +126,7 @@ export async function GET(
     });
 
     // 4. Set Cookie and Redirect
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.in";
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.vercel.app";
     const absoluteTargetUrl = targetUrl.startsWith("http")
       ? targetUrl
       : `${appUrl}${targetUrl.startsWith("/") ? "" : "/"}${targetUrl}`;
@@ -144,7 +144,7 @@ export async function GET(
     return redirectResponse;
   } catch (err) {
     console.error("Redirect redirect tracker failed:", err);
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.in";
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.vercel.app";
     return NextResponse.redirect(new URL(appUrl));
   }
 }

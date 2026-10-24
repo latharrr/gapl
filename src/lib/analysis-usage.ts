@@ -1,39 +1,30 @@
 import { FieldValue } from "firebase-admin/firestore";
 import { getAdminDb } from "./firebase-admin";
-import { PLAN_LIMITS } from "./plans";
-
-function currentMonth(): string {
-  const now = new Date();
-  return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
-}
+import { creditBalance } from "./plans";
 
 export class UsageLimitError extends Error {
-  constructor(public readonly limit: number) {
-    super(`Monthly analysis limit reached. Your plan includes ${limit} analysis${limit === 1 ? "" : "es"} per month.`);
+  constructor() {
+    super("You're out of credits. Buy a credit pack to run another analysis.");
   }
 }
 
-export async function reserveAnalysis(uid: string, fallbackPlan: string) {
+/** Takes one credit from the user, or throws UsageLimitError when the balance is empty. */
+export async function reserveAnalysis(uid: string) {
   const db = getAdminDb();
   const userRef = db.collection("users").doc(uid);
-  const month = currentMonth();
 
   await db.runTransaction(async (transaction) => {
     const snapshot = await transaction.get(userRef);
     const data = snapshot.exists ? snapshot.data() ?? {} : {};
-    const plan = String(data.plan || fallbackPlan || "free").toLowerCase();
-    const limit = PLAN_LIMITS[plan] ?? PLAN_LIMITS.free;
-    const count = data.analysisUsageMonth === month ? Number(data.analysisUsageCount || 0) : 0;
 
     if (data.suspended === true) throw new Error("This account is suspended.");
-    if (Number.isFinite(limit) && count >= limit) throw new UsageLimitError(limit);
+    const credits = creditBalance(data);
+    if (credits < 1) throw new UsageLimitError();
 
     transaction.set(
       userRef,
       {
-        plan,
-        analysisUsageMonth: month,
-        analysisUsageCount: count + 1,
+        credits: credits - 1,
         analysisCount: FieldValue.increment(1),
         updatedAt: FieldValue.serverTimestamp(),
       },
@@ -42,10 +33,10 @@ export async function reserveAnalysis(uid: string, fallbackPlan: string) {
   });
 }
 
+/** Gives back a credit taken by reserveAnalysis when the work it paid for failed. */
 export async function releaseAnalysis(uid: string) {
   const db = getAdminDb();
   const userRef = db.collection("users").doc(uid);
-  const month = currentMonth();
 
   const maxAttempts = 3;
   let attempt = 0;
@@ -56,10 +47,8 @@ export async function releaseAnalysis(uid: string) {
         if (!snapshot.exists) return;
 
         const data = snapshot.data() ?? {};
-        if (data.analysisUsageMonth !== month) return;
-
         transaction.update(userRef, {
-          analysisUsageCount: Math.max(0, Number(data.analysisUsageCount || 0) - 1),
+          credits: creditBalance(data) + 1,
           analysisCount: FieldValue.increment(-1),
           updatedAt: FieldValue.serverTimestamp(),
         });
@@ -74,4 +63,3 @@ export async function releaseAnalysis(uid: string) {
     }
   }
 }
-

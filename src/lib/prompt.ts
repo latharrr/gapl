@@ -1,6 +1,6 @@
-// Free Groq tier: 8000 TPM — keep prompt under ~5500 tokens to leave room for output
-const MAX_RESUME_CHARS = 3500; // ≈ 875 tokens
-const MAX_JD_CHARS = 1000;     // ≈ 250 tokens
+// Generous enough for a two-page resume and a full JD (≈ 3k + 1.5k tokens) while bounding the cost of a report.
+const MAX_RESUME_CHARS = 12_000;
+const MAX_JD_CHARS = 6_000;
 
 function truncate(text: string, max: number): string {
   if (text.length <= max) return text;

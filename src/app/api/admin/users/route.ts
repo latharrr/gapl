@@ -59,36 +59,45 @@ export async function POST(req: NextRequest) {
     const isAdmin = adminUser.role === "admin";
     const isSupport = adminUser.role === "support";
 
-    if (action === "updateRole" || action === "updatePlan") {
+    if (action === "setCredits") {
       if (!isSuperAdmin) {
-        return NextResponse.json({ error: "Only super_admin can modify user roles or subscriptions." }, { status: 403 });
+        return NextResponse.json({ error: "Only super_admin can change credit balances." }, { status: 403 });
+      }
+      const credits = Number(data?.credits);
+      if (!Number.isInteger(credits) || credits < 0 || credits > 1000) {
+        return NextResponse.json({ error: "Credits must be a whole number from 0 to 1000." }, { status: 400 });
+      }
+      await updateDoc(targetRef, { credits });
+      await logAuditAction({
+        adminId: adminUser.uid,
+        adminEmail: adminUser.email,
+        adminRole: adminUser.role,
+        action: "Credits Changed",
+        targetUserId: targetUid,
+        targetUser: targetUser.email,
+        details: `Set credit balance of ${targetUser.email} to ${credits}`,
+      });
+      return NextResponse.json({ success: true });
+    }
+
+    if (action === "updateRole") {
+      if (!isSuperAdmin) {
+        return NextResponse.json({ error: "Only super_admin can modify user roles." }, { status: 403 });
       }
       
-      const updateData: { role?: string; plan?: string } = {};
-      if (action === "updateRole") {
-        updateData.role = data.role;
-        await logAuditAction({
-          adminId: adminUser.uid,
-          adminEmail: adminUser.email,
-          adminRole: adminUser.role,
-          action: "Role Change",
-          targetUserId: targetUid,
-          targetUser: targetUser.email,
-          details: `Changed role of ${targetUser.email} from ${targetUser.role || "user"} to ${data.role}`,
-        });
-      } else {
-        updateData.plan = data.plan;
-        await logAuditAction({
-          adminId: adminUser.uid,
-          adminEmail: adminUser.email,
-          adminRole: adminUser.role,
-          action: "Subscription Modify",
-          targetUserId: targetUid,
-          targetUser: targetUser.email,
-          details: `Modified subscription of ${targetUser.email} to ${data.plan}`,
-        });
+      if (!["user", "readonly", "support", "admin", "super_admin"].includes(data?.role)) {
+        return NextResponse.json({ error: "Unknown role." }, { status: 400 });
       }
-      await updateDoc(targetRef, updateData);
+      await logAuditAction({
+        adminId: adminUser.uid,
+        adminEmail: adminUser.email,
+        adminRole: adminUser.role,
+        action: "Role Change",
+        targetUserId: targetUid,
+        targetUser: targetUser.email,
+        details: `Changed role of ${targetUser.email} from ${targetUser.role || "user"} to ${data.role}`,
+      });
+      await updateDoc(targetRef, { role: data.role });
       return NextResponse.json({ success: true });
     }
 

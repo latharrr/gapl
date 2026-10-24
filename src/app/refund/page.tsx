@@ -3,7 +3,7 @@ import { ReadingPage } from "@/components/layout/ReadingPage";
 
 export const metadata: Metadata = {
   title: "Refund Policy — Gapl",
-  description: "Refund policy and terms for paid plans on Gapl.",
+  description: "Refund policy for Gapl credit packs.",
 };
 
 export default function RefundPolicyPage() {
@@ -15,7 +15,7 @@ export default function RefundPolicyPage() {
 
             <h2>1. General Policy</h2>
             <p>
-              Due to the immediate compute resources consumed by our AI-powered deep-analysis reports and recruiter simulations, we generally do not offer refunds once a credits package or premium plan has been actively used to generate report analyses.
+              Due to the immediate compute resources consumed by our AI-powered deep-analysis reports and recruiter simulations, we generally do not offer refunds once credits from a pack have been used.
             </p>
 
             <h2>2. Eligibility for Refunds</h2>
@@ -23,7 +23,7 @@ export default function RefundPolicyPage() {
               We want to be reasonable. You may be eligible for a full or partial refund under the following conditions:
             </p>
             <ul>
-              <li>You purchased a premium plan or credit pack but have not generated any report analyses.</li>
+              <li>You bought a credit pack and have not used any of its credits.</li>
               <li>You experienced a documented technical failure (e.g., payment was charged, but system failed to grant credits or run the analysis, and support could not resolve it).</li>
               <li>A duplicate transaction occurred due to a payment gateway error.</li>
             </ul>
@@ -31,8 +31,8 @@ export default function RefundPolicyPage() {
             <h2>3. Requesting a Refund</h2>
             <p>
               To request a refund, please send an email to{" "}
-              <a href="mailto:hello@gapl.in" className="text-primary-600 font-medium hover:underline">
-                hello@gapl.in
+              <a href="mailto:deepanshulathar@gmail.com" className="text-primary-600 font-medium hover:underline">
+                deepanshulathar@gmail.com
               </a>{" "}
               within 7 days of the transaction. Please include:
             </p>

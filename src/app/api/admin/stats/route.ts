@@ -57,7 +57,6 @@ export async function GET(req: NextRequest) {
     // Payments calculations
     let totalRevenue = 0;
     let refunds = 0;
-    const planCounts: Record<string, number> = { free: 0, basic: 0, pro: 0, premium: 0 };
 
     payments.forEach((p) => {
       if (p.status === "captured" || p.status === "refunded") {
@@ -69,13 +68,8 @@ export async function GET(req: NextRequest) {
       }
     });
 
-    users.forEach((u) => {
-      const plan = (u.plan || "free").toLowerCase();
-      planCounts[plan] = (planCounts[plan] || 0) + 1;
-    });
-
-    // MRR approximation: Basic ($49), Pro ($149), Premium ($299)
-    const mrr = (planCounts.basic * 49) + (planCounts.pro * 149) + (planCounts.premium * 299);
+    // Buyers: accounts that have bought at least one credit pack (or a legacy monthly plan).
+    const buyers = users.filter((u) => Number(u.creditsPurchased || 0) > 0 || ["basic", "pro", "premium"].includes(String(u.plan || "").toLowerCase())).length;
 
     // AI Costs
     let totalAICostToday = 0;
@@ -91,7 +85,7 @@ export async function GET(req: NextRequest) {
     // Count actual processing errors (crashed/failed reports), NOT recruiter Reject verdicts
     const processingFailures = reports.filter((r) => r.status === "error" || r.status === "failed").length;
     const refundRate = totalRevenue > 0 ? (refunds / (totalRevenue + refunds)) * 100 : 0;
-    const conversionRate = totalUsers > 0 ? ((planCounts.basic + planCounts.pro + planCounts.premium) / totalUsers) * 100 : 0;
+    const conversionRate = users.length > 0 ? (buyers / users.length) * 100 : 0;
 
     // 3. Build real daily growth charts from the last-30-day query results
     const dailyUsers: Record<string, number> = {};
@@ -266,7 +260,7 @@ export async function GET(req: NextRequest) {
         activeUsers,
         newUsersToday,
         totalRevenue,
-        mrr,
+        revenue30d: totalRevenue,
         reportsCount: reports.length,
         aiCostToday: parseFloat(totalAICostToday.toFixed(4)),
         // profitToday: actual revenue captured today minus AI costs today (not fabricated)

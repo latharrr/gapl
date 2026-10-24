@@ -12,9 +12,9 @@ service cloud.firestore {
 
     match /users/{userId} {
       allow read: if owns(userId);
-      allow create: if owns(userId)
-        && request.resource.data.plan == "free"
-        && (!("role" in request.resource.data) || request.resource.data.role == "user");
+      // Profiles are created by /api/user/ensure (Admin SDK), which sets the signup credit.
+      // A browser-side create could choose its own credit balance, so it is denied.
+      allow create: if false;
       allow update: if owns(userId)
         && request.resource.data.diff(resource.data).affectedKeys()
           .hasOnly(["displayName", "photoURL", "updatedAt"]);

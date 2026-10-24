@@ -53,13 +53,38 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Payment is already refunded." }, { status: 400 });
       }
 
-      // Upgrade payment doc
-      await updateDoc(paymentRef, { refunded: true, status: "refunded" });
+      // Money first: if Razorpay refuses the refund, nothing changes on our side.
+      const keyId = process.env.RAZORPAY_KEY_ID;
+      const keySecret = process.env.RAZORPAY_KEY_SECRET;
+      if (!keyId || !keySecret) {
+        return NextResponse.json({ error: "Payment gateway is not configured." }, { status: 503 });
+      }
+      const Razorpay = (await import("razorpay")).default;
+      const razorpay = new Razorpay({ key_id: keyId, key_secret: keySecret });
+      const refund = await razorpay.payments.refund(paymentId, {
+        amount: Number(payment.amount) * 100,
+        notes: { reason: "Admin refund", adminId: adminUser.uid },
+      });
 
-      // Demote user plan to free
+      await updateDoc(paymentRef, { refunded: true, status: "refunded", refundId: refund.id, refundedAt: new Date().toISOString() });
+
+      // Take back the credits this payment added, as far as the balance allows.
+      let creditsRemoved = 0;
       if (payment.userId) {
-        const userRef = doc(db, "users", payment.userId);
-        await updateDoc(userRef, { plan: "free" });
+        const { getAdminDb } = await import("@/lib/firebase-admin");
+        const { creditBalance } = await import("@/lib/plans");
+        const adminDb = getAdminDb();
+        const userRef = adminDb.collection("users").doc(payment.userId);
+        await adminDb.runTransaction(async (tx) => {
+          const snap = await tx.get(userRef);
+          if (!snap.exists) return;
+          const balance = creditBalance(snap.data() ?? {});
+          creditsRemoved = Math.min(balance, Number(payment.credits || 0));
+          tx.update(userRef, { credits: balance - creditsRemoved, updatedAt: new Date() });
+        });
+        if (payment.orderId) {
+          await adminDb.collection("payment_orders").doc(payment.orderId).set({ status: "refunded" }, { merge: true });
+        }
       }
 
       await logAuditAction({
@@ -68,7 +93,7 @@ export async function POST(req: NextRequest) {
         adminRole: adminUser.role,
         action: "Refunds",
         targetUserId: payment.userId,
-        details: `Issued refund for payment ID ${paymentId} ($${payment.amount}). User plan reverted to free.`,
+        details: `Refunded payment ${paymentId} (₹${payment.amount}, Razorpay refund ${refund.id}). Removed ${creditsRemoved} credit(s).`,
       });
 
       return NextResponse.json({ success: true });

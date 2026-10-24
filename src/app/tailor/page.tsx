@@ -412,7 +412,7 @@ export default function TailorPage() {
           <Button size="lg" className="w-full mt-6" disabled={resumeText.trim().length < 100 || loading} onClick={runTailor}>
             <PenLine size={17} /> Tailor for {analysis?.companyTier ?? "my target"}
           </Button>
-          <p className="mt-3 text-center text-sm text-ink-muted">Uses 1 analysis credit.</p>
+          <p className="mt-3 text-center text-sm text-ink-muted">Uses 1 credit.</p>
         </div>
       </main>
     </>

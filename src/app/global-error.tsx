@@ -25,7 +25,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
         <StatusScreen
           mark="Something broke"
           title="Gapl hit a critical error."
-          body="Reload the page or try again. If it keeps happening, email hello@gapl.in."
+          body="Reload the page or try again. If it keeps happening, email deepanshulathar@gmail.com."
           actions={
             <>
               <button

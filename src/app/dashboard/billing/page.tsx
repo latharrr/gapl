@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { PRICING_PLANS } from "@/lib/mock-data";
-import { PLAN_LIMITS } from "@/lib/plans";
+import { CREDIT_PACKS, creditBalance, pricePerCredit, type CreditPack } from "@/lib/plans";
 import { Button } from "@/components/ui/Button";
 import { Sheet, PageHeader, FigureStrip, APP_PAGE } from "@/components/ui/Sheet";
 import { Check, CheckCircle2, AlertCircle } from "lucide-react";
@@ -23,30 +22,15 @@ function loadRazorpay(): Promise<boolean> {
 
 export default function BillingPage() {
   const { user, userDoc } = useAuth();
-  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
-  const [successPlan, setSuccessPlan] = useState<string | null>(null);
+  const [loadingPack, setLoadingPack] = useState<string | null>(null);
+  const [successPack, setSuccessPack] = useState<CreditPack | null>(null);
   const [error, setError] = useState("");
-  const currentPlan = String(userDoc?.plan || "free").toLowerCase();
-  
-  const PLAN_RANK: Record<string, number> = {
-    free: 0,
-    basic: 1,
-    pro: 2,
-    premium: 3,
-  };
-  
-  const currentRank = PLAN_RANK[currentPlan] ?? PLAN_RANK.free;
+  const credits = creditBalance(userDoc ?? {});
+  const purchased = Number(userDoc?.creditsPurchased || 0);
 
-  const availablePlans = PRICING_PLANS.filter((p) => {
-    const planNameLower = p.name.toLowerCase();
-    if (planNameLower === "free") return false;
-    const planRank = PLAN_RANK[planNameLower] ?? 0;
-    return planRank > currentRank;
-  });
-
-  const handleUpgrade = async (planName: string) => {
+  const handleBuy = async (pack: CreditPack) => {
     setError("");
-    setLoadingPlan(planName);
+    setLoadingPack(pack.id);
 
     try {
       import("@/lib/analytics").then(({ trackEvent }) => trackEvent("payment_started"));
@@ -55,7 +39,7 @@ export default function BillingPage() {
       const loaded = await loadRazorpay();
       if (!loaded) {
         setError("Could not load payment gateway. Check your internet connection.");
-        setLoadingPlan(null);
+        setLoadingPack(null);
         return;
       }
 
@@ -63,13 +47,13 @@ export default function BillingPage() {
       const res = await authFetch("/api/payment/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: planName }),
+        body: JSON.stringify({ pack: pack.id }),
       });
       const data = await res.json();
 
       if (!res.ok) {
         setError(data.error || "Failed to create payment order.");
-        setLoadingPlan(null);
+        setLoadingPack(null);
         return;
       }
 
@@ -81,17 +65,17 @@ export default function BillingPage() {
         currency: data.currency,
         order_id: data.orderId,
         name: "Gapl",
-        description: `${planName} Plan — Beta access`,
+        description: `${pack.name} pack · ${pack.credits} credits`,
         prefill: {
           name: user?.displayName || "",
           email: user?.email || "",
         },
         theme: { color: "#1D2B6B" },
         modal: {
-          ondismiss: () => setLoadingPlan(null),
+          ondismiss: () => setLoadingPack(null),
         },
         handler: async (response: Record<string, string>) => {
-          setLoadingPlan(planName);
+          setLoadingPack(pack.id);
           try {
             const verifyRes = await authFetch("/api/payment/verify", {
               method: "POST",
@@ -106,7 +90,7 @@ export default function BillingPage() {
 
             if (verifyRes.ok && verifyData.success) {
               import("@/lib/analytics").then(({ trackEvent }) => trackEvent("payment_success"));
-              setSuccessPlan(planName);
+              setSuccessPack(pack);
               setTimeout(() => {
                 window.location.reload();
               }, 1500);
@@ -116,7 +100,7 @@ export default function BillingPage() {
           } catch {
             setError("Verification request failed. Please contact support.");
           } finally {
-            setLoadingPlan(null);
+            setLoadingPack(null);
           }
         },
       });
@@ -125,23 +109,22 @@ export default function BillingPage() {
     } catch (err) {
       console.error(err);
       setError("Payment failed. Please try again.");
-      setLoadingPlan(null);
+      setLoadingPack(null);
     }
   };
 
-  const shownPlan = successPlan ?? String(userDoc?.plan || "free");
-  const limit = PLAN_LIMITS[shownPlan.toLowerCase()] ?? PLAN_LIMITS.free;
-
   return (
     <div className={APP_PAGE}>
-      <PageHeader title="Billing" description="Your plan and what it includes. Credits refresh on the 1st of each month." />
+      <PageHeader title="Billing" description="Buy credits once and use them whenever you need. Credits never expire." />
 
-      {successPlan && (
+      {successPack && (
         <div role="status" className="flex items-start gap-3 p-4 bg-success-bg border border-success-border rounded-[6px]">
           <CheckCircle2 size={18} className="text-success shrink-0 mt-0.5" />
           <div>
             <p className="font-bold text-success">Payment successful</p>
-            <p className="text-sm text-success">You&apos;re now on the <strong>{successPlan}</strong> plan. Refreshing…</p>
+            <p className="text-sm text-success">
+              <strong>{successPack.credits} credits</strong> were added to your account. Refreshing…
+            </p>
           </div>
         </div>
       )}
@@ -153,70 +136,58 @@ export default function BillingPage() {
         </div>
       )}
 
-      <Sheet title="Current plan" aside={<span className="tag text-[0.625rem] text-success bg-success-bg">Active</span>}>
+      <Sheet title="Your credits" aside={<span className="tag text-[0.625rem] text-success bg-success-bg">Never expire</span>}>
         <FigureStrip
           items={[
-            { label: "Plan", value: <span className="capitalize">{shownPlan}</span> },
-            { label: "Analyses a month", value: limit },
-            { label: "Credits reset", value: "1st", note: "of every month" },
+            { label: "Credits left", value: credits },
+            { label: "Credits bought", value: purchased },
+            { label: "One credit", value: "1 use", note: "analysis, CV build or tailor" },
           ]}
         />
       </Sheet>
 
-      {availablePlans.length > 0 ? (
-        <Sheet title="Upgrade" aside="Razorpay · credits reset monthly">
-          <ul className="divide-y divide-border-DEFAULT">
-            {availablePlans.map((plan) => {
-              const isLoading = loadingPlan === plan.name;
-              const isSuccess = successPlan === plan.name;
-              return (
-                <li
-                  key={plan.name}
-                  className="grid gap-x-6 gap-y-4 px-4 sm:px-6 py-5 lg:grid-cols-[11rem_minmax(0,1fr)_7rem_10rem] lg:items-center"
+      <Sheet title="Buy credits" aside="Razorpay · one-time payment">
+        <ul className="divide-y divide-border-DEFAULT">
+          {CREDIT_PACKS.map((pack) => {
+            const isLoading = loadingPack === pack.id;
+            const isSuccess = successPack?.id === pack.id;
+            return (
+              <li
+                key={pack.id}
+                className="grid gap-x-6 gap-y-4 px-4 sm:px-6 py-5 lg:grid-cols-[11rem_minmax(0,1fr)_7rem_10rem] lg:items-center"
+              >
+                <div>
+                  <h3 className="text-lg font-bold tracking-[-0.015em]">{pack.name}</h3>
+                  <p className="text-sm text-ink-muted">{pack.description}</p>
+                  {pack.highlighted && <span className="tag mt-2 text-[0.625rem] text-ink bg-highlight">Best value for most</span>}
+                </div>
+                <ul className="grid gap-x-6 gap-y-1.5 sm:grid-cols-2">
+                  {[`${pack.credits} credits`, `₹${pricePerCredit(pack)} per credit`, "Never expire", "Every feature included"].map((f) => (
+                    <li key={f} className="flex items-start gap-2 text-sm text-ink-secondary">
+                      <Check size={15} strokeWidth={2.5} className="mt-0.5 shrink-0 text-success" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <p className="lg:text-right">
+                  <span className="figure text-2xl font-bold">₹{pack.priceInr}</span>
+                  <span className="block text-xs text-ink-muted">one-time</span>
+                </p>
+                <Button
+                  size="md"
+                  variant={pack.highlighted ? "primary" : "outline"}
+                  className="w-full"
+                  disabled={loadingPack !== null || isSuccess}
+                  loading={isLoading}
+                  onClick={() => handleBuy(pack)}
                 >
-                  <div>
-                    <h3 className="text-lg font-bold tracking-[-0.015em]">{plan.name}</h3>
-                    <p className="text-sm text-ink-muted">{plan.description}</p>
-                    {plan.highlighted && <span className="tag mt-2 text-[0.625rem] text-ink bg-highlight">Recommended</span>}
-                  </div>
-                  <ul className="grid gap-x-6 gap-y-1.5 sm:grid-cols-2">
-                    {plan.features.map((f) => (
-                      <li key={f} className="flex items-start gap-2 text-sm text-ink-secondary">
-                        <Check size={15} strokeWidth={2.5} className="mt-0.5 shrink-0 text-success" />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                  <p className="lg:text-right">
-                    <span className="figure text-2xl font-bold">₹{plan.price}</span>
-                    <span className="block text-xs text-ink-muted">per month</span>
-                  </p>
-                  <Button
-                    size="md"
-                    variant={plan.highlighted ? "primary" : "outline"}
-                    className="w-full"
-                    disabled={isLoading || isSuccess}
-                    loading={isLoading}
-                    onClick={() => handleUpgrade(plan.name)}
-                  >
-                    {isSuccess ? "Active" : isLoading ? "Opening…" : plan.cta}
-                  </Button>
-                </li>
-              );
-            })}
-          </ul>
-        </Sheet>
-      ) : (
-        <Sheet>
-          <div className="px-5 sm:px-8 py-10">
-            <span className="tag text-xs text-success bg-success-bg">Highest plan</span>
-            <h2 className="mt-3 text-xl font-bold tracking-[-0.015em]">You&apos;re on the highest plan</h2>
-            <p className="mt-2 max-w-lg text-[0.9375rem] text-ink-secondary">
-              Thank you for supporting Gapl. You have access to every analysis, roadmap and CV feature.
-            </p>
-          </div>
-        </Sheet>
-      )}
+                  {isSuccess ? "Added" : isLoading ? "Opening…" : `Buy ${pack.credits} credits`}
+                </Button>
+              </li>
+            );
+          })}
+        </ul>
+      </Sheet>
     </div>
   );
 }

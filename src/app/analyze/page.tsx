@@ -7,7 +7,7 @@ import { useDropzone } from "react-dropzone";
 import { Button } from "@/components/ui/Button";
 import { ANALYSIS_STAGES } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
-import { PLAN_LIMITS } from "@/lib/plans";
+import { creditBalance } from "@/lib/plans";
 import { useAuth } from "@/context/AuthContext";
 import { authFetch } from "@/lib/auth-fetch";
 import {
@@ -25,11 +25,6 @@ import { ReadingScreen } from "@/components/brand/ReadingScreen";
 import { OptionList } from "@/components/ui/Choice";
 import { ROLES, TIERS } from "@/lib/targets";
 import { clearHandedOffResume, peekHandedOffResume } from "@/lib/resume-handoff";
-
-function currentUsageMonth(): string {
-  const now = new Date();
-  return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
-}
 
 const ALLOWED_EXTENSIONS = new Set([".pdf", ".txt"]);
 const DRAFT_KEY = "gapl_analyze_draft";
@@ -127,13 +122,8 @@ function AnalyzeFlow() {
     };
   }, []);
 
-  const currentPlan = String(userDoc?.plan || "free").toLowerCase();
-  const monthlyLimit = PLAN_LIMITS[currentPlan] ?? PLAN_LIMITS.free;
-  const usageCount =
-    userDoc?.analysisUsageMonth === currentUsageMonth()
-      ? Math.max(0, Number(userDoc?.analysisUsageCount || 0))
-      : 0;
-  const usageLabel = `${Math.min(usageCount, monthlyLimit)}/${monthlyLimit} ${currentPlan}`;
+  const credits = creditBalance(userDoc ?? {});
+  const usageLabel = `${credits} credit${credits === 1 ? "" : "s"} left`;
 
   const onResumeDrop = useCallback((acceptedFiles: File[], rejectedFiles: { file: File }[]) => {
     setFileError("");
@@ -345,7 +335,7 @@ function AnalyzeFlow() {
   ];
   const stageOrder: Stage[] = ["role", "tier", "resume", "jd", "loading"];
   const currentIndex = stageOrder.indexOf(stage);
-  const remaining = Math.max(0, monthlyLimit - usageCount);
+  const remaining = credits;
 
   if (stage === "loading") {
     return <LoadingScreen loadingStep={loadingStep} role={selectedRole} tier={selectedTier} />;
@@ -373,9 +363,9 @@ function AnalyzeFlow() {
                 "ml-auto tabular text-xs font-medium",
                 remaining === 0 ? "text-danger-on-desk" : "text-desk-muted"
               )}
-              title="Analyses used this month"
+              title="Each analysis uses 1 credit"
             >
-              {usageLabel} plan used
+              {usageLabel}
             </span>
           )}
         </div>
@@ -410,14 +400,14 @@ function AnalyzeFlow() {
         <div className="max-w-xl mx-auto w-full px-4 sm:px-6 pt-8">
           <div className="sheet rounded-[10px] overflow-hidden">
             <div className="p-5 sm:p-6">
-              <h2 className="text-xl font-semibold tracking-[-0.015em]">You&apos;ve used every analysis on your plan</h2>
+              <h2 className="text-xl font-semibold tracking-[-0.015em]">You&apos;re out of credits</h2>
               <p className="mt-2 text-[0.9375rem] text-ink-secondary">
-                All <strong>{monthlyLimit}</strong> analyses included in your {currentPlan} plan this month are used.
-                Upgrade for more and keep working through your roadmap. Limits reset on the 1st of each month.
+                Each analysis uses one credit. Packs start at ₹99 for 4 credits, paid once, and credits never expire.
+                Your answers are kept, so you won&apos;t have to start over.
               </p>
               <div className="mt-5 flex flex-col sm:flex-row gap-2">
-                <Link href="/pricing" className="sm:flex-1">
-                  <Button size="lg" className="w-full">See plans</Button>
+                <Link href="/dashboard/billing" className="sm:flex-1">
+                  <Button size="lg" className="w-full">Buy credits</Button>
                 </Link>
                 <Button variant="outline" size="lg" onClick={() => setShowPaywall(false)}>
                   Not now

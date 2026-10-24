@@ -18,7 +18,7 @@ export default function ErrorBoundary({ error, reset }: ErrorProps) {
     <StatusScreen
       mark="Something broke"
       title="Something went wrong on this page."
-      body="An unexpected error stopped it from loading. Try again; if it keeps happening, email hello@gapl.in."
+      body="An unexpected error stopped it from loading. Try again; if it keeps happening, email deepanshulathar@gmail.com."
       actions={
         <>
           <Button size="lg" onClick={() => reset()}>

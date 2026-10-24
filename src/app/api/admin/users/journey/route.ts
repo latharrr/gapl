@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, collection, getDocs, doc, getDoc, query, where } from "@/lib/server-firestore";
 import { requireAdmin } from "@/lib/firebase-admin";
+import { creditBalance } from "@/lib/plans";
 
 export const runtime = "nodejs";
 
@@ -89,8 +90,10 @@ export async function GET(req: NextRequest) {
         id: d.id,
         type: "payment",
         timestamp: data.createdAt || new Date().toISOString(),
-        title: `Payment ${data.status.toUpperCase()}`,
-        description: `Plan: ${data.plan.toUpperCase()} · Amount: $${data.amount}`,
+        title: `Payment ${String(data.status || "unknown").toUpperCase()}`,
+        description: data.pack
+          ? `Pack: ${data.pack} · ${data.credits} credits · ₹${data.amount}`
+          : `Plan: ${String(data.plan || "unknown").toUpperCase()} · ₹${data.amount}`,
         meta: `Order: ${data.orderId}`,
       });
     });
@@ -103,7 +106,7 @@ export async function GET(req: NextRequest) {
         timestamp: userData.createdAt,
         title: "Account Created",
         description: `Registered email profile on Gapl platform.`,
-        meta: `Plan: ${userData.plan || "free"}`,
+        meta: `Credits: ${creditBalance(userData)}`,
       });
     }
 

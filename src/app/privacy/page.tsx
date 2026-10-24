@@ -53,8 +53,8 @@ export default function PrivacyPolicyPage() {
             <h2>6. Contact Us</h2>
             <p>
               If you have any questions or concerns about this Privacy Policy, please reach out to us at{" "}
-              <a href="mailto:hello@gapl.in" className="text-primary-600 font-medium hover:underline">
-                hello@gapl.in
+              <a href="mailto:deepanshulathar@gmail.com" className="text-primary-600 font-medium hover:underline">
+                deepanshulathar@gmail.com
               </a>.
             </p>
           </ReadingPage>

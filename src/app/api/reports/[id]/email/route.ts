@@ -37,7 +37,7 @@ export async function POST(
       return NextResponse.json({ error: "Access denied." }, { status: 403 });
     }
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.in";
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.vercel.app";
     const careerGaps = report.careerGaps || [];
 
     const verdict: string = report.recruiterVerdict?.verdict ?? "";

@@ -10,7 +10,7 @@ import { type AnalysisResult } from "@/types/analysis";
 import { extractText, validateResumeContent } from "@/lib/resume-parser";
 
 export const runtime = "nodejs";
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const MAX_RESUME_TEXT_LENGTH = 50_000;
@@ -70,12 +70,11 @@ export async function POST(req: NextRequest) {
     const validation = validateResumeContent(content);
     if (!validation.isResume) return NextResponse.json({ error: validation.reason, code: "NOT_A_RESUME" }, { status: 422 });
 
-    await reserveAnalysis(user.uid, user.plan);
+    await reserveAnalysis(user.uid);
     reserved = true;
 
     const { parsed, traceId } = await generateAICall("ats-evaluation", buildAnalysisPrompt(content, role, tier, jdText || undefined), {
       userId: user.uid,
-      temperature: 0.4,
     });
     const safePayload = validateAnalysisPayload(parsed);
     const createdAt = new Date().toISOString();

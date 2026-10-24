@@ -39,6 +39,7 @@ Tags: ${JSON.stringify(tags || [])}
   try {
     const response = await resend.emails.send({
       from,
+      replyTo: process.env.RESEND_REPLY_TO || "deepanshulathar@gmail.com",
       to,
       subject,
       html,

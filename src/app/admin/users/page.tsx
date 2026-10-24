@@ -5,6 +5,7 @@ import { Loading } from "@/components/ui/Sheet";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { adminFetch } from "@/lib/admin-fetch";
+import { creditBalance } from "@/lib/plans";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import {
@@ -25,6 +26,8 @@ interface AdminUserDoc {
   email?: string;
   role?: string;
   plan?: string;
+  credits?: number;
+  creditsPurchased?: number;
   analysisCount?: number;
   suspended?: boolean;
 }
@@ -40,7 +43,7 @@ interface TimelineItem {
 type HandleUserAction = (
   action: string,
   targetUid: string,
-  extraData?: Record<string, string | boolean>
+  extraData?: Record<string, string | number | boolean>
 ) => Promise<void>;
 
 export default function AdminUsersPage() {
@@ -135,7 +138,8 @@ export default function AdminUsersPage() {
       (u.email || "").toLowerCase().includes(search.toLowerCase());
     
     const matchesRole = roleFilter === "all" || (u.role || "user") === roleFilter;
-    const matchesPlan = planFilter === "all" || (u.plan || "free") === planFilter;
+    const hasPaid = Number(u.creditsPurchased || 0) > 0 || ["basic", "pro", "premium"].includes(u.plan || "");
+    const matchesPlan = planFilter === "all" || (planFilter === "paid" ? hasPaid : !hasPaid);
 
     return matchesSearch && matchesRole && matchesPlan;
   });
@@ -193,17 +197,15 @@ export default function AdminUsersPage() {
           </div>
 
           <div className="flex items-center gap-1.5 bg-surface-DEFAULT border border-border-DEFAULT rounded-[5px] px-3 py-1.5 text-xs text-ink">
-            <span className="text-ink-muted">Plan:</span>
+            <span className="text-ink-muted">Buyers:</span>
             <select
               value={planFilter}
               onChange={(e) => setPlanFilter(e.target.value)}
               className="bg-transparent border-none focus:outline-none text-xs font-medium text-ink cursor-pointer"
             >
-              <option value="all">All Plans</option>
-              <option value="free">Free</option>
-              <option value="basic">Basic</option>
-              <option value="pro">Pro</option>
-              <option value="premium">Premium</option>
+              <option value="all">Everyone</option>
+              <option value="paid">Bought credits</option>
+              <option value="free">Never paid</option>
             </select>
           </div>
         </div>
@@ -217,7 +219,7 @@ export default function AdminUsersPage() {
               <tr className="border-b border-border-DEFAULT bg-surface-subtle text-ink-muted font-semibold uppercase tracking-wider">
                 <th className="px-5 py-3.5">User</th>
                 <th className="px-5 py-3.5">Role</th>
-                <th className="px-5 py-3.5">Plan</th>
+                <th className="px-5 py-3.5">Credits</th>
                 <th className="px-5 py-3.5">Analysis Count</th>
                 <th className="px-5 py-3.5">Status</th>
                 <th className="px-5 py-3.5 text-right">Actions</th>
@@ -226,7 +228,7 @@ export default function AdminUsersPage() {
             <tbody className="divide-y divide-border-DEFAULT">
               {filteredUsers.map((u) => {
                 const uRole = u.role || "user";
-                const uPlan = u.plan || "free";
+                const uCredits = creditBalance(u);
                 const isSuspended = u.suspended === true;
 
                 return (
@@ -248,14 +250,10 @@ export default function AdminUsersPage() {
                       </span>
                     </td>
                     <td className="px-5 py-4">
-                      <span className={`px-2 py-0.5 rounded text-[0.6875rem] font-semibold uppercase ${
-                        uPlan === "premium" ? "bg-success-bg border border-success-border text-success" :
-                        uPlan === "pro" ? "bg-primary-50 border border-primary-100 text-primary-600" :
-                        uPlan === "basic" ? "bg-primary-50 border border-primary-100 text-primary-600" :
-                        "bg-surface-subtle text-ink-muted"
-                      }`}>
-                        {uPlan}
-                      </span>
+<span className="font-mono text-ink">{uCredits}</span>
+                      {Number(u.creditsPurchased || 0) > 0 && (
+                        <span className="ml-1.5 text-[0.6875rem] text-ink-muted">({u.creditsPurchased} bought)</span>
+                      )}
                     </td>
                     <td className="px-5 py-4 font-mono text-ink-muted">
                       {u.analysisCount || 0}
@@ -487,29 +485,27 @@ function UserDetailDrawer({
 
             {/* Sub setting */}
             <div>
-              <label className="text-[0.6875rem] font-bold uppercase tracking-wider text-ink-muted block mb-1.5">
-                Modify Plan Tier
+              <label htmlFor="set-credits-input" className="text-[0.6875rem] font-bold uppercase tracking-wider text-ink-muted block mb-1.5">
+                Credit balance
               </label>
               <div className="flex gap-2">
-                <select
-                  defaultValue={selectedUser.plan || "free"}
+                <input
+                  type="number"
+                  min={0}
+                  max={1000}
+                  defaultValue={creditBalance(selectedUser)}
                   disabled={!isSuperAdmin}
-                  id="update-plan-select"
+                  id="set-credits-input"
                   className="bg-surface-muted border border-border-DEFAULT rounded-[5px] px-3 py-1.5 text-xs text-ink flex-1 focus:outline-none"
-                >
-                  <option value="free">Free</option>
-                  <option value="basic">Basic</option>
-                  <option value="pro">Pro</option>
-                  <option value="premium">Premium</option>
-                </select>
+                />
                 <Button
                   variant="primary"
                   size="sm"
                   disabled={!isSuperAdmin}
                   loading={updatingUser}
                   onClick={() => {
-                    const sel = document.getElementById("update-plan-select") as HTMLSelectElement;
-                    handleAction("updatePlan", selectedUser.uid, { plan: sel.value });
+                    const input = document.getElementById("set-credits-input") as HTMLInputElement;
+                    handleAction("setCredits", selectedUser.uid, { credits: Number(input.value) });
                   }}
                 >
                   Save
@@ -517,7 +513,7 @@ function UserDetailDrawer({
               </div>
               {!isSuperAdmin && (
                 <span className="text-[0.6875rem] text-ink-muted mt-1 block">
-                  🔒 Super Admin permission required to modify subscription plans.
+                  🔒 Super Admin permission required to change credit balances.
                 </span>
               )}
             </div>

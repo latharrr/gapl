@@ -199,7 +199,7 @@ export default function AdminLinksPage() {
             <h1 className="display text-[clamp(1.9rem,4vw,2.6rem)]">Trackable links</h1>
           </div>
           <p className="mt-1.5 text-[0.9375rem] text-ink-secondary">
-            Redirect and attribution manager for links routing from links.gapl.in custom domains.
+            Redirect and attribution manager for tracked email links.
           </p>
         </div>
         <Button
@@ -346,7 +346,7 @@ export default function AdminLinksPage() {
                 </tr>
               ) : (
                 links.map((link: ShortLink) => {
-                  const trackingDomain = process.env.NEXT_PUBLIC_TRACKING_DOMAIN || "links.gapl.in";
+                  const trackingDomain = process.env.NEXT_PUBLIC_TRACKING_DOMAIN || `${(process.env.NEXT_PUBLIC_APP_URL || "https://gapl.vercel.app").replace(/^https?:\/\//, "")}/api/t`;
                   const shortUrl = `https://${trackingDomain}/${link.id}`;
                   return (
                     <tr key={link.id} className="hover:bg-surface-muted transition-colors">

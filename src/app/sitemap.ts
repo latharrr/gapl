@@ -3,7 +3,7 @@ import type { MetadataRoute } from "next";
 const POSTS = ["why-ats-scores-are-a-myth", "building-project-evidence-that-convinces"];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.in";
+  const base = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.vercel.app";
   const pages = ["", "/demo", "/pricing", "/about", "/blog", "/privacy", "/terms", "/refund"];
   return [
     ...pages.map((path) => ({

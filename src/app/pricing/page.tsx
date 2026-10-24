@@ -6,7 +6,7 @@ import { FAQ } from "@/components/landing/FAQ";
 
 export const metadata: Metadata = {
   title: "Pricing — Gapl",
-  description: "Start free with one analysis a month. Paid plans add more analyses each month, priced in INR.",
+  description: "Start free with one analysis. Then buy credits once, from ₹99 for 4. No subscription, and credits never expire.",
 };
 
 export default function PricingPage() {
@@ -20,8 +20,8 @@ export default function PricingPage() {
               Start free. <span className="hero-hl">Pay when you&apos;re re-checking.</span>
             </h1>
             <p className="mt-5 max-w-xl text-lg leading-relaxed text-desk-muted">
-              Every plan gets the full report, roadmap and CV tools. Plans differ only in how many analyses you get each
-              month.
+              Every pack gets the full report, roadmap and CV tools. Pay once, no subscription, and your credits never
+              expire.
             </p>
           </div>
         </section>

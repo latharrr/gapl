@@ -67,7 +67,7 @@ export default async function OpengraphImage() {
             REJECT
           </div>
           <div style={{ fontSize: 28, fontWeight: 500, color: "#a7a9b2" }}>
-            Your resume, read the way a recruiter reads it. gapl.in
+            Your resume, read the way a recruiter reads it. gapl.vercel.app
           </div>
         </div>
       </div>

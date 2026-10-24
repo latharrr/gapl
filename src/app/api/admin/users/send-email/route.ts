@@ -63,7 +63,6 @@ export async function POST(req: NextRequest) {
             content: `Rewrite this email message:\n\n${message}`,
           },
         ],
-        temperature: 0.7,
         max_tokens: 800,
       });
 
@@ -85,7 +84,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Target user has no email address." }, { status: 400 });
       }
 
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.in";
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.vercel.app";
 
       const bodyHtml = emailLayout(
         `<h1 style="margin:0 0 14px 0;font-size:22px;line-height:1.25;font-weight:800;letter-spacing:-0.02em;">${escapeHtml(subject)}</h1>

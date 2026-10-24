@@ -3,7 +3,7 @@ import { sendEmail } from "./resend";
 import { createTrackableLink } from "./link-tracker";
 import { emailLayout, emailButton, escapeHtml, EMAIL } from "./email-layout";
 
-// Utility to parse and replace all links targeting Gapl with links.gapl.in redirects
+// Utility to parse and replace all links targeting Gapl with tracked redirects
 async function rewriteLinks({
   html,
   campaignId,
@@ -15,8 +15,8 @@ async function rewriteLinks({
   emailId: string;
   userId: string;
 }): Promise<string> {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.in";
-  // Regex matches href="https://gapl.in/..." or href="http://localhost:3000/..."
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.vercel.app";
+  // Regex matches href="https://gapl.vercel.app/..." or href="http://localhost:3000/..."
   const regex = new RegExp(`href=["'](${appUrl}[^"']*)["']`, "g");
   const matches = [...html.matchAll(regex)];
 
@@ -190,7 +190,7 @@ function figures(items: { label: string; value: string; color?: string }[]): str
 }
 
 export async function sendWelcomeEmail(userId: string, email: string, name: string) {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.in";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.vercel.app";
   const safeName = escapeHtml(String(name || "there").slice(0, 80));
 
   const bodyHtml =
@@ -223,7 +223,7 @@ export async function sendReportReadyEmail(
   atsScore: number,
   readiness: number
 ) {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.in";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.vercel.app";
 
   const bodyHtml =
     h2("Your read is ready.") +
@@ -251,18 +251,19 @@ export async function sendPaymentSuccessEmail(
   userId: string,
   email: string,
   paymentId: string,
-  plan: string,
-  amount: number // whole rupees, e.g. 149
+  packName: string,
+  credits: number,
+  amount: number // whole rupees, e.g. 199
 ) {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.in";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.vercel.app";
   const rupees = `₹${Number(amount || 0).toLocaleString("en-IN")}`;
-  const planName = plan ? plan.charAt(0).toUpperCase() + plan.slice(1) : "";
+  const creditLabel = `${credits} credit${credits === 1 ? "" : "s"}`;
 
   const bodyHtml =
     h2("Payment received.") +
-    para("Thanks for upgrading. Your plan is active now.") +
+    para(`Thanks for buying credits. ${creditLabel} are in your account now, and they don't expire.`) +
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;border:1px solid ${EMAIL.rule};border-radius:8px;background-color:#ffffff;font-size:14px;">
-      <tr><td style="padding:10px 16px;color:${EMAIL.muted};">Plan</td><td style="padding:10px 16px;font-weight:700;text-align:right;">${escapeHtml(planName)}</td></tr>
+      <tr><td style="padding:10px 16px;color:${EMAIL.muted};">Pack</td><td style="padding:10px 16px;font-weight:700;text-align:right;">${escapeHtml(`${packName} · ${creditLabel}`)}</td></tr>
       <tr><td style="padding:10px 16px;color:${EMAIL.muted};background-color:${EMAIL.band};">Amount paid</td><td style="padding:10px 16px;font-weight:700;text-align:right;background-color:${EMAIL.band};">${escapeHtml(rupees)}</td></tr>
       <tr><td style="padding:10px 16px;color:${EMAIL.muted};">Payment ID</td><td style="padding:10px 16px;text-align:right;font-size:13px;">${escapeHtml(paymentId)}</td></tr>
       <tr><td style="padding:10px 16px;color:${EMAIL.muted};background-color:${EMAIL.band};">Status</td><td style="padding:10px 16px;font-weight:700;color:${EMAIL.success};text-align:right;background-color:${EMAIL.band};">Captured · credits added</td></tr>
@@ -275,9 +276,9 @@ export async function sendPaymentSuccessEmail(
     email,
     campaignId: "payment_receipt",
     campaignName: "Receipt Billing Transaction",
-    subject: `Receipt: Gapl ${planName} plan`,
+    subject: `Receipt: Gapl ${packName} pack`,
     bodyHtml,
-    preheader: `${rupees} received for the ${planName} plan.`,
+    preheader: `${rupees} received for ${creditLabel}.`,
   });
 }
 
@@ -289,7 +290,7 @@ export async function sendDay1ReminderEmail(
   topGap: string,
   recommendedProject: string
 ) {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.in";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.vercel.app";
 
   const bodyHtml =
     h2("Your roadmap hasn't started yet.") +
@@ -321,7 +322,7 @@ export async function sendRoadmapMilestoneEmail(
   currentReadiness: number,
   targetReadiness: number
 ) {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.in";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.vercel.app";
 
   const bodyHtml =
     h2(`You're ${escapeHtml(percentage)}% through your roadmap.`) +
@@ -351,7 +352,7 @@ export async function sendDay7ReminderEmail(
   reportId: string,
   completedTasksCount: number
 ) {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.in";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.vercel.app";
 
   const bodyHtml =
     h2("A week into your roadmap.") +
@@ -372,7 +373,7 @@ export async function sendDay7ReminderEmail(
 
 // ── Reanalysis Reminder ───────────────────────────────────────────────────────
 export async function sendReanalysisReminderEmail(userId: string, email: string) {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.in";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gapl.vercel.app";
 
   const bodyHtml =
     h2("Time for a fresh read?") +

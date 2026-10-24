@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminDb, requireUser } from "@/lib/firebase-admin";
+import { creditBalance, FREE_SIGNUP_CREDITS } from "@/lib/plans";
 
 export const runtime = "nodejs";
 
@@ -34,6 +35,7 @@ export async function POST(req: NextRequest) {
         photoURL,
         createdAt: new Date(),
         plan: "free",
+        credits: FREE_SIGNUP_CREDITS,
         analysisCount: 0,
       });
     });
@@ -46,8 +48,7 @@ export async function POST(req: NextRequest) {
         email: data.email ?? null,
         plan: String(data.plan || "free").toLowerCase(),
         role: String(data.role || "user"),
-        analysisUsageCount: Number(data.analysisUsageCount || 0),
-        analysisUsageMonth: data.analysisUsageMonth ?? null,
+        credits: creditBalance(data),
       },
     });
   } catch (err) {

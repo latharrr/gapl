@@ -48,6 +48,10 @@ export async function POST(req: NextRequest) {
       console.error("Webhook signature verification failed:", err instanceof Error ? err.message : err);
       return NextResponse.json({ error: "Webhook verification failed." }, { status: 400 });
     }
+  } else if (process.env.NODE_ENV === "production") {
+    // Unsigned events could forge bounces and complaints; refuse them in production.
+    console.error("RESEND_WEBHOOK_SECRET is not configured; rejecting unsigned Resend webhook.");
+    return NextResponse.json({ error: "Webhook is not configured." }, { status: 503 });
   } else {
     // Development fallback
     console.warn("RESEND_WEBHOOK_SECRET is not configured. Webhook signature check was skipped.");

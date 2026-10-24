@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   },
   description:
     "Recruiters give your resume six seconds. Gapl shows what they saw, the line that sank it, and what to build to get shortlisted.",
-  metadataBase: new URL("https://gapl.in"),
+  metadataBase: new URL("https://gapl.vercel.app"),
   robots: {
     index: true,
     follow: true,

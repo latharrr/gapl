@@ -27,7 +27,7 @@ interface DashboardMetrics {
   newUsersToday?: number;
   conversionRate?: number | string;
   totalRevenue?: number;
-  mrr?: number;
+  revenue30d?: number;
   aiCostToday?: number;
   refundRate?: number | string;
   reportsCount?: number;
@@ -166,7 +166,7 @@ export default function AdminDashboardPage() {
             { label: "Total users", value: metrics.totalUsers, note: "All registrations" },
             { label: "Active", value: metrics.activeUsers, note: "Not suspended" },
             { label: "New today", value: metrics.newUsersToday, note: "Last 24 hours" },
-            { label: "Conversion", value: `${metrics.conversionRate}%`, note: "Paid plan conversions" },
+            { label: "Conversion", value: `${metrics.conversionRate}%`, note: "Accounts that bought credits" },
           ]}
         />
       </Sheet>
@@ -175,7 +175,7 @@ export default function AdminDashboardPage() {
         <FigureStrip
           items={[
             { label: "Total revenue", value: inr(metrics.totalRevenue), note: "Gross collections" },
-            { label: "MRR estimate", value: inr(metrics.mrr), note: "From active paid plans" },
+            { label: "Revenue, 30 days", value: inr(metrics.revenue30d), note: "Captured minus refunds" },
             { label: "AI cost today", value: `$${Number(metrics.aiCostToday || 0).toFixed(3)}`, note: "LLM token billing" },
             { label: "Refund rate", value: `${metrics.refundRate}%`, note: "Refunds over gross", tone: Number(metrics.refundRate) > 5 ? "text-danger" : undefined },
           ]}

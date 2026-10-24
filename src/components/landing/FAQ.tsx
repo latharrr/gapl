@@ -41,8 +41,8 @@ export function FAQ() {
           <h2 className="display text-[clamp(2.25rem,4.2vw,3.5rem)]">Questions.</h2>
           <p className="mt-4 text-lg text-ink-secondary">
             Something else?{" "}
-            <a href="mailto:hello@gapl.in" className="font-semibold text-primary-700 underline hover:text-primary-900">
-              hello@gapl.in
+            <a href="mailto:deepanshulathar@gmail.com" className="font-semibold text-primary-700 underline hover:text-primary-900">
+              deepanshulathar@gmail.com
             </a>
           </p>
         </div>

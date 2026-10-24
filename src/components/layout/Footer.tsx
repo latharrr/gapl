@@ -24,7 +24,7 @@ const COLUMNS = [
     links: [
       { label: "About", href: "/about" },
       { label: "Blog", href: "/blog" },
-      { label: "hello@gapl.in", href: "mailto:hello@gapl.in" },
+      { label: "deepanshulathar@gmail.com", href: "mailto:deepanshulathar@gmail.com" },
     ],
   },
 ];

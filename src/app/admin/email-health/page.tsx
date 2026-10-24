@@ -256,7 +256,7 @@ export default function AdminEmailHealthPage() {
               <span className="font-bold text-ink">Custom Domain CNAME</span>
               <CheckCircle size={14} className="text-success" />
             </div>
-            <p className="text-[0.6875rem] text-ink-muted">Custom CNAME links.gapl.in routing configured on Vercel.</p>
+            <p className="text-[0.6875rem] text-ink-muted">Tracked links resolve through /api/t on the app domain, or a links.* domain when NEXT_PUBLIC_TRACKING_DOMAIN is set.</p>
           </div>
         </div>
       </div>
