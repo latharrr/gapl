@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { authFetch } from "@/lib/auth-fetch";
+import { useAuth } from "@/context/AuthContext";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface TailoredResume {
@@ -177,6 +178,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function TailorPage() {
+  const { refreshUserDoc } = useAuth();
 
   // The last report is read straight from sessionStorage — derived during render, no effect.
   const [analysis] = useState<AnalysisResult | null>(() => {
@@ -211,6 +213,7 @@ export default function TailorPage() {
         }),
       });
       const data = await res.json();
+      void refreshUserDoc();
       if (!res.ok) { setError(data.error || "Tailoring failed."); setStep("paste"); return; }
       setResult(data.result);
       setStep("result");

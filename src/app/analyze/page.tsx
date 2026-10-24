@@ -81,7 +81,7 @@ export default function AnalyzePage() {
 }
 
 function AnalyzeFlow() {
-  const { user, userDoc } = useAuth();
+  const { user, userDoc, refreshUserDoc } = useAuth();
   // Prefill from the landing hero (/analyze?role=…&tier=…) and skip the answered steps.
   const searchParams = useSearchParams();
   const paramRole = searchParams.get("role") ?? "";
@@ -293,6 +293,7 @@ function AnalyzeFlow() {
       setLoadingStep(ANALYSIS_STAGES.length);
 
       const data = await response.json();
+      void refreshUserDoc();
 
       if (response.status === 403 || data.code === "LIMIT_REACHED") {
         setShowPaywall(true);

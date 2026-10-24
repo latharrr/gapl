@@ -24,12 +24,7 @@ export async function POST(req: NextRequest) {
 
     await getAdminDb().runTransaction(async (tx) => {
       const snap = await tx.get(ref);
-      if (snap.exists) {
-        // Signup and the auth listener race; whichever call carries the typed name fills it in.
-        if (!snap.data()?.displayName && displayName) tx.update(ref, { displayName, updatedAt: new Date() });
-        return;
-      }
-      tx.set(ref, {
+      const profile = {
         displayName: displayName || null,
         email: user.email || null,
         photoURL,
@@ -37,7 +32,21 @@ export async function POST(req: NextRequest) {
         plan: "free",
         credits: FREE_SIGNUP_CREDITS,
         analysisCount: 0,
-      });
+      };
+      if (!snap.exists) {
+        tx.set(ref, profile);
+        return;
+      }
+      const existing = snap.data() ?? {};
+      if (!existing.createdAt) {
+        // The signup analytics event can write welcomeEmailSentAt before this runs,
+        // leaving a document with no profile fields. Fill in only what is missing.
+        const missing = Object.fromEntries(Object.entries(profile).filter(([key]) => existing[key] === undefined));
+        tx.set(ref, missing, { merge: true });
+        return;
+      }
+      // Signup and the auth listener race; whichever call carries the typed name fills it in.
+      if (!existing.displayName && displayName) tx.update(ref, { displayName, updatedAt: new Date() });
     });
 
     const data = (await ref.get()).data() ?? {};

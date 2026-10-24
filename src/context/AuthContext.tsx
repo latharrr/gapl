@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useState, ReactNode } from "react";
 import { type User } from "firebase/auth";
 import { onAuthChange, createUserDocument, getClientDb } from "@/lib/firebase";
 import { doc, onSnapshot } from "firebase/firestore";
@@ -16,6 +16,8 @@ interface AuthContextType {
   loading: boolean;
   isDemo: boolean;
   setIsDemo: (demo: boolean) => void;
+  /** Re-reads the profile from the server; call after anything that spends or adds credits. */
+  refreshUserDoc: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -24,6 +26,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   isDemo: false,
   setIsDemo: () => {},
+  refreshUserDoc: async () => {},
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -49,7 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
           // The server returns the profile too, so plan and usage show even if the live listener is denied.
           const profile = await createUserDocument(firebaseUser);
-          if (profile) setUserDoc(profile);
+          if (profile) setUserDoc((current) => ({ ...current, ...profile }));
         } catch (e) {
           console.warn("Could not create user document:", e);
         }
@@ -86,8 +89,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  // The live listener normally keeps userDoc current, but if it is denied or drops,
+  // the credit count would stay at its signup value. The server read is the source of truth.
+  const refreshUserDoc = useCallback(async () => {
+    if (!user) return;
+    try {
+      const profile = await createUserDocument(user);
+      if (profile) setUserDoc((current) => ({ ...current, ...profile }));
+    } catch (e) {
+      console.warn("Could not refresh user document:", e);
+    }
+  }, [user]);
+
   return (
-    <AuthContext.Provider value={{ user, userDoc, loading, isDemo, setIsDemo }}>
+    <AuthContext.Provider value={{ user, userDoc, loading, isDemo, setIsDemo, refreshUserDoc }}>
       {children}
     </AuthContext.Provider>
   );

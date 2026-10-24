@@ -42,7 +42,7 @@ const STAGES = [
 ];
 
 export default function CVBuilderPage() {
-  const { user } = useAuth();
+  const { user, refreshUserDoc } = useAuth();
   const [step, setStep] = useState(1);
   const [loadingStage, setLoadingStage] = useState(0);
   const [savedId, setSavedId] = useState<string | null>(null);
@@ -156,6 +156,7 @@ export default function CVBuilderPage() {
           });
           clearInterval(iv);
           const d2 = await res2.json();
+          void refreshUserDoc();
           if (!res2.ok) { setError(d2.error || "Build failed."); setStep(2); return; }
           setResult(d2.result);
           setStep(4);
@@ -170,6 +171,7 @@ export default function CVBuilderPage() {
       });
       clearInterval(iv);
       const d = await res.json();
+      void refreshUserDoc();
       if (!res.ok) { setError(d.error || "Build failed."); setStep(2); return; }
       setResult(d.result);
       setStep(4);
