@@ -10,7 +10,7 @@ An application-readiness tool for job seekers, with an email and attribution bac
 |---|---|
 | **Status** | Live beta with about 10 early users, mostly friends. Not a production launch ([details](PROJECT_STATUS.md)) |
 | **Stack** | Next.js (App Router), TypeScript, Firebase Auth + Firestore, Resend, Razorpay, Tailwind + Radix UI |
-| **AI** | Anthropic Claude (Opus 5.5, with Sonnet 5.5 as backup) behind one gateway; FreeModel or Groq only as last-resort fallbacks |
+| **AI** | One gateway in `src/lib/ai-gateway.ts` with a primary model, a backup and optional last-resort fallbacks. The models named in the source are Anthropic Claude; which one a deployment runs depends on its keys and settings |
 | **Tests** | 14 unit tests (credits, payments, report-ready scores); CI runs lint, typecheck, tests and a production build |
 | **My role** | Product, UI, backend, AI routing, email and attribution pipeline, admin tooling |
 
@@ -22,7 +22,7 @@ An application-readiness tool for job seekers, with an email and attribution bac
 
 ## What is interesting in the code
 
-- **AI gateway** (`src/lib/ai-gateway.ts`): one entry point for every user-facing AI task. It runs Claude Opus 5.5, falls back to Sonnet 5.5, and uses FreeModel or Groq only if both fail and a key is configured. Each call records tokens and cost.
+- **AI gateway** (`src/lib/ai-gateway.ts`): one entry point for every user-facing AI task. In the current source it tries a primary Claude model, falls back to a second Claude model, and uses FreeModel or Groq only if both fail and a key is configured. Each call records tokens and cost.
 - **Email attribution.** Links in emails are rewritten to a tracking subdomain. A proxy (`src/proxy.ts`) turns each click into a logged redirect, and a payment or finished report is credited to the last email click in the previous 30 days.
 - **Webhook handling.** Resend webhooks are signature-verified and de-duplicated by event ID before anything is written; Razorpay webhooks are signature-verified.
 - **Rate limits** are stored in Firestore so they hold across serverless instances, with an in-memory fallback when the store is down.
@@ -59,8 +59,8 @@ graph TD
   
   API_Analyze -->|Query Routing & Prompts| Firestore[(Firestore DB: settings/routing)]
   API_Analyze -->|Central AI Dispatcher| AI_Gateway[AI Gateway Fallback System]
-  AI_Gateway -->|Attempt 1| Preferred[Anthropic claude-opus-5-5]
-  AI_Gateway -->|Attempt 2| OpenAI[Anthropic claude-sonnet-5-5]
+  AI_Gateway -->|Attempt 1| Preferred[Primary Claude model]
+  AI_Gateway -->|Attempt 2| OpenAI[Backup Claude model]
   AI_Gateway -->|Attempt 3| Anthropic[Last resort: FreeModel or Groq if a key is set]
 
   
@@ -323,7 +323,7 @@ Administrative controls at `/admin` are gated using Firestore custom claim user 
 * **Styling**: Vanilla CSS, Tailwind CSS, & Radix UI (shadcn/ui layout standards)
 * **Database & Auth**: Google Firebase Auth and Cloud Firestore Admin SDK
 * **Email Engine**: Resend Node SDK
-* **AI Orchestrator**: Custom gateway (`src/lib/ai-gateway.ts`) with failover: Claude Opus 5.5, then Claude Sonnet 5.5, then FreeModel or Groq if configured. Token usage and cost are logged per call.
+* **AI Orchestrator**: Custom gateway (`src/lib/ai-gateway.ts`) with failover: a primary Claude model, a backup Claude model, then FreeModel or Groq if configured (model names are constants in the source). Token usage and cost are logged per call.
 * **Payment Gateway**: Razorpay Node API (HMAC SHA256 Webhook Verification)
 
 
