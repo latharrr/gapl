@@ -1,10 +1,55 @@
-# Gapl — AI Application Readiness & Email Intelligence Engine
+# Gapl
 
-Gapl is a production-grade candidate application readiness platform and founder analytics engine. It leverages advanced AI models, dynamic multi-channel attribution, real-time telemetry tracking, and robust rate limits to help candidates build ATS-optimized resumes, and empower founders to track marketing funnels down to the exact dollar.
+An application-readiness tool for job seekers, with an email and attribution back office for the founder. A candidate uploads a resume (PDF or text) and a job description; Gapl scores the fit, lists the gaps, builds a learning roadmap and helps rewrite the CV. Built solo by [Deepanshu Lathar](https://deepanshulathar.com).
 
----
+[Live app](https://gapl.vercel.app) | [Project status](PROJECT_STATUS.md) | [Report an issue](https://github.com/latharrr/gapl/issues)
 
-## 🏗️ System Architecture & Data Flow
+![CI](https://github.com/latharrr/gapl/actions/workflows/ci.yml/badge.svg)
+
+| | |
+|---|---|
+| **Status** | Live beta with about 10 early users, mostly friends. Not a production launch ([details](PROJECT_STATUS.md)) |
+| **Stack** | Next.js (App Router), TypeScript, Firebase Auth + Firestore, Resend, Razorpay, Tailwind + Radix UI |
+| **AI** | Anthropic Claude (Opus 5.5, with Sonnet 5.5 as backup) behind one gateway; FreeModel or Groq only as last-resort fallbacks |
+| **Tests** | 14 unit tests (credits, payments, report-ready scores); CI runs lint, typecheck, tests and a production build |
+| **My role** | Product, UI, backend, AI routing, email and attribution pipeline, admin tooling |
+
+## What a candidate gets
+
+1. **Resume and JD analysis.** Reads a PDF or pasted text, compares it with the job description and returns a readiness score, ATS fit, strongest signals and weaknesses for a chosen role and company tier.
+2. **CV builder.** AI bullet rewrites, keyword suggestions, single-page print layout and "email me this".
+3. **Roadmap.** Missing skills sorted by priority, with weekly project milestones. Progress emails go out at 25, 50, 75 and 100 percent.
+
+## What is interesting in the code
+
+- **AI gateway** (`src/lib/ai-gateway.ts`): one entry point for every user-facing AI task. It runs Claude Opus 5.5, falls back to Sonnet 5.5, and uses FreeModel or Groq only if both fail and a key is configured. Each call records tokens and cost.
+- **Email attribution.** Links in emails are rewritten to a tracking subdomain. A proxy (`src/proxy.ts`) turns each click into a logged redirect, and a payment or finished report is credited to the last email click in the previous 30 days.
+- **Webhook handling.** Resend webhooks are signature-verified and de-duplicated by event ID before anything is written; Razorpay webhooks are signature-verified.
+- **Rate limits** are stored in Firestore so they hold across serverless instances, with an in-memory fallback when the store is down.
+- **Admin back office** (`/admin`) with role-based access (`super_admin`, `admin`, `support`, `readonly`): email health, shortlinks, alerts, payments and refunds, audit log.
+
+## Quick start
+
+Needs Node 22 (as in CI) and a Firebase project.
+
+```bash
+npm install
+# create .env.local with the variables listed under "Local development setup" below
+npm run dev          # http://localhost:3000
+npm test             # node --test tests/*.test.mjs
+npm run lint
+npm run build
+```
+
+## Known limitations
+
+- A paid flow with a real card, load behaviour, analysis accuracy and AI cost per analysis have not been measured. No scale claim is made.
+- Output quality depends on which model answers, and every analysis costs API money.
+- No license file yet.
+
+The sections below are the detailed reference: architecture, data model, API, admin tools and configuration.
+
+## System Architecture & Data Flow
 
 ```mermaid
 graph TD
@@ -14,10 +59,10 @@ graph TD
   
   API_Analyze -->|Query Routing & Prompts| Firestore[(Firestore DB: settings/routing)]
   API_Analyze -->|Central AI Dispatcher| AI_Gateway[AI Gateway Fallback System]
-  AI_Gateway -->|Attempt 1| Preferred[Routed provider, default Groq gpt-oss-120b]
-  AI_Gateway -->|Attempt 2| OpenAI[OpenAI gpt-4o-mini]
-  AI_Gateway -->|Attempt 3| Anthropic[Anthropic, else Gemini 1.5 Flash]
-  AI_Gateway -.->|Provider key missing| FreeModel[FreeModel if configured, else Groq]
+  AI_Gateway -->|Attempt 1| Preferred[Anthropic claude-opus-5-5]
+  AI_Gateway -->|Attempt 2| OpenAI[Anthropic claude-sonnet-5-5]
+  AI_Gateway -->|Attempt 3| Anthropic[Last resort: FreeModel or Groq if a key is set]
+
   
   API_Analyze -->|Save Report Summary| Reports_Db[(Firestore DB: reports)]
   API_Analyze -->|Trigger Notification| Email_Service[Email Service Abstraction]
@@ -31,7 +76,7 @@ graph TD
   
   User -->|Clicks Shortlink| Links_Domain
   Links_Domain -->|Next.js Proxy| Proxy_Rewrite{"src/proxy.ts"}
-  Middleware_Rewrite -->|Internal Redirect| Redirect_API["/api/t/id"]
+  Proxy_Rewrite -->|Internal Redirect| Redirect_API["/api/t/id"]
   Redirect_API -->|Increment Click Counts & Log Telemetry| Trackable_Links
   Redirect_API -->|Set Browser Context Tracking Cookie| User
   Redirect_API -->|Redirect Browser to Target Path| App
@@ -52,9 +97,8 @@ graph TD
   Admin_Rewrite_API -->|AI Gateway| AI_Gateway
 ```
 
----
 
-## 🚀 Core Product Capabilities
+## Core Product Capabilities
 
 ### 1. Resume Parsing & Job Description (JD) Analysis
 * **Multi-Format Extraction**: Parses text from PDF uploads, text blocks, and manual copies.
@@ -73,9 +117,8 @@ graph TD
 * **Project Syllabi**: Generates weekly, structured milestones for candidates to build projects and prove skill readiness.
 * **Completion Email Notifications**: Dispatches automated celebration emails as candidates check off milestones at 25%, 50%, 75%, and 100% of their learning roadmap.
 
----
 
-## 📧 Email Intelligence & Attribution Platform
+## Email Intelligence & Attribution Platform
 
 To protect domain reputation and maximize deliverability, the app decouples tracking redirect URLs using a dedicated subdomain set by **`NEXT_PUBLIC_TRACKING_DOMAIN`** (for example `links.gapl.in`). The proxy routes any `links.*` host to the shortlink handler.
 
@@ -96,9 +139,8 @@ Processes real-time feedback from the Resend mail servers.
   * **Day 1**: Triggered via `/api/cron/day1-reminder` for users who registered but did not complete their first resume scan.
   * **Day 7**: Triggered via `/api/cron/day7-reminder` to sync roadmap milestones and recover inactive users.
 
----
 
-## 💾 Database Schema (Firestore Collections)
+## Database Schema (Firestore Collections)
 
 ### `users`
 ```json
@@ -182,9 +224,8 @@ Processes real-time feedback from the Resend mail servers.
 }
 ```
 
----
 
-## 🔌 API Documentation
+## API Documentation
 
 ### User Routes
 
@@ -220,7 +261,6 @@ Processes real-time feedback from the Resend mail servers.
   { "success": true }
   ```
 
----
 
 ### Admin Routes
 *(All `/api/admin/*` routes require a Bearer token mapped to a user with `super_admin` or `admin` Firestore claims)*
@@ -255,9 +295,8 @@ Processes real-time feedback from the Resend mail servers.
   }
   ```
 
----
 
-## 🛠️ Administrative Dashboards (`/admin/*`)
+## Administrative Dashboards (`/admin/*`)
 
 * **Main Administration (`/admin`)**: Aggregates general statistics including candidate registrations, scans, and conversion funnel indexes.
 * **Email Control Panel (`/admin/emails`)**: Tracks sent volume, open rates, CTRs, and ROI revenue details. Includes the **Admin Email Dispatcher Card** supporting email composition, AI message rewriting, and resend limits.
@@ -268,9 +307,8 @@ Processes real-time feedback from the Resend mail servers.
 * **Payments & Transactions (`/admin/payments`)**: Lists orders, captures webhooks statuses, and supports one-click Razorpay refund triggers.
 * **Access Roles Gatekeeper (`/admin/users` / `/admin/audit`)**: Controls role assignments (`super_admin`, `admin`, `support`, `readonly`) and exposes system configuration logs.
 
----
 
-## 🔒 Role-Based Access Control (RBAC)
+## Role-Based Access Control (RBAC)
 
 Administrative controls at `/admin` are gated using Firestore custom claim user roles:
 *   `super_admin`: Full database access, refund configurations, prompt overriding, and user creation.
@@ -278,20 +316,18 @@ Administrative controls at `/admin` are gated using Firestore custom claim user 
 *   `support`: Read-only access to customer profiles, timelines, and payment histories.
 *   `readonly`: General read-only access to statistics and metrics charts.
 
----
 
-## 💻 Tech Stack & Dependencies
+## Tech Stack & Dependencies
 
 * **Frontend**: Next.js App Router (Turbopack optimized)
 * **Styling**: Vanilla CSS, Tailwind CSS, & Radix UI (shadcn/ui layout standards)
 * **Database & Auth**: Google Firebase Auth and Cloud Firestore Admin SDK
 * **Email Engine**: Resend Node SDK
-* **AI Orchestrator**: Custom Gateway (`src/lib/ai-gateway.ts`) with automated failover over three attempts: the provider set in admin routing (default Groq `openai/gpt-oss-120b`) ➔ OpenAI `gpt-4o-mini` ➔ Anthropic, else Gemini. Any attempt whose provider key is missing runs on FreeModel when `FREEMODEL_API_KEY` is set, otherwise on Groq
+* **AI Orchestrator**: Custom gateway (`src/lib/ai-gateway.ts`) with failover: Claude Opus 5.5, then Claude Sonnet 5.5, then FreeModel or Groq if configured. Token usage and cost are logged per call.
 * **Payment Gateway**: Razorpay Node API (HMAC SHA256 Webhook Verification)
 
----
 
-## 📋 Local Development Setup
+## Local Development Setup
 
 ### 1. Environment Setup
 Configure your `.env.local` file in the root workspace directory:
@@ -308,10 +344,10 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_firebase_app_id
 FIREBASE_SERVICE_ACCOUNT_KEY='{"type": "service_account", "project_id": "...", ...}'
 
 # AI Keys & Gateways
-GROQ_API_KEY=your_groq_api_key
-OPENAI_API_KEY=your_openai_api_key
 ANTHROPIC_API_KEY=your_anthropic_api_key
-GEMINI_API_KEY=your_gemini_api_key
+# optional last-resort fallbacks
+GROQ_API_KEY=your_groq_api_key
+FREEMODEL_API_KEY=your_freemodel_api_key
 
 # Payment Configuration
 NEXT_PUBLIC_RAZORPAY_KEY_ID=your_razorpay_key_id
