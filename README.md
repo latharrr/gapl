@@ -1,6 +1,6 @@
 # Gapl
 
-An application-readiness tool for job seekers, with an email and attribution back office for the founder. A candidate uploads a resume (PDF or text) and a job description; Gapl scores the fit, lists the gaps, builds a learning roadmap and helps rewrite the CV. Built solo by [Deepanshu Lathar](https://deepanshulathar.com).
+An application-readiness tool for job seekers, with an email and attribution back office for the founder. A candidate uploads a resume (PDF or text) and a job description; Gapl scores the fit, lists the gaps, builds a learning roadmap and helps rewrite the CV. By [Deepanshu Lathar](https://deepanshulathar.com).
 
 [Live app](https://gapl.vercel.app) | [Project status](PROJECT_STATUS.md) | [Report an issue](https://github.com/latharrr/gapl/issues)
 
