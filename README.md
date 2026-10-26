@@ -6,7 +6,7 @@ An application-readiness tool for job seekers, with an email and attribution bac
 
 ![CI](https://github.com/latharrr/gapl/actions/workflows/ci.yml/badge.svg)
 
-| | |
+| At a glance | |
 |---|---|
 | **Status** | Live beta with about 10 early users, mostly friends. Not a production launch ([details](PROJECT_STATUS.md)) |
 | **Stack** | Next.js (App Router), TypeScript, Firebase Auth + Firestore, Resend, Razorpay, Tailwind + Radix UI |
