@@ -9,12 +9,14 @@
 
 @theme {
   /* Desk — the ground the paper lies on */
-  --color-desk: #141519;
-  --color-desk-raised: #1c1d23;
-  --color-desk-line: #2d2f37;
-  --color-desk-ink: #f4f3ef;
-  --color-desk-muted: #a7a9b2;
-  --color-desk-faint: #80838d;
+  /* 2026-10-30: the desk is light paper now (the Mercor + Gem landing, carried app-wide).
+     The token names stay so every page follows without per-page edits. */
+  --color-desk: #fcfcfc;
+  --color-desk-raised: #f2f2ee;
+  --color-desk-line: #e1e1db;
+  --color-desk-ink: #16171b;
+  --color-desk-muted: #5e616a;
+  --color-desk-faint: #75787f;
 
   /* Paper and the pad it sits on in the app */
   --color-surface-DEFAULT: #ffffff;
@@ -60,11 +62,12 @@
   --color-danger-bg: #fbeae8;
   --color-danger-border: #f0bcb7;
   --color-danger-deep: #a32520;
-  --color-danger-on-desk: #ff7b6f;
+  --color-danger-on-desk: #c8302a;
 
   /* Type: Mona Sans for every UI word and figure; CMU Serif only for resume text */
   --font-sans: var(--font-mona), "Mona Sans", system-ui, sans-serif;
   --font-serif: var(--font-cmu), "CMU Serif", "Latin Modern Roman", Georgia, serif;
+  --font-display: var(--font-news), "Newsreader", Georgia, serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
 
   --font-size-2xs: 0.6875rem;
@@ -78,7 +81,7 @@
   --shadow-lg: 0 18px 40px -12px rgb(22 23 27 / 0.2), 0 4px 8px -4px rgb(22 23 27 / 0.06);
   --shadow-xl: 0 28px 56px -16px rgb(22 23 27 / 0.24), 0 8px 16px -8px rgb(22 23 27 / 0.08);
   --shadow-card: 0 1px 2px 0 rgb(22 23 27 / 0.06), 0 6px 18px -10px rgb(22 23 27 / 0.14);
-  --shadow-page: 0 2px 3px 0 rgb(0 0 0 / 0.35), 0 30px 60px -28px rgb(0 0 0 / 0.75);
+  --shadow-page: 0 0 0 1px var(--color-border-DEFAULT), 0 18px 40px -24px rgb(22 23 27 / 0.18);
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
@@ -141,7 +144,7 @@
   }
 
   .on-desk :focus-visible {
-    outline-color: var(--color-highlight);
+    outline-color: var(--color-primary-600);
   }
 
   ::placeholder {
@@ -186,7 +189,7 @@
   .on-desk {
     background-color: var(--color-desk);
     color: var(--color-desk-ink);
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   /* A sheet of paper lying on the desk */
@@ -209,13 +212,13 @@
     box-shadow: var(--shadow-page);
   }
 
-  /* Headline voice: Mona Sans, heavy and a touch wide */
+  /* Headline voice: the landing's editorial serif, everywhere */
   .display {
-    font-family: var(--font-sans);
-    font-weight: 780;
-    font-variation-settings: "wdth" 108;
-    letter-spacing: -0.03em;
-    line-height: 0.98;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-optical-sizing: auto;
+    letter-spacing: -0.04em;
+    line-height: 1;
   }
 
   .resume-text {
@@ -468,4 +471,44 @@
     white-space: nowrap;
     box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 32%, transparent);
   }
+}
+
+/* Landing: light editorial page (Mercor + Gem). The app keeps the desk. */
+@layer components {
+  .landing {
+    background: #fcfcfc;
+    color: var(--color-ink);
+    color-scheme: light;
+  }
+  .serif-display {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-optical-sizing: auto;
+    letter-spacing: -0.045em;
+    line-height: 0.95;
+  }
+  .btn-sq {
+    border-radius: 2px;
+  }
+}
+
+
+@layer components {
+  .marquee-track { animation: marquee 38s linear infinite; }
+  .marquee:hover .marquee-track { animation-play-state: paused; }
+  .how-bar { animation: how-bar 2.6s linear both; }
+  @media (prefers-reduced-motion: reduce) {
+    .marquee-track, .how-bar { animation: none; }
+  }
+}
+@keyframes marquee { to { transform: translateX(-50%); } }
+@keyframes how-bar { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* [data-rise] waits hidden for GSAP's arrival; with reduced motion it simply shows. */
+.js [data-rise] { opacity: 0; }
+@media (prefers-reduced-motion: reduce) { .js [data-rise] { opacity: 1; } }
+
+/* The loop diagram scales down on phones; its labels scale back up so they stay readable. */
+@media (max-width: 640px) {
+  .loop-art text { font-size: 22px; }
 }

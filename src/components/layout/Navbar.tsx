@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLenis } from "lenis/react";
 import { Button } from "@/components/ui/Button";
 import { Wordmark } from "@/components/brand/Wordmark";
 import { Menu, X } from "lucide-react";
@@ -20,6 +21,7 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
   const { user, loading } = useAuth();
+  const lenis = useLenis(); // only set on the landing, inside SmoothScroll
 
   // Close mobile menu on route change — adjust state during render, no effect.
   const [prevPathname, setPrevPathname] = useState(pathname);
@@ -33,10 +35,12 @@ export function Navbar() {
     if (!mobileOpen) return;
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    lenis?.stop();
     return () => {
       document.body.style.overflow = previous;
+      lenis?.start();
     };
-  }, [mobileOpen]);
+  }, [mobileOpen, lenis]);
 
   // Sign-in from a content page comes back to it; from home it goes to the dashboard.
   const loginHref = pathname && pathname !== "/" && !pathname.startsWith("/auth")
@@ -45,7 +49,7 @@ export function Navbar() {
 
   return (
     <>
-      <header className="on-desk fixed top-0 left-0 right-0 z-50 border-b border-desk-line">
+      <header className={cn("fixed top-0 left-0 right-0 z-50 border-b", "landing bg-[#fcfcfc]/85 backdrop-blur-xl border-border-DEFAULT")}>
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-6">
           <Link href={user ? "/dashboard" : "/"} aria-label="Gapl home" className="shrink-0">
             <Wordmark />
@@ -61,7 +65,7 @@ export function Navbar() {
                   aria-current={active ? "page" : undefined}
                   className={cn(
                     "px-3 py-2 text-sm font-medium rounded-[7px] transition-colors",
-                    active ? "text-desk-ink" : "text-desk-muted hover:text-desk-ink hover:bg-desk-raised"
+                    active ? "text-ink" : "text-ink-muted hover:text-ink hover:bg-surface-muted"
                   )}
                 >
                   {link.label}
@@ -72,21 +76,24 @@ export function Navbar() {
 
           <div className="hidden md:flex items-center gap-2">
             {loading ? (
-              <div className="w-28 h-9 bg-desk-raised animate-pulse rounded-[7px]" />
+              <div className={cn("w-28 h-9 animate-pulse rounded-[7px]", "bg-surface-muted")} />
             ) : user ? (
               <Link href="/dashboard">
-                <Button size="sm">Dashboard</Button>
+                <Button size="sm" variant="secondary" className="btn-sq shadow-none">Dashboard</Button>
               </Link>
             ) : (
               <>
                 <Link
                   href={loginHref}
-                  className="px-3 py-2 text-sm font-medium text-desk-muted hover:text-desk-ink rounded-[7px] hover:bg-desk-raised transition-colors"
+                  className={cn(
+                    "px-3 py-2 text-sm font-medium rounded-[7px] transition-colors",
+                    "text-ink-muted hover:text-ink border border-border-strong btn-sq hover:border-ink"
+                  )}
                 >
                   Sign in
                 </Link>
                 <Link href="/analyze">
-                  <Button size="sm">Check my resume</Button>
+                  <Button size="sm" variant={"secondary"} className={"btn-sq shadow-none"}>{"Read my resume"}</Button>
                 </Link>
               </>
             )}
@@ -95,12 +102,12 @@ export function Navbar() {
           {/* Phones keep the one action in reach above the fold */}
           {!loading && (
             <Link href={user ? "/dashboard" : "/analyze"} className="md:hidden ml-auto">
-              <Button size="sm">{user ? "Dashboard" : "Read my resume"}</Button>
+              <Button size="sm" variant={"secondary"} className={"btn-sq shadow-none"}>{user ? "Dashboard" : "Read my resume"}</Button>
             </Link>
           )}
 
           <button
-            className="md:hidden -mr-2 w-11 h-11 inline-flex items-center justify-center rounded-[8px] text-desk-ink hover:bg-desk-raised"
+            className={cn("md:hidden -mr-2 w-11 h-11 inline-flex items-center justify-center rounded-[8px]", "text-ink hover:bg-surface-muted")}
             onClick={() => setMobileOpen((v) => !v)}
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileOpen}
@@ -117,32 +124,32 @@ export function Navbar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-            className="on-desk fixed top-16 left-0 right-0 bottom-0 z-40 md:hidden"
+            className={cn("fixed top-16 left-0 right-0 bottom-0 z-40 md:hidden", "landing")}
           >
             <div className="px-4 pt-2 pb-6">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="block py-4 text-lg font-medium text-desk-ink border-b border-desk-line"
+                  className={cn("block py-4 text-lg font-medium border-b", "text-ink border-border-DEFAULT")}
                 >
                   {link.label}
                 </Link>
               ))}
               <div className="pt-6 flex flex-col gap-2">
                 {loading ? (
-                  <div className="h-12 bg-desk-raised animate-pulse rounded-[9px]" />
+                  <div className={cn("h-12 animate-pulse rounded-[9px]", "bg-surface-muted")} />
                 ) : user ? (
                   <Link href="/dashboard" className="w-full">
-                    <Button size="lg" className="w-full">Dashboard</Button>
+                    <Button size="lg" variant="secondary" className="w-full btn-sq shadow-none">Dashboard</Button>
                   </Link>
                 ) : (
                   <>
                     <Link href="/analyze" className="w-full">
-                      <Button size="lg" className="w-full">Check my resume</Button>
+                      <Button size="lg" variant={"secondary"} className={cn("w-full", "btn-sq shadow-none")}>{"Read my resume"}</Button>
                     </Link>
                     <Link href={loginHref} className="w-full">
-                      <Button variant="desk" size="lg" className="w-full">Sign in</Button>
+                      <Button variant={"outline"} size="lg" className={cn("w-full", "btn-sq")}>Sign in</Button>
                     </Link>
                   </>
                 )}

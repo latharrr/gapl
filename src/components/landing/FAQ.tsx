@@ -38,11 +38,11 @@ export function FAQ() {
     <section id="faq" className="bg-surface-DEFAULT text-ink scroll-mt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-20 sm:py-28 grid gap-10 lg:grid-cols-12 lg:gap-10">
         <div className="lg:col-span-4">
-          <h2 className="display text-[clamp(2.25rem,4.2vw,3.5rem)]">Questions.</h2>
+          <h2 data-rise className="serif-display text-[clamp(2.75rem,5vw,4.5rem)]">Questions</h2>
           <p className="mt-4 text-lg text-ink-secondary">
             Something else?{" "}
             <a href="mailto:deepanshulathar@gmail.com" className="font-semibold text-primary-700 underline hover:text-primary-900">
-              deepanshulathar@gmail.com
+              Email support
             </a>
           </p>
         </div>
@@ -59,6 +59,7 @@ export function FAQ() {
                     aria-expanded={isOpen}
                     aria-controls={`faq-${i}`}
                   >
+                    <span className="serif-display w-8 shrink-0 text-[1.25rem] leading-[1.2] text-ink-faint">{String(i + 1).padStart(2, "0")}</span>
                     <span className="flex-1 text-[1.0625rem] font-semibold tracking-[-0.01em] group-hover:text-primary-700">
                       {item.q}
                     </span>
@@ -81,7 +82,7 @@ export function FAQ() {
                       transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
                       className="overflow-hidden"
                     >
-                      <p className="pb-6 pr-8 max-w-[68ch] text-[0.9375rem] leading-relaxed text-ink-secondary">
+                      <p className="pb-6 pl-11 pr-8 max-w-[68ch] text-[0.9375rem] leading-relaxed text-ink-secondary">
                         {item.a}
                       </p>
                     </motion.div>

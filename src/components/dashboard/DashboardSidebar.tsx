@@ -89,7 +89,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
               )}
               aria-current={active ? "page" : undefined}
             >
-              <Icon size={17} className={active ? "text-highlight" : "text-desk-faint"} />
+              <Icon size={17} className={active ? "text-ink" : "text-desk-faint"} />
               {item.label}
             </Link>
           );

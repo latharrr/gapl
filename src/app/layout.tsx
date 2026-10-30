@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Mona_Sans } from "next/font/google";
+import { Mona_Sans, Newsreader } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
@@ -10,6 +10,14 @@ const mona = Mona_Sans({
   subsets: ["latin"],
   variable: "--font-mona",
   axes: ["wdth"],
+  display: "swap",
+});
+
+// Newsreader: landing display headlines only (the editorial serif of the Mercor + Gem landing).
+const news = Newsreader({
+  subsets: ["latin"],
+  variable: "--font-news",
+  axes: ["opsz"],
   display: "swap",
 });
 
@@ -39,7 +47,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#141519",
+  themeColor: "#fcfcfc",
 };
 
 export default function RootLayout({
@@ -48,10 +56,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${mona.variable} ${cmu.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${mona.variable} ${news.variable} ${cmu.variable}`} suppressHydrationWarning>
       <head>
-        {/* Lets CSS hold the sample resume's marks until it scrolls into view; without JS they simply show. */}
-        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
+        {/* js: lets CSS hold the sample resume's marks until they scroll into view; without JS they simply show.
+            lite: phones, touch, low memory/cores, data saver or slow links get the light page (no film canvas,
+            no smooth scroll, no blur), set before first paint so nothing heavy starts. */}
+        <script dangerouslySetInnerHTML={{ __html: "var d=document.documentElement,n=navigator,c=n.connection||{};d.classList.add('js');if(matchMedia('(max-width: 768px), (pointer: coarse)').matches||(n.deviceMemory||8)<=4||(n.hardwareConcurrency||8)<=4||c.saveData||/2g|3g/.test(c.effectiveType||''))d.classList.add('lite')" }} />
       </head>
       <body className="bg-surface-muted text-ink antialiased">
         <AuthProvider>{children}</AuthProvider>

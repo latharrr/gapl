@@ -24,7 +24,7 @@ const COLUMNS = [
     links: [
       { label: "About", href: "/about" },
       { label: "Blog", href: "/blog" },
-      { label: "deepanshulathar@gmail.com", href: "mailto:deepanshulathar@gmail.com" },
+      { label: "Email support", href: "mailto:deepanshulathar@gmail.com" },
     ],
   },
 ];

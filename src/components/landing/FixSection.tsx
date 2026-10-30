@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import gsap from "gsap";
 import { SAMPLE } from "@/lib/sample-report";
 import { usePlayOnView } from "@/hooks/usePlayOnView";
 
@@ -20,40 +21,35 @@ export function FixSection() {
       return;
     }
     if (state !== "play") return;
-    let raf = 0;
-    const begin = performance.now() + 1300;
-    const tick = (now: number) => {
-      const t = Math.min(1, Math.max(0, (now - begin) / 1600));
-      const eased = 1 - Math.pow(1 - t, 4);
-      setShown(Math.round(START + (END - START) * eased));
-      if (t < 1) raf = requestAnimationFrame(tick);
+    const n = { v: START };
+    const tween = gsap.to(n, { v: END, duration: 1.6, delay: 1.3, ease: "power4.out", onUpdate: () => setShown(Math.round(n.v)) });
+    return () => {
+      tween.kill();
     };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
   }, [state]);
 
   return (
-    <section className="on-desk border-t border-desk-line">
+    <section className="landing">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-20 sm:py-28 grid gap-12 lg:grid-cols-12 lg:gap-10">
         <div className="lg:col-span-5">
-          <h2 className="display text-[clamp(2.25rem,4.6vw,3.75rem)]">Then it writes the fix back.</h2>
-          <p className="mt-5 max-w-md text-lg leading-relaxed text-desk-muted">
+          <h2 data-rise className="serif-display text-[clamp(2.5rem,4.6vw,4rem)]">Then it writes the fix back.</h2>
+          <p className="mt-5 max-w-md text-[1.0625rem] leading-relaxed text-ink-muted">
             Every gap ends in something to build: a project a recruiter can open, how long it takes, and roughly where
             your readiness lands after it. Not a course. Not keyword stuffing.
           </p>
           <div className="mt-10" aria-live="off">
-            <p className="text-sm text-desk-muted">Sample readiness after three builds</p>
+            <p className="text-sm text-ink-muted">Sample readiness after three builds</p>
             <p className="figure mt-1 text-[clamp(4rem,9vw,6rem)] font-semibold leading-none">
-              <span className="text-desk-faint">{START}</span>
-              <span className="mx-3 text-desk-faint">→</span>
-              <span className="text-highlight">{shown}</span>
+              <span className="text-ink-faint">{START}</span>
+              <span className="mx-3 text-ink-faint">→</span>
+              <span className="text-primary-700">{shown}</span>
             </p>
-            <p className="mt-2 text-xs text-desk-faint">Illustrative. Your report gives your own numbers, and a re-check confirms them.</p>
+            <p className="mt-2 text-xs text-ink-faint">Illustrative. Your report gives your own numbers, and a re-check confirms them.</p>
           </div>
         </div>
 
         <div ref={ref} data-play={state} className="fix lg:col-span-7">
-          <div className="page rounded-[4px] [container-type:inline-size] px-[6cqw] py-[6cqw]">
+          <div className="rounded-[12px] bg-white border border-border-DEFAULT [container-type:inline-size] px-[6cqw] py-[6cqw]">
             <h3 className="resume-text text-[max(15px,3.2cqw)] [font-variant:small-caps] tracking-[0.02em] border-b border-ink pb-1">
               Projects
             </h3>

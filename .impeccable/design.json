@@ -7,7 +7,7 @@
       "desk": {
         "role": "neutral",
         "displayName": "Desk Charcoal",
-        "canonical": "#141519",
+        "canonical": "#fcfcfc",
         "oklch": "oklch(19.6% 0.008 274.5)",
         "cssVar": "--color-desk",
         "purpose": "Ground of marketing, auth, analyze, report, demo, pricing, reading and status screens; nav, footer, sidebar.",
@@ -25,7 +25,7 @@
       "desk-raised": {
         "role": "neutral",
         "displayName": "Desk Raised",
-        "canonical": "#1c1d23",
+        "canonical": "#f2f2ee",
         "oklch": "oklch(23.2% 0.012 278.0)",
         "cssVar": "--color-desk-raised",
         "purpose": "Hero drop tray and hover fills on the desk.",
@@ -43,7 +43,7 @@
       "desk-line": {
         "role": "neutral",
         "displayName": "Desk Line",
-        "canonical": "#2d2f37",
+        "canonical": "#e1e1db",
         "oklch": "oklch(30.6% 0.015 274.4)",
         "cssVar": "--color-desk-line",
         "purpose": "Every rule and outline on charcoal.",
@@ -61,7 +61,7 @@
       "desk-ink": {
         "role": "neutral",
         "displayName": "Desk Ink",
-        "canonical": "#f4f3ef",
+        "canonical": "#16171b",
         "oklch": "oklch(96.4% 0.005 95.1)",
         "cssVar": "--color-desk-ink",
         "purpose": "Headlines and primary text on the desk.",
@@ -79,7 +79,7 @@
       "desk-muted": {
         "role": "neutral",
         "displayName": "Desk Muted",
-        "canonical": "#a7a9b2",
+        "canonical": "#5e616a",
         "oklch": "oklch(73.6% 0.013 276.0)",
         "cssVar": "--color-desk-muted",
         "purpose": "Body and nav text on the desk.",
@@ -97,7 +97,7 @@
       "desk-faint": {
         "role": "neutral",
         "displayName": "Desk Faint",
-        "canonical": "#80838d",
+        "canonical": "#75787f",
         "oklch": "oklch(61.1% 0.015 272.6)",
         "cssVar": "--color-desk-faint",
         "purpose": "Metadata and footnotes on the desk.",
@@ -547,7 +547,7 @@
       "danger-on-desk": {
         "role": "secondary",
         "displayName": "Red Pen on Desk",
-        "canonical": "#ff7b6f",
+        "canonical": "#c8302a",
         "oklch": "oklch(73.4% 0.163 27.1)",
         "cssVar": "--color-danger-on-desk",
         "purpose": "The only red for text on charcoal.",
@@ -920,7 +920,7 @@
       "refersTo": "button-desk",
       "description": "Light-ink outline for second actions on the charcoal desk.",
       "html": "<div class=\"ds-desk-pad\"><button class=\"ds-btn-desk\">See the sample report</button></div>",
-      "css": ".ds-desk-pad { background:var(--color-desk,#141519); padding:20px; } .ds-btn-desk { font-family: var(--font-sans, 'Mona Sans', system-ui, sans-serif); display:inline-flex; align-items:center; height:48px; padding:0 20px; font-size:0.9375rem; font-weight:600; color:var(--color-desk-ink,#f4f3ef); background:transparent; border:1px solid var(--color-desk-line,#2d2f37); border-radius:9px; cursor:pointer; transition:border-color 150ms ease-out, background-color 150ms ease-out; } .ds-btn-desk:hover { border-color:var(--color-desk-muted,#a7a9b2); background:var(--color-desk-raised,#1c1d23); } .ds-btn-desk:focus-visible { outline:2px solid var(--color-highlight,#ffe14d); outline-offset:2px; }"
+      "css": ".ds-desk-pad { background:var(--color-desk,#fcfcfc); padding:20px; } .ds-btn-desk { font-family: var(--font-sans, 'Mona Sans', system-ui, sans-serif); display:inline-flex; align-items:center; height:48px; padding:0 20px; font-size:0.9375rem; font-weight:600; color:var(--color-desk-ink,#16171b); background:transparent; border:1px solid var(--color-desk-line,#e1e1db); border-radius:9px; cursor:pointer; transition:border-color 150ms ease-out, background-color 150ms ease-out; } .ds-btn-desk:hover { border-color:var(--color-desk-muted,#5e616a); background:var(--color-desk-raised,#f2f2ee); } .ds-btn-desk:focus-visible { outline:2px solid var(--color-highlight,#ffe14d); outline-offset:2px; }"
     },
     {
       "name": "Text Input",
@@ -936,7 +936,7 @@
       "refersTo": "desk-nav",
       "description": "Charcoal bar: highlighted wordmark, three muted links, small yellow action.",
       "html": "<nav class=\"ds-nav\"><span class=\"ds-wordmark\">Gapl</span><a href=\"#\">How it reads</a><a href=\"#\" class=\"ds-active\">Sample report</a><a href=\"#\">Pricing</a><button class=\"ds-nav-cta\">Check my resume</button></nav>",
-      "css": ".ds-nav { font-family: var(--font-sans, 'Mona Sans', system-ui, sans-serif); display:flex; align-items:center; gap:4px; height:64px; padding:0 24px; background:var(--color-desk,#141519); border-bottom:1px solid var(--color-desk-line,#2d2f37); } .ds-wordmark { display:inline-flex; align-items:center; height:32px; padding:0 8px; margin-right:20px; background:var(--color-highlight,#ffe14d); color:var(--color-ink,#16171b); border-radius:3px; font-weight:820; font-variation-settings:'wdth' 112; letter-spacing:-0.035em; font-size:1.3125rem; line-height:1; } .ds-nav a { padding:8px 12px; font-size:0.875rem; font-weight:500; color:var(--color-desk-muted,#a7a9b2); text-decoration:none; border-radius:7px; transition:color 150ms, background-color 150ms; } .ds-nav a:hover { color:var(--color-desk-ink,#f4f3ef); background:var(--color-desk-raised,#1c1d23); } .ds-nav a.ds-active { color:var(--color-desk-ink,#f4f3ef); } .ds-nav a:focus-visible { outline:2px solid var(--color-highlight,#ffe14d); outline-offset:2px; } .ds-nav-cta { font:inherit; margin-left:auto; height:36px; padding:0 14px; font-size:0.8125rem; font-weight:600; color:var(--color-ink,#16171b); background:var(--color-highlight,#ffe14d); border:0; border-radius:7px; cursor:pointer; } .ds-nav-cta:hover { background:var(--color-highlight-deep,#f4cd16); }"
+      "css": ".ds-nav { font-family: var(--font-sans, 'Mona Sans', system-ui, sans-serif); display:flex; align-items:center; gap:4px; height:64px; padding:0 24px; background:var(--color-desk,#fcfcfc); border-bottom:1px solid var(--color-desk-line,#e1e1db); } .ds-wordmark { display:inline-flex; align-items:center; height:32px; padding:0 8px; margin-right:20px; background:var(--color-highlight,#ffe14d); color:var(--color-ink,#16171b); border-radius:3px; font-weight:820; font-variation-settings:'wdth' 112; letter-spacing:-0.035em; font-size:1.3125rem; line-height:1; } .ds-nav a { padding:8px 12px; font-size:0.875rem; font-weight:500; color:var(--color-desk-muted,#5e616a); text-decoration:none; border-radius:7px; transition:color 150ms, background-color 150ms; } .ds-nav a:hover { color:var(--color-desk-ink,#16171b); background:var(--color-desk-raised,#f2f2ee); } .ds-nav a.ds-active { color:var(--color-desk-ink,#16171b); } .ds-nav a:focus-visible { outline:2px solid var(--color-highlight,#ffe14d); outline-offset:2px; } .ds-nav-cta { font:inherit; margin-left:auto; height:36px; padding:0 14px; font-size:0.8125rem; font-weight:600; color:var(--color-ink,#16171b); background:var(--color-highlight,#ffe14d); border:0; border-radius:7px; cursor:pointer; } .ds-nav-cta:hover { background:var(--color-highlight-deep,#f4cd16); }"
     },
     {
       "name": "Verdicts and Tags",
@@ -960,7 +960,7 @@
       "refersTo": "page",
       "description": "A page on the desk carrying highlighter, red pen and blue ballpoint, with CMU Serif resume text.",
       "html": "<div class=\"ds-desk\"><div class=\"ds-page\"><p class=\"ds-remark\"><span class=\"ds-label\">What caught the eye</span><span class=\"ds-hl\">450+ problems on LeetCode</span></p><p class=\"ds-remark\"><span class=\"ds-label ds-red\">What sank it</span><span class=\"ds-under\">No deployed project</span></p><p class=\"ds-remark\"><span class=\"ds-label ds-blue\">What would change it</span><span class=\"ds-blue ds-fixw\">Ship one project on a live URL</span></p><p class=\"ds-resume\"><span class=\"ds-strike\">Expense Tracker | React, Firebase</span></p></div></div>",
-      "css": ".ds-desk { background:var(--color-desk,#141519); padding:32px; } .ds-page { font-family: var(--font-sans, 'Mona Sans', system-ui, sans-serif); background:var(--color-surface-DEFAULT,#fff); color:var(--color-ink,#16171b); border-radius:4px; padding:28px 32px; max-width:520px; box-shadow:0 2px 3px 0 rgb(0 0 0 / 0.35), 0 30px 60px -28px rgb(0 0 0 / 0.75); } .ds-remark { margin:0 0 18px; display:grid; gap:6px; font-size:0.9375rem; } .ds-label { font-size:0.6875rem; line-height:1rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--color-ink-muted,#5e616a); } .ds-red { color:var(--color-danger,#c8302a); } .ds-blue { color:var(--color-primary-700,#1f44a8); } .ds-fixw { font-weight:500; } .ds-hl { justify-self:start; background:var(--color-highlight-soft,#fff0a3); padding:0.04em 0.18em; margin:0 -0.18em; border-radius:2px; } .ds-under { justify-self:start; text-decoration:underline 2px var(--color-danger,#c8302a); text-underline-offset:0.2em; } .ds-resume { margin:8px 0 0; font-family:var(--font-serif, 'CMU Serif', 'Latin Modern Roman', Georgia, serif); font-weight:700; } .ds-strike { color:var(--color-ink-muted,#5e616a); text-decoration:line-through 2px var(--color-danger,#c8302a); }"
+      "css": ".ds-desk { background:var(--color-desk,#fcfcfc); padding:32px; } .ds-page { font-family: var(--font-sans, 'Mona Sans', system-ui, sans-serif); background:var(--color-surface-DEFAULT,#fff); color:var(--color-ink,#16171b); border-radius:4px; padding:28px 32px; max-width:520px; box-shadow:0 2px 3px 0 rgb(0 0 0 / 0.35), 0 30px 60px -28px rgb(0 0 0 / 0.75); } .ds-remark { margin:0 0 18px; display:grid; gap:6px; font-size:0.9375rem; } .ds-label { font-size:0.6875rem; line-height:1rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--color-ink-muted,#5e616a); } .ds-red { color:var(--color-danger,#c8302a); } .ds-blue { color:var(--color-primary-700,#1f44a8); } .ds-fixw { font-weight:500; } .ds-hl { justify-self:start; background:var(--color-highlight-soft,#fff0a3); padding:0.04em 0.18em; margin:0 -0.18em; border-radius:2px; } .ds-under { justify-self:start; text-decoration:underline 2px var(--color-danger,#c8302a); text-underline-offset:0.2em; } .ds-resume { margin:8px 0 0; font-family:var(--font-serif, 'CMU Serif', 'Latin Modern Roman', Georgia, serif); font-weight:700; } .ds-strike { color:var(--color-ink-muted,#5e616a); text-decoration:line-through 2px var(--color-danger,#c8302a); }"
     },
     {
       "name": "Choice Chips",

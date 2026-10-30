@@ -2,12 +2,12 @@
 name: Gapl
 description: Your resume, read the way a recruiter reads it — a charcoal desk, white paper, and three marks.
 colors:
-  desk: "#141519"
-  desk-raised: "#1c1d23"
-  desk-line: "#2d2f37"
-  desk-ink: "#f4f3ef"
-  desk-muted: "#a7a9b2"
-  desk-faint: "#80838d"
+  desk: "#fcfcfc"
+  desk-raised: "#f2f2ee"
+  desk-line: "#e1e1db"
+  desk-ink: "#16171b"
+  desk-muted: "#5e616a"
+  desk-faint: "#75787f"
   surface: "#ffffff"
   surface-muted: "#f2f2ee"
   surface-subtle: "#e8e8e3"
@@ -32,7 +32,7 @@ colors:
   danger-deep: "#a32520"
   danger-bg: "#fbeae8"
   danger-border: "#f0bcb7"
-  danger-on-desk: "#ff7b6f"
+  danger-on-desk: "#c8302a"
   success: "#17784a"
   success-bg: "#e3f2e9"
   success-border: "#a8d5bb"
@@ -41,26 +41,23 @@ colors:
   warning-border: "#ecd08f"
 typography:
   display:
-    fontFamily: "Mona Sans, system-ui, sans-serif"
+    fontFamily: "Newsreader, Georgia, serif"
     fontSize: "clamp(2.6rem, 5.6vw, 4.75rem)"
-    fontWeight: 780
+    fontWeight: 400
     lineHeight: 1.02
-    letterSpacing: "-0.03em"
-    fontVariation: "'wdth' 108"
+    letterSpacing: "-0.045em"
   headline:
-    fontFamily: "Mona Sans, system-ui, sans-serif"
+    fontFamily: "Newsreader, Georgia, serif"
     fontSize: "clamp(2.25rem, 4.6vw, 3.75rem)"
-    fontWeight: 780
+    fontWeight: 400
     lineHeight: 0.98
-    letterSpacing: "-0.03em"
-    fontVariation: "'wdth' 108"
+    letterSpacing: "-0.045em"
   page-title:
-    fontFamily: "Mona Sans, system-ui, sans-serif"
+    fontFamily: "Newsreader, Georgia, serif"
     fontSize: "clamp(1.875rem, 4vw, 2.5rem)"
-    fontWeight: 780
+    fontWeight: 400
     lineHeight: 0.98
-    letterSpacing: "-0.03em"
-    fontVariation: "'wdth' 108"
+    letterSpacing: "-0.045em"
   title:
     fontFamily: "Mona Sans, system-ui, sans-serif"
     fontSize: "1.25rem"
@@ -266,6 +263,8 @@ components:
 
 **Creative North Star: "The Recruiter's Read"**
 
+> **2026-10-30, the light redesign (branch `living`).** The whole product moved from the charcoal desk to light paper, modelled on Mercor and Gem: page `#fcfcfc`, editorial Newsreader serif for every headline, square 2px landing buttons, warm daylight photography of one sunlit table (`public/living/img`), a scroll film (`public/living/frames`) and GSAP + Lenis motion on the landing. The `desk-*` token names were kept and now hold the light values, so every screen follows. The three marks, the verdict words and CMU Serif for resume text are unchanged. Where the text below still says "charcoal", read "light paper".
+
 Gapl shows a student their resume the way a recruiter reads it: six seconds, a pen, a highlighter. The whole interface is that scene. A charcoal desk is the ground; white sheets of paper lie on it; and everything the product has to say is written onto the paper with three marks. A highlighter block says what caught the eye. A red pen underlines, strikes, rings and annotates what sank it, and writes the verdict. A blue ballpoint writes the fix back. The marks are geometrically precise (crisp blocks, straight 2px rules, a rounded-rect ring, short leader lines into the margin), never wobbly or hand-drawn.
 
 The system is quiet so the marks can be loud. Type is one variable sans, Mona Sans, set heavy and slightly wide for headlines and condensed-tabular for figures; resume text alone is set in CMU Serif, the Computer Modern face of the one-page LaTeX template most CS students already use, so the sample page reads as *their* resume. Density sits between a document and a tool: generous section rhythm on the desk, hairline-ruled rows on paper. The previous Indian-Railways reservation-chart world was retired by the user as too themed, dated and dense; none of its devices carry over.
@@ -273,10 +272,10 @@ The system is quiet so the marks can be loud. Type is one variable sans, Mona Sa
 The signature is the six-second read: a sample resume that, once it scrolls into view, gets marked in reading order while a clock runs to 6 sec and a red `Reject` prints in the margin. It is followed by the fix being written back: a struck coursework line, then blue "Build instead" rows, with readiness counting up.
 
 **Key Characteristics:**
-- Two materials: charcoal desk and white paper. A light pad appears only under Operate screens.
+- Two materials: a light paper ground (`desk`, #fcfcfc) and white sheets on it, plus warm daylight photography on the landing.
 - Three marks carry all meaning: highlighter (seen, and the one action), red pen (what sank it), blue ballpoint (the fix).
 - Verdicts are written words in a ruled box, never colour alone.
-- Mona Sans for every UI word and figure; CMU Serif only for resume text.
+- Newsreader serif for headlines, Mona Sans for every UI word and figure, CMU Serif only for resume text.
 - One motion curve (ease-out-expo); marks draw on, nothing bounces; reduced motion shows the finished page.
 
 ## Colors
@@ -289,7 +288,7 @@ A near-neutral desk and paper, with three saturated ink colours that each mean e
 
 ### Secondary
 - **Red Pen** (`danger`): what sank it. The 2px underline, the strike, the ring around an entry, margin notes, the `Reject` verdict, the weakest readiness component, missing skills (ruled with `danger-border`), the Critical priority tag, error text and destructive buttons (pressed: `danger-deep`). `danger-bg` is the faint wash behind Critical tags and error panels.
-- **Red Pen on the Desk** (`danger-on-desk`): the only red allowed for text on charcoal (status-page marks, upload errors in the hero, the "plan used" counter at zero). Plain `danger` is too dark to read on the desk.
+- **Red Pen on the Desk** (`danger-on-desk`): now equal to `danger`, since the desk is light. Kept as a token so existing uses still resolve.
 
 ### Tertiary
 - **Blue Ballpoint** (`primary`, deepened to `primary-700` for text on paper): the fix. Recommended builds, "What would change it", "Build instead" rows, milestones, readiness deltas on paper (`65 → 78`, the `→ N` column), links, the focus ring and the input focus border. `primary-50` / `primary-100` are the faint wash and ring of the `fix` tag. Blue is never a fill for a primary button.
@@ -299,7 +298,7 @@ A near-neutral desk and paper, with three saturated ink colours that each mean e
 - **Maybe Ochre** (`warning`, with `warning-bg`, `warning-border`): only the `Maybe` verdict and the `High` priority tag.
 
 ### Neutral
-- **Desk Charcoal** (`desk`): the ground of marketing, auth, analyze, report, demo, pricing, reading and status screens, the nav, the footer and the dashboard sidebar; also the `<html>` background and theme colour.
+- **Desk Paper** (`desk`, #fcfcfc since 2026-10-30): the ground of marketing, auth, analyze, report, demo, pricing, reading and status screens, the nav, the footer and the dashboard sidebar; also the `<html>` background and theme colour.
 - **Desk Raised** (`desk-raised`): the hero drop-zone tray and hover fills on the desk. **Desk Line** (`desk-line`): every rule and outline on charcoal.
 - **Desk Ink / Muted / Faint** (`desk-ink`, `desk-muted`, `desk-faint`): headline, body and metadata text on the desk.
 - **Paper** (`surface`): every sheet, page, card, input, and the full-bleed white bands (Contents, FAQ) on the landing.
@@ -316,14 +315,14 @@ A near-neutral desk and paper, with three saturated ink colours that each mean e
 
 ## Typography
 
-**Display Font:** Mona Sans (variable, `wdth` axis), via `next/font` with system-ui fallback
+**Display Font:** Newsreader (Google, optical sizes), via `next/font`, Georgia fallback. The `.display` and `.serif-display` classes both set it.
 **Body Font:** Mona Sans
 **Resume Font:** CMU Serif (self-hosted woff2 subset in `src/fonts/cmu`, 400 / 700 / 400 italic), with Latin Modern Roman and Georgia fallback
 
 **Character:** One confident grotesque does every job, made heavy and a touch wide for headlines and condensed for figures, so the only typographic contrast on the page is the serif of the resume itself. The serif signals "this is your document"; the sans is Gapl talking.
 
 ### Hierarchy
-- **Display** (780, `wdth` 108, -0.03em, clamp 2.6–4.75rem, line-height 1.02): the hero headline. The `.display` class carries weight, width and tracking; size is set per use.
+- **Display** (Newsreader 400, -0.04 to -0.045em, line-height 0.95 to 1): every headline, landing and app. The `.display` class carries weight, width and tracking; size is set per use.
 - **Headline** (780, clamp 2.25–3.75rem, 0.98): landing section heads ("Then it writes the fix back."), reading-page and status-screen titles (clamp to 4.5rem on status).
 - **Page Title** (780, clamp 1.875–2.6rem): app page heads, the report head, analyze step questions.
 - **Title** (600, 1.25rem, -0.015em): plan names, notice heads, empty-state titles.

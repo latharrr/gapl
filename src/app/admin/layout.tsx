@@ -117,7 +117,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 isActive ? "bg-desk-raised text-desk-ink font-semibold" : "text-desk-muted hover:text-desk-ink hover:bg-desk-raised/60"
               }`}
             >
-              <Icon size={16} className={isActive ? "text-highlight" : "text-desk-faint"} />
+              <Icon size={16} className={isActive ? "text-ink" : "text-desk-faint"} />
               {item.label}
             </Link>
           );
