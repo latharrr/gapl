@@ -202,8 +202,9 @@ export async function POST(req: NextRequest) {
       if (err instanceof UsageLimitError) {
         return NextResponse.json({ error: err.message, code: "LIMIT_REACHED" }, { status: 403 });
       }
+      console.error("CV generation failed:", err);
       return NextResponse.json(
-        { error: err instanceof Error ? err.message : "CV generation failed. Please try again." },
+        { error: "CV generation failed. Please try again." },
         { status: 500 }
       );
     }
@@ -211,7 +212,7 @@ export async function POST(req: NextRequest) {
     const error = err as { message?: string };
     console.error("CV Builder error:", error);
     return NextResponse.json(
-      { error: error?.message || "CV generation failed. Please try again." },
+      { error: "CV generation failed. Please try again." },
       { status: 500 }
     );
   }
