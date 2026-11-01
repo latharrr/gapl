@@ -127,8 +127,9 @@ export async function POST(req: NextRequest) {
       if (err instanceof UsageLimitError) {
         return NextResponse.json({ error: err.message, code: "LIMIT_REACHED" }, { status: 403 });
       }
+      console.error("Tailor generation failed:", err);
       return NextResponse.json(
-        { error: err instanceof Error ? err.message : "Tailoring failed. Please try again." },
+        { error: "Tailoring failed. Please try again." },
         { status: 500 }
       );
     }
@@ -136,7 +137,7 @@ export async function POST(req: NextRequest) {
     const error = err as { message?: string };
     console.error("Tailor error:", error);
     return NextResponse.json(
-      { error: error?.message || "Tailoring failed. Please try again." },
+      { error: "Tailoring failed. Please try again." },
       { status: 500 }
     );
   }

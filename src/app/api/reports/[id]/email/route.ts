@@ -117,6 +117,6 @@ export async function POST(
     return NextResponse.json({ success: true, remaining, total: MAX_SENDS, sent: newCount });
   } catch (err: unknown) {
     console.error("Failed to email report:", err);
-    return NextResponse.json({ error: err instanceof Error ? err.message : "Failed to send email." }, { status: 500 });
+    return NextResponse.json({ error: "Failed to send email." }, { status: 500 });
   }
 }
