@@ -14,6 +14,9 @@ const USER_FACING_ROUTES = [
   "src/app/api/reports/[id]/email/route.ts",
   "src/app/api/analyze/validate/route.ts",
   "src/app/api/webhooks/resend/route.ts",
+  "src/app/api/roadmaps/[id]/route.ts",
+  "src/app/api/user/delete/route.ts",
+  "src/app/api/user/delete-reports/route.ts",
 ];
 
 const LEAK_PATTERNS = [
@@ -50,6 +53,9 @@ test("500 responses keep a fixed generic client message", () => {
     "src/app/api/reports/[id]/email/route.ts": "Failed to send email.",
     "src/app/api/analyze/validate/route.ts": "Failed to validate resume.",
     "src/app/api/webhooks/resend/route.ts": "Failed to process webhook.",
+    "src/app/api/roadmaps/[id]/route.ts": "Failed to update roadmap.",
+    "src/app/api/user/delete/route.ts": "Failed to delete account.",
+    "src/app/api/user/delete-reports/route.ts": "Failed to delete reports.",
   };
   for (const [route, message] of Object.entries(expectations)) {
     assert.ok(read(route).includes(`{ error: "${message}" }`), `${route} returns "${message}"`);

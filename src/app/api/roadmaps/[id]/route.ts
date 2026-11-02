@@ -149,6 +149,6 @@ export async function PATCH(
     return NextResponse.json({ success: true, completionPercentage: newPct, currentReadiness });
   } catch (err: unknown) {
     console.error("Error updating roadmap:", err);
-    return NextResponse.json({ error: err instanceof Error ? err.message : "Failed to update roadmap." }, { status: 500 });
+    return NextResponse.json({ error: "Failed to update roadmap." }, { status: 500 });
   }
 }
