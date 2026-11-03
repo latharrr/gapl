@@ -10,7 +10,7 @@ export async function DELETE(req: NextRequest) {
   const user = userOrError;
 
   try {
-    // 1. Delete Firestore data cascade (9 collections)
+    // 1. Delete Firestore data cascade (all per-user collections)
     const collectionsDeleted = await cascadeDeleteUserData(user.uid);
 
     // 2. Delete Auth account last

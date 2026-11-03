@@ -9,6 +9,8 @@ export async function cascadeDeleteUserData(uid: string) {
     "payment_orders",
     "analytics_events",
     "email_messages",
+    "email_events",
+    "trackable_links",
     "cvs"
   ];
 
