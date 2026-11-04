@@ -1,3 +1,4 @@
+import { validateTailoredResume } from "@/lib/tailor-validation";
 import { NextRequest, NextResponse } from "next/server";
 import { generateAICall } from "@/lib/ai-gateway";
 import { releaseAnalysis, reserveAnalysis, UsageLimitError } from "@/lib/analysis-usage";
@@ -102,6 +103,9 @@ export async function POST(req: NextRequest) {
       jdText?: string;
     };
 
+    if (typeof resumeText !== "string" || typeof role !== "string" || typeof tier !== "string" || (jdText !== undefined && typeof jdText !== "string")) {
+      return NextResponse.json({ error: "resumeText, role, and tier must be text." }, { status: 400 });
+    }
     if (!resumeText || !role || !tier) {
       return NextResponse.json({ error: "resumeText, role, and tier are required." }, { status: 400 });
     }
@@ -121,7 +125,7 @@ export async function POST(req: NextRequest) {
         userId: user.uid,
       });
 
-      return NextResponse.json({ result: parsed });
+      return NextResponse.json({ result: validateTailoredResume(parsed) });
     } catch (err: unknown) {
       if (reserved) await releaseAnalysis(user.uid).catch((error) => console.error("CRITICAL: releaseAnalysis failed for", user.uid, error));
       if (err instanceof UsageLimitError) {
