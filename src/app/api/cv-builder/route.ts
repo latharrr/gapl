@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateAICall } from "@/lib/ai-gateway";
 import { releaseAnalysis, reserveAnalysis, UsageLimitError } from "@/lib/analysis-usage";
+import { validateCvResult } from "@/lib/cv-validation";
 import { requireUser } from "@/lib/firebase-admin";
 import { takeRateLimit } from "@/lib/rate-limit";
 
@@ -168,6 +169,9 @@ export async function POST(req: NextRequest) {
       companyType = body.companyType || "";
       companyName = body.companyName || "";
       jdText      = body.jdText      || "";
+      if ([resumeText, role, seniority, companyType, companyName, jdText].some((v) => typeof v !== "string")) {
+        return NextResponse.json({ error: "All fields must be text." }, { status: 400 });
+      }
     }
 
     if (!role || !seniority || !companyType) {
@@ -196,7 +200,7 @@ export async function POST(req: NextRequest) {
         userId: user.uid,
       });
 
-      return NextResponse.json({ result: parsed });
+      return NextResponse.json({ result: validateCvResult(parsed) });
     } catch (err: unknown) {
       if (reserved) await releaseAnalysis(user.uid).catch((error) => console.error("CRITICAL: releaseAnalysis failed for", user.uid, error));
       if (err instanceof UsageLimitError) {
