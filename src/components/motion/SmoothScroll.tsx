@@ -50,7 +50,7 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
   return (
     <ReactLenis root options={{ autoRaf: false, anchors: true, lerp: 0.12, smoothWheel: !reduce }} ref={lenisRef}>
       <ScrollTriggerSync />
-      {children}
+      <div className="rise-scope">{children}</div>
     </ReactLenis>
   );
 }
