@@ -504,9 +504,11 @@
 @keyframes marquee { to { transform: translateX(-50%); } }
 @keyframes how-bar { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 
-/* [data-rise] waits hidden for GSAP's arrival; with reduced motion it simply shows. */
-.js [data-rise] { opacity: 0; }
-@media (prefers-reduced-motion: reduce) { .js [data-rise] { opacity: 1; } }
+/* [data-rise] hides only inside a SmoothScroll scope (.rise-scope), the pages whose GSAP
+   actually reveals it. Pages that render these components without SmoothScroll
+   (e.g. /pricing) must stay visible. Reduced motion always shows. */
+.js .rise-scope [data-rise] { opacity: 0; }
+@media (prefers-reduced-motion: reduce) { .js .rise-scope [data-rise] { opacity: 1; } }
 
 /* The loop diagram scales down on phones; its labels scale back up so they stay readable. */
 @media (max-width: 640px) {
