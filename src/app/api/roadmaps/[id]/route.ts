@@ -43,10 +43,14 @@ export async function GET(
   }
 
   // Initialize roadmap document
+  // Scores are numbers that can legitimately be 0; only fall back when absent,
+  // never on falsy (a real 0 readiness must not display as 65/85).
+  const num = (v: unknown, fallback: number) => (typeof v === "number" && Number.isFinite(v) ? v : fallback);
   const careerGaps = report.careerGaps || [];
+  const reportReadiness = num(report.readiness, 85);
   const targetReadiness = careerGaps.length > 0
-    ? Math.max(...careerGaps.map((g: RoadmapCareerGap) => g.expectedReadinessAfter || 85), report.readiness || 85)
-    : Math.max(report.readiness || 85, 85);
+    ? Math.max(...careerGaps.map((g: RoadmapCareerGap) => num(g.expectedReadinessAfter, 85)), reportReadiness)
+    : Math.max(reportReadiness, 85);
 
   const initialRoadmap = {
     reportId: id,
@@ -55,7 +59,7 @@ export async function GET(
     completedTasks: [],
     completionPercentage: 0,
     targetReadiness,
-    currentReadiness: report.readiness || 65,
+    currentReadiness: num(report.readiness, 65),
   };
 
   await roadmapDocRef.set(initialRoadmap);
