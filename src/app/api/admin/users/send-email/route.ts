@@ -29,6 +29,12 @@ export async function POST(req: NextRequest) {
   try {
     const adminOrError = await requireAdmin(req);
     if (adminOrError instanceof NextResponse) return adminOrError;
+    const adminUser = adminOrError;
+
+    // Sending or rewriting email to a user is a write action: readonly/support are read-only here.
+    if (!["super_admin", "admin"].includes(adminUser.role)) {
+      return NextResponse.json({ error: "Unauthorized role for sending email." }, { status: 403 });
+    }
 
     const body = await req.json();
     const { action, targetUid, subject, message } = body;
