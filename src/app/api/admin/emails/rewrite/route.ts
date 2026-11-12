@@ -8,6 +8,12 @@ export async function POST(req: NextRequest) {
   try {
     const adminOrError = await requireAdmin(req);
     if (adminOrError instanceof NextResponse) return adminOrError;
+    const adminUser = adminOrError;
+
+    // AI rewrites spend paid model calls: readonly/support admins are read-only here.
+    if (!["super_admin", "admin"].includes(adminUser.role)) {
+      return NextResponse.json({ error: "Unauthorized role for AI email rewrites." }, { status: 403 });
+    }
 
     const { message } = await req.json();
     if (!message || typeof message !== "string") {
