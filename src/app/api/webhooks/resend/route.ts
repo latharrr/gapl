@@ -73,21 +73,46 @@ export async function POST(req: NextRequest) {
 
     const db = getAdminDb();
 
-    // 1.5. Idempotency check using webhook_events collection
+    // 1.5. Idempotency check using webhook_events collection. create() is atomic:
+    // two concurrent deliveries of the same event cannot both pass, unlike get()+set().
     const svixId = req.headers.get("webhook-id") || payload.id || `evt-${resendEmailId}-${eventType}`;
     const webhookEventRef = db.collection("webhook_events").doc(svixId);
-    const eventSnap = await webhookEventRef.get();
 
-    if (eventSnap.exists) {
-      console.log(`Duplicate webhook event ignored: ${svixId}`);
-      return NextResponse.json({ success: true, duplicated: true });
+    try {
+      await webhookEventRef.create({
+        eventId: svixId,
+        type: eventType,
+        receivedAt: new Date().toISOString(),
+      });
+    } catch (err: unknown) {
+      // Firestore ALREADY_EXISTS (gRPC code 6) means this delivery was already processed.
+      if ((err as { code?: number })?.code === 6) {
+        console.log(`Duplicate webhook event ignored: ${svixId}`);
+        return NextResponse.json({ success: true, duplicated: true });
+      }
+      throw err;
     }
 
-    await webhookEventRef.set({
-      eventId: svixId,
-      type: eventType,
-      receivedAt: new Date().toISOString(),
-    });
+    // Map Resend events to email_messages statuses and email_events types. Unknown
+    // types (e.g. email.delivery_delayed) are acknowledged but ignored: they must not
+    // reset a message's status or write a bogus email_sent log.
+    const EVENT_MAP: Record<string, { status: string; logType: string }> = {
+      "email.sent": { status: "sent", logType: "email_sent" },
+      "email.delivered": { status: "delivered", logType: "email_delivered" },
+      "email.opened": { status: "opened", logType: "email_opened" },
+      "email.clicked": { status: "clicked", logType: "email_clicked" },
+      "email.bounced": { status: "bounced", logType: "email_bounced" },
+      "email.complained": { status: "complained", logType: "email_complained" },
+      "email.failed": { status: "failed", logType: "email_failed" },
+    };
+    if (eventType.includes("unsubscribe")) {
+      EVENT_MAP[eventType] = { status: "unsubscribed", logType: "email_unsubscribed" };
+    }
+    const mapped = EVENT_MAP[eventType];
+    if (!mapped) {
+      return NextResponse.json({ success: true, ignored: eventType });
+    }
+    const { status: newStatus, logType } = mapped;
     
     // 2. Query email_messages to locate matching sent record
     const messagesRef = db.collection("email_messages");
@@ -106,53 +131,22 @@ export async function POST(req: NextRequest) {
 
     const timestamp = payload.created_at || new Date().toISOString();
     
-    // Map Resend events to email_messages statuses and email_events types
-    let newStatus = "sent";
-    let logType = "email_sent";
+    // 3. Update Email Message Document. Events can arrive out of order, so a status
+    // only advances forward (sent < delivered < opened < clicked); a late "delivered"
+    // must never overwrite an "opened". Terminal states always apply.
+    const STATUS_RANK: Record<string, number> = { sent: 1, delivered: 2, opened: 3, clicked: 4 };
+    const TERMINAL_STATUSES = new Set(["bounced", "complained", "failed", "unsubscribed"]);
+    const currentStatus = typeof msgData.status === "string" ? msgData.status : "";
+    const isRegression =
+      !TERMINAL_STATUSES.has(newStatus) &&
+      (STATUS_RANK[newStatus] ?? 0) <= (STATUS_RANK[currentStatus] ?? 0);
 
-    switch (eventType) {
-      case "email.sent":
-        newStatus = "sent";
-        logType = "email_sent";
-        break;
-      case "email.delivered":
-        newStatus = "delivered";
-        logType = "email_delivered";
-        break;
-      case "email.opened":
-        newStatus = "opened";
-        logType = "email_opened";
-        break;
-      case "email.clicked":
-        newStatus = "clicked";
-        logType = "email_clicked";
-        break;
-      case "email.bounced":
-        newStatus = "bounced";
-        logType = "email_bounced";
-        break;
-      case "email.complained":
-        newStatus = "complained";
-        logType = "email_complained";
-        break;
-      case "email.failed":
-        newStatus = "failed";
-        logType = "email_failed";
-        break;
-      default:
-        // Handle other edge events like unsubscribe
-        if (eventType.includes("unsubscribe")) {
-          newStatus = "unsubscribed";
-          logType = "email_unsubscribed";
-        }
-        break;
-    }
-
-    // 3. Update Email Message Document
     const updatePayload: Record<string, string> = {
-      status: newStatus,
       updatedAt: timestamp,
     };
+    if (!isRegression) {
+      updatePayload.status = newStatus;
+    }
 
     if (eventType === "email.delivered") {
       updatePayload.deliveredAt = timestamp;
