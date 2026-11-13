@@ -18,10 +18,17 @@ export function validateResumeContent(text: string): { isResume: boolean; reason
     "invoice", "receipt", "total amount due", "purchase order", "bibliography",
   ];
 
-  if (negatives.filter((signal) => lower.includes(signal)).length >= 2) {
+  const signalCount = signals.filter((signal) => lower.includes(signal)).length;
+  const negativeCount = negatives.filter((signal) => lower.includes(signal)).length;
+
+  // Negative keywords only mark junk when resume structure is also weak. A real
+  // resume can mention invoices, receipts, menus or purchase orders as project
+  // work; those still carry strong resume signals, so the keyword match alone
+  // must not reject them.
+  if (negativeCount >= 2 && signalCount < 5) {
     return { isResume: false, reason: "This looks like a different kind of document (like a receipt or invoice). Please upload a valid resume." };
   }
-  if (signals.filter((signal) => lower.includes(signal)).length < 3) {
+  if (signalCount < 3) {
     return { isResume: false, reason: "This does not look like a resume. Include sections such as education, skills, projects, or experience." };
   }
   return { isResume: true, reason: "" };

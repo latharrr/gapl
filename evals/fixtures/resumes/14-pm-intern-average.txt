@@ -1,0 +1,22 @@
+Karan Nair
+karan.nair14@example.com | +91 9777984118 | linkedin.com/in/karan-nair | github.com/karan14
+
+SUMMARY
+Aspiring Product Manager seeking an entry-level opportunity to learn and contribute.
+
+EDUCATION
+B.Tech, IIT Delhi, 2021-2025, CGPA 7.04/10
+
+SKILLS
+User Research, Wireframing, SQL, Roadmapping, A/B Testing, Figma, Analytics, Prioritization
+
+EXPERIENCE
+Product Intern at an ed-tech startup: owned backlog grooming, wrote PRDs, coordinated with 4 engineers and 1 designer.
+
+PROJECTS
+- Ran 15 user interviews and synthesized a prioritized pain-point list for a campus app
+- Specced and shipped an onboarding revamp; activation up 12%
+
+ACHIEVEMENTS
+- Completed 3 online certifications
+- Member of the college coding club

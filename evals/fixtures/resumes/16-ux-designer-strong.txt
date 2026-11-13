@@ -1,0 +1,24 @@
+CURRICULUM VITAE
+Dev Verma
+dev.verma16@example.com | +91 9679116499 | linkedin.com/in/dev-verma | github.com/dev16
+
+SUMMARY
+UI/UX Designer with shipped, measurable work. Looking for a role where I can own outcomes end to end.
+
+EDUCATION
+B.Tech, NIT Trichy, 2021-2025, CGPA 6.03/10
+
+SKILLS
+Figma, Prototyping, User Research, Design Systems, Usability Testing, HTML, CSS, Motion Design
+
+EXPERIENCE
+Product Design Intern at a SaaS startup: ran 8 usability sessions, delivered hi-fi prototypes for the analytics dashboard.
+
+PROJECTS
+- Redesigned checkout flow for a D2C brand; task completion rose from 61% to 84% in usability tests
+- Built a 40-component design system adopted across 3 products
+
+ACHIEVEMENTS
+- Won 2nd place at a national hackathon (800+ teams)
+- Open-source contributor: 12 merged PRs across 4 projects
+- Dean's list, top 5% of batch

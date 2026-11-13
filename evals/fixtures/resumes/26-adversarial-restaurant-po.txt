@@ -1,0 +1,18 @@
+Meera Kulkarni
+meera.mk@example.com | +91 9887766554 | linkedin.com/in/meera-mk | github.com/meeramk
+
+SUMMARY
+Full-stack developer, 3 years experience, hospitality and supply-chain products.
+
+EDUCATION
+B.E. Computer Engineering, VIT Vellore, 2018-2022, CGPA 8.4/10
+
+SKILLS
+TypeScript, React, Node.js, PostgreSQL, Redis, Docker
+
+EXPERIENCE
+Full-Stack Developer at a food-tech company: built the restaurant dashboard owners use to edit each menu item, and a purchase order module that auto-reorders ingredients when stock runs low.
+
+PROJECTS
+- Restaurant menu item analytics: tracks which dishes sell, per outlet
+- Purchase order approval workflow with role-based access

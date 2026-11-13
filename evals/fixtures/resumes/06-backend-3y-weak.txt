@@ -1,0 +1,14 @@
+Karan Kulkarni
+karan.kulkarni6@example.com | +91 9487719857 | linkedin.com/in/karan-kulkarni | github.com/karan6
+
+SUMMARY
+Fresher looking for a job.
+
+EDUCATION
+B.Tech, IIT Delhi, 2021-2025, CGPA 9.80/10
+
+SKILLS
+Go, PostgreSQL, Redis, Kafka
+
+PROJECTS
+- Designed a rate-limited notification service handling 2M messages/day

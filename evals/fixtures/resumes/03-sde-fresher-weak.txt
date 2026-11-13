@@ -1,0 +1,14 @@
+Ishita Nair
+ishita.nair3@example.com | +91 9921754598 | linkedin.com/in/ishita-nair | github.com/ishita3
+
+SUMMARY
+Fresher looking for a job.
+
+EDUCATION
+B.Tech, VIT Vellore, 2021-2025, CGPA 7.62/10
+
+SKILLS
+Java, Python, Data Structures, Algorithms
+
+PROJECTS
+- Built a full-stack hostel mess management app used by 500+ students

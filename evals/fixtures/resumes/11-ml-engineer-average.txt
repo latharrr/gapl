@@ -1,0 +1,22 @@
+Ishita Kulkarni
+ishita.kulkarni11@example.com | +91 9323016023 | linkedin.com/in/ishita-kulkarni | github.com/ishita11
+
+SUMMARY
+Machine Learning Engineer seeking an entry-level opportunity to learn and contribute.
+
+EDUCATION
+B.Tech, NIT Trichy, 2021-2025, CGPA 8.05/10
+
+SKILLS
+Python, PyTorch, scikit-learn, NLP, Docker, MLflow, SQL, FastAPI
+
+EXPERIENCE
+ML Intern at a health-tech startup: built evaluation harness for a triage model, improved recall from 0.71 to 0.83.
+
+PROJECTS
+- Trained a sentiment classifier on 200k product reviews (F1 0.87)
+- Deployed an embedding-based duplicate-question detector behind FastAPI
+
+ACHIEVEMENTS
+- Completed 3 online certifications
+- Member of the college coding club

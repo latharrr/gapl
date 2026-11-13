@@ -1,0 +1,23 @@
+Priya Khan
+priya.khan22@example.com | +91 9443296468 | linkedin.com/in/priya-khan | github.com/priya22
+
+SUMMARY
+Electronics Engineer pivoting to software with shipped, measurable work. Looking for a role where I can own outcomes end to end.
+
+EDUCATION
+B.Tech, NIT Trichy, 2021-2025, CGPA 6.95/10
+
+SKILLS
+C, Embedded Systems, Python, MATLAB, Arduino, Circuit Design, SQL, Linux
+
+EXPERIENCE
+Embedded Systems Intern at an automotive supplier: wrote C firmware for a sensor module, documented test procedures.
+
+PROJECTS
+- Built an Arduino-based air quality monitor logging to a Python dashboard
+- Simulated a 4-bit ALU in Verilog for coursework
+
+ACHIEVEMENTS
+- Won 2nd place at a national hackathon (800+ teams)
+- Open-source contributor: 12 merged PRs across 4 projects
+- Dean's list, top 5% of batch

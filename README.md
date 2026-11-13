@@ -11,7 +11,7 @@ An application-readiness tool for job seekers, with an email and attribution bac
 | **Status** | Live beta with about 10 early users, mostly friends. Not a production launch ([details](PROJECT_STATUS.md)) |
 | **Stack** | Next.js (App Router), TypeScript, Firebase Auth + Firestore, Resend, Razorpay, Tailwind + Radix UI |
 | **AI** | One gateway in `src/lib/ai-gateway.ts` with a primary model, a backup and optional last-resort fallbacks. The models named in the source are Anthropic Claude; which one a deployment runs depends on its keys and settings |
-| **Tests** | 14 unit tests (credits, payments, report-ready scores); CI runs lint, typecheck, tests and a production build |
+| **Tests** | 50 unit tests (credits, payments, validation, webhooks, admin RBAC) plus an offline evaluation harness in `evals/` (44 labeled documents covering the resume upload gate, PDF extraction, output validation and prompt construction); CI runs lint, typecheck, tests and a production build |
 | **Scope** | Web app, AI gateway, email and attribution pipeline, admin tooling |
 
 ## What a candidate gets

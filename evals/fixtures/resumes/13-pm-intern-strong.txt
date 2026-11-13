@@ -1,0 +1,23 @@
+Dev Iyer
+dev.iyer13@example.com | +91 9202503621 | linkedin.com/in/dev-iyer | github.com/dev13
+
+SUMMARY
+Aspiring Product Manager with shipped, measurable work. Looking for a role where I can own outcomes end to end.
+
+EDUCATION
+B.Tech, Delhi University, 2021-2025, CGPA 6.94/10
+
+SKILLS
+User Research, Wireframing, SQL, Roadmapping, A/B Testing, Figma, Analytics, Prioritization
+
+EXPERIENCE
+Product Intern at an ed-tech startup: owned backlog grooming, wrote PRDs, coordinated with 4 engineers and 1 designer.
+
+PROJECTS
+- Ran 15 user interviews and synthesized a prioritized pain-point list for a campus app
+- Specced and shipped an onboarding revamp; activation up 12%
+
+ACHIEVEMENTS
+- Won 2nd place at a national hackathon (800+ teams)
+- Open-source contributor: 12 merged PRs across 4 projects
+- Dean's list, top 5% of batch

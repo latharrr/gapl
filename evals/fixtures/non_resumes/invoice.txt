@@ -1,0 +1,13 @@
+TAX INVOICE
+Invoice No: INV-2026-0412
+Date: 12 Nov 2026
+Billed To: Acme Traders, Ludhiana
+
+Items:
+1. Cotton fabric 40m @ ₹210 = ₹8,400
+2. Stitching charges = ₹1,600
+
+Subtotal: ₹10,000
+GST 18%: ₹1,800
+Total amount due: ₹11,800
+Payment terms: 15 days. This is a computer generated invoice.

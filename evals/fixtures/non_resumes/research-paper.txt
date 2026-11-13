@@ -1,0 +1,14 @@
+Attention Mechanisms for Low-Resource Neural Machine Translation
+
+Abstract: We study chapter 3 style encoder-decoder models...
+
+Table of Contents
+1. Introduction
+2. Related Work
+3. Method
+
+Chapter 1 Introduction
+Recent work (doi:10.1145/3456.7890) shows...
+
+Bibliography
+[1] Vaswani et al., 2017. doi:10.5555/3295222

@@ -1,0 +1,23 @@
+CURRICULUM VITAE
+Ishita Sharma
+ishita.sharma8@example.com | +91 9634573185 | linkedin.com/in/ishita-sharma | github.com/ishita8
+
+SUMMARY
+Data Analyst seeking an entry-level opportunity to learn and contribute.
+
+EDUCATION
+B.Tech, IIIT Hyderabad, 2021-2025, CGPA 8.77/10
+
+SKILLS
+SQL, Python, Pandas, Tableau, Excel, Statistics, A/B Testing, dbt
+
+EXPERIENCE
+Data Analyst Intern at a mobility startup: automated weekly reporting in Python, saving 6 analyst-hours per week.
+
+PROJECTS
+- Analyzed 1.2M ride records to find demand hotspots, presented to city ops team
+- Built Tableau dashboards tracking weekly retention for a consumer app
+
+ACHIEVEMENTS
+- Completed 3 online certifications
+- Member of the college coding club

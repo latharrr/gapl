@@ -1,0 +1,15 @@
+CURRICULUM VITAE
+Vikram Kulkarni
+vikram.kulkarni24@example.com | +91 9474909412 | linkedin.com/in/vikram-kulkarni | github.com/vikram24
+
+SUMMARY
+Fresher looking for a job.
+
+EDUCATION
+B.Tech, Lovely Professional University, 2021-2025, CGPA 6.74/10
+
+SKILLS
+C, Embedded Systems, Python, MATLAB
+
+PROJECTS
+- Built an Arduino-based air quality monitor logging to a Python dashboard

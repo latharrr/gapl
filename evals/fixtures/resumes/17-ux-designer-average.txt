@@ -1,0 +1,22 @@
+Vikram Verma
+vikram.verma17@example.com | +91 9800249993 | linkedin.com/in/vikram-verma | github.com/vikram17
+
+SUMMARY
+UI/UX Designer seeking an entry-level opportunity to learn and contribute.
+
+EDUCATION
+B.Tech, BITS Pilani, 2021-2025, CGPA 6.64/10
+
+SKILLS
+Figma, Prototyping, User Research, Design Systems, Usability Testing, HTML, CSS, Motion Design
+
+EXPERIENCE
+Product Design Intern at a SaaS startup: ran 8 usability sessions, delivered hi-fi prototypes for the analytics dashboard.
+
+PROJECTS
+- Redesigned checkout flow for a D2C brand; task completion rose from 61% to 84% in usability tests
+- Built a 40-component design system adopted across 3 products
+
+ACHIEVEMENTS
+- Completed 3 online certifications
+- Member of the college coding club

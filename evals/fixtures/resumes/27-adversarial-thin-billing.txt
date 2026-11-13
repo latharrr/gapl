@@ -1,0 +1,15 @@
+Dev Verma
+dev.verma@example.com | github.com/devverma
+
+SUMMARY
+Fresher looking for backend roles.
+
+EDUCATION
+B.Tech CSE, Delhi University, 2022-2026, CGPA 7.8/10
+
+SKILLS
+Node.js, SQL, Docker
+
+PROJECTS
+- Invoice generator CLI with GST rules and PDF output
+- Receipt OCR parser that tags line items

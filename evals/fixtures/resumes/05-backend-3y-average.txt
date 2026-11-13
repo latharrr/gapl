@@ -1,0 +1,22 @@
+Meera Verma
+meera.verma5@example.com | +91 9588678634 | linkedin.com/in/meera-verma | github.com/meera5
+
+SUMMARY
+Backend Engineer, 3 years experience seeking an entry-level opportunity to learn and contribute.
+
+EDUCATION
+B.Tech, Anna University, 2021-2025, CGPA 7.55/10
+
+SKILLS
+Go, PostgreSQL, Redis, Kafka, Docker, Kubernetes, AWS, gRPC
+
+EXPERIENCE
+Backend Engineer at a Series B e-commerce company (3 years): owned inventory service, led on-call rotation, mentored 2 junior engineers.
+
+PROJECTS
+- Designed a rate-limited notification service handling 2M messages/day
+- Migrated monolith checkout flow to event-driven services, cutting p95 latency 40%
+
+ACHIEVEMENTS
+- Completed 3 online certifications
+- Member of the college coding club

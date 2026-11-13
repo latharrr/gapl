@@ -1,0 +1,10 @@
+SAVINGS ACCOUNT STATEMENT
+Account: XXXX4521
+Period: Oct 2026
+
+01 Oct - UPI/CR - ₹15,000.00
+05 Oct - UPI/DR - ₹450.00
+12 Oct - ATM WDL - ₹2,000.00
+
+Closing balance: ₹41,220.55
+This is a system generated statement.

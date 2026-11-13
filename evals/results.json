@@ -1,0 +1,98 @@
+{
+  "runAt": "2026-11-13T20:51:43.380Z",
+  "suites": {
+    "uploadGate": {
+      "description": "Resume-content gate: should accept real resumes, reject other documents (blocks junk uploads before a paid AI call).",
+      "positives": 27,
+      "negatives": 17,
+      "positivesNote": "24 core resumes + 3 adversarial accept cases; negatives include 1 adversarial reject case(s)",
+      "acceptedResumes": 27,
+      "falseRejections": [],
+      "rejectedNonResumes": 17,
+      "falseAcceptances": [],
+      "accuracy": 100,
+      "adversarialProbes": [
+        {
+          "file": "resumes/25-adversarial-invoice-receipt.txt",
+          "idealExpectation": "accept",
+          "accepted": true,
+          "correct": true,
+          "note": "Real resume whose projects involve invoices/receipts; previously rejected because >=2 negative keywords fired before resume signals were counted. Fixed: negatives only reject when resume signals are weak."
+        },
+        {
+          "file": "resumes/26-adversarial-restaurant-po.txt",
+          "idealExpectation": "accept",
+          "accepted": true,
+          "correct": true,
+          "note": "Real resume with restaurant menu-item and purchase-order project work (3 negative keywords); strong resume structure must win."
+        },
+        {
+          "file": "resumes/27-adversarial-thin-billing.txt",
+          "idealExpectation": "accept",
+          "accepted": true,
+          "correct": true,
+          "note": "Thin fresher resume (6 signals) with invoice+receipt projects; boundary case just above the 5-signal junk threshold."
+        },
+        {
+          "file": "non_resumes/stuffed-invoice.txt",
+          "idealExpectation": "reject",
+          "accepted": false,
+          "correct": true,
+          "reason": "This looks like a different kind of document (like a receipt or invoice). Please upload a valid resume.",
+          "note": "Adversarial junk: a real invoice stuffed with resume keywords (resume/skills/experience/education = 4 signals). Must still be rejected."
+        }
+      ]
+    },
+    "pdfExtraction": {
+      "description": "unpdf text extraction on synthetic resume PDFs: expected-token recovery and word-level F1 vs source text.",
+      "pdfs": 24,
+      "meanTokenRecovery": 100,
+      "meanWordF1": 97.9,
+      "worst": [
+        {
+          "pdf": "18-ux-designer-weak.pdf",
+          "expectedTokens": 8,
+          "tokensRecovered": 8,
+          "missing": [],
+          "wordF1": 95.1,
+          "extractedChars": 367
+        },
+        {
+          "pdf": "19-marketing-grad-strong.pdf",
+          "expectedTokens": 8,
+          "tokensRecovered": 8,
+          "missing": [],
+          "wordF1": 95.8,
+          "extractedChars": 837
+        },
+        {
+          "pdf": "23-ece-engineer-average.pdf",
+          "expectedTokens": 8,
+          "tokensRecovered": 8,
+          "missing": [],
+          "wordF1": 95.9,
+          "extractedChars": 699
+        }
+      ]
+    },
+    "outputValidator": {
+      "description": "Mutation testing of validateAnalysisPayload: structurally broken model outputs must be rejected; designed clamping/leniency must accept.",
+      "mutants": 21,
+      "shouldReject": 12,
+      "caught": 12,
+      "catchRate": 100,
+      "shouldAccept": 9,
+      "falseRejections": 0,
+      "uncaught": []
+    },
+    "promptConstruction": {
+      "description": "buildAnalysisPrompt bounds: resume <= 12k chars, JD <= 6k chars, truncation marker, role/tier injected, JSON contract present.",
+      "resumeBounded": true,
+      "bothTruncated": true,
+      "promptCharsOversizedInput": 19940,
+      "roleInjected": true,
+      "jsonContractPresent": true,
+      "noTruncationOnSmallInput": true
+    }
+  }
+}

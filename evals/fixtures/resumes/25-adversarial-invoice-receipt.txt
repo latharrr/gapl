@@ -1,0 +1,18 @@
+Aarav Singh
+adv.resume@example.com | +91 9812345678 | linkedin.com/in/adv-resume | github.com/advresume
+
+SUMMARY
+Backend engineer with 2 years of fintech experience.
+
+EDUCATION
+B.Tech Computer Science, NIT Trichy, 2019-2023, CGPA 8.1/10
+
+SKILLS
+Node.js, PostgreSQL, Redis, Docker, AWS, TypeScript
+
+EXPERIENCE
+Backend Developer at a billing startup: built an invoice generator service producing GST-compliant invoice PDFs, and a receipt parser that extracts line items from scanned receipt images. Wrote integration tests for both.
+
+PROJECTS
+- Open-source invoice template engine with 300 GitHub stars
+- Receipt scanning mobile app prototype

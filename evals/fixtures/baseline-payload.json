@@ -1,0 +1,111 @@
+{
+  "atsScore": 72,
+  "readiness": 64,
+  "recruiterVerdict": {
+    "verdict": "Maybe",
+    "confidence": 70,
+    "reason": "Solid project evidence for a fresher, but no production backend depth and no system design exposure.",
+    "strongestSignal": "Shipped a used product with real users",
+    "topGap": "No measurable scale or reliability work",
+    "whatWouldChangeDecision": "One deployed service with documented load or reliability numbers"
+  },
+  "readinessBreakdown": {
+    "skillMatch": {
+      "score": 68
+    },
+    "projectComplexity": {
+      "score": 61
+    },
+    "deploymentEvidence": {
+      "score": 55
+    },
+    "teamCollaboration": {
+      "score": 70
+    }
+  },
+  "careerGaps": [
+    {
+      "skill": "System design",
+      "currentLevel": "Beginner",
+      "priority": "Critical",
+      "recommendedProject": "Build a rate-limited URL shortener with a written design doc",
+      "difficulty": "Hard",
+      "estimatedWeeks": 4,
+      "expectedReadinessAfter": 78
+    },
+    {
+      "skill": "Testing",
+      "currentLevel": "Beginner",
+      "priority": "High",
+      "recommendedProject": "Add an integration test suite to an existing project",
+      "difficulty": "Medium",
+      "estimatedWeeks": 2,
+      "expectedReadinessAfter": 70
+    },
+    {
+      "skill": "Cloud deployment",
+      "currentLevel": "Intermediate",
+      "priority": "Medium",
+      "recommendedProject": "Deploy with CI/CD and monitoring on a cloud provider",
+      "difficulty": "Medium",
+      "estimatedWeeks": 2,
+      "expectedReadinessAfter": 72
+    }
+  ],
+  "roadmap": [
+    {
+      "week": 1,
+      "title": "Design basics",
+      "description": "Learn core building blocks.",
+      "tasks": [
+        "Read design primer",
+        "Sketch URL shortener",
+        "Write API contract"
+      ],
+      "milestone": "Design doc reviewed"
+    },
+    {
+      "week": 2,
+      "title": "Build core",
+      "description": "Implement the service.",
+      "tasks": [
+        "Set up repo",
+        "Implement endpoints",
+        "Add storage"
+      ],
+      "milestone": "Working local service"
+    },
+    {
+      "week": 3,
+      "title": "Harden",
+      "description": "Add tests and rate limiting.",
+      "tasks": [
+        "Write tests",
+        "Add rate limiter",
+        "Load test"
+      ],
+      "milestone": "p95 under 200ms at 100 rps"
+    },
+    {
+      "week": 4,
+      "title": "Deploy",
+      "description": "Ship and document.",
+      "tasks": [
+        "Deploy",
+        "Add monitoring",
+        "Write README"
+      ],
+      "milestone": "Public URL with metrics"
+    }
+  ],
+  "missingSkills": [
+    "System design",
+    "Distributed systems",
+    "Observability"
+  ],
+  "strongSkills": [
+    "React",
+    "Node.js",
+    "SQL"
+  ]
+}

@@ -1,0 +1,14 @@
+Ananya Verma
+ananya.verma18@example.com | +91 9404739069 | linkedin.com/in/ananya-verma | github.com/ananya18
+
+SUMMARY
+Fresher looking for a job.
+
+EDUCATION
+B.Tech, VIT Vellore, 2021-2025, CGPA 6.71/10
+
+SKILLS
+Figma, Prototyping, User Research, Design Systems
+
+PROJECTS
+- Redesigned checkout flow for a D2C brand; task completion rose from 61% to 84% in usability tests

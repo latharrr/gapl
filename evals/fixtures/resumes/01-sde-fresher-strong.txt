@@ -1,0 +1,23 @@
+Meera Nair
+meera.nair1@example.com | +91 9927303767 | linkedin.com/in/meera-nair | github.com/meera1
+
+SUMMARY
+Software Development Engineer (Fresher) with shipped, measurable work. Looking for a role where I can own outcomes end to end.
+
+EDUCATION
+B.Tech, Anna University, 2021-2025, CGPA 9.08/10
+
+SKILLS
+Java, Python, Data Structures, Algorithms, SQL, Git, React, Node.js
+
+EXPERIENCE
+Software Engineering Intern at a fintech startup: shipped REST APIs in Node.js, wrote unit tests, fixed 30+ production bugs.
+
+PROJECTS
+- Built a full-stack hostel mess management app used by 500+ students
+- Developed a CLI attendance tracker in Python with SQLite storage
+
+ACHIEVEMENTS
+- Won 2nd place at a national hackathon (800+ teams)
+- Open-source contributor: 12 merged PRs across 4 projects
+- Dean's list, top 5% of batch

@@ -1,0 +1,70 @@
+{
+  "protocol": {
+    "purpose": "Model-quality eval for Gapl's resume analysis: does the AI verdict track candidate fit?",
+    "status": "PREPARED, NOT RUN - requires a separately approved inference budget.",
+    "caseCount": "30 = 8 archetypes x 3 quality tiers (24 matched-role) + 6 deliberately role-mismatched",
+    "criteria": [
+      "Readiness-score monotonicity (strong > average > weak within archetype) - countable, but the tiers are set by fixture construction, so treat as preliminary.",
+      "Schema validity: every response must pass validateAnalysisPayload.",
+      "Verdict-band match: descriptive only; bands assigned from an explicit evidence checklist (shipped artifact, quantified impact, relevant experience), subject to independent review."
+    ],
+    "bandChecklist": {
+      "Shortlist-band": "fixture shows a shipped/deployed artifact AND quantified impact AND directly relevant internship or work experience",
+      "Maybe-band": "some relevant project evidence but missing at least one of: deployment, quantified impact, directly relevant experience",
+      "Reject-band": "little relevant evidence, or role mismatch (fixture's core skill set does not overlap the target role's core requirements)"
+    },
+    "rubricCaveat": "Preliminary synthetic rubric: verdict bands and monotonicity expectations are derived from how these fixtures were constructed and need independent review before any results could be cited.",
+    "notes": "Synthetic resumes only; no real personal data."
+  },
+  "roles": {
+    "sde-fresher": {
+      "role": "SDE Intern",
+      "tier": "Product Startup"
+    },
+    "backend-3y": {
+      "role": "Backend Engineer",
+      "tier": "Product Startup"
+    },
+    "data-analyst": {
+      "role": "Data Analyst",
+      "tier": "Product Startup"
+    },
+    "ml-engineer": {
+      "role": "ML Engineer",
+      "tier": "Product Startup"
+    },
+    "pm-intern": {
+      "role": "Product Manager Intern",
+      "tier": "Product Startup"
+    },
+    "ux-designer": {
+      "role": "Product Designer",
+      "tier": "Product Startup"
+    },
+    "marketing-grad": {
+      "role": "Growth Marketing Associate",
+      "tier": "Mass Recruiter"
+    },
+    "ece-engineer": {
+      "role": "Embedded Software Engineer",
+      "tier": "Mass Recruiter"
+    }
+  },
+  "bands": {
+    "strong": [
+      "Shortlist",
+      "Maybe"
+    ],
+    "average": [
+      "Maybe"
+    ],
+    "weak": [
+      "Maybe",
+      "Reject"
+    ],
+    "mismatched": [
+      "Reject"
+    ]
+  },
+  "cases": "resumes 01-24 use their archetype role+tier with band by quality tier; 6 mismatched cases: marketing-grad-strong vs SDE Intern, ece-engineer-weak vs ML Engineer, ux-designer-weak vs Data Analyst, backend-3y-weak vs Product Manager Intern, data-analyst-weak vs ML Engineer, ml-engineer-weak vs Growth Marketing Associate - all band Reject."
+}

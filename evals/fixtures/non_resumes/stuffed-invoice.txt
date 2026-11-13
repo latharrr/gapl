@@ -1,0 +1,14 @@
+INVOICE
+Invoice No: CS-9921
+Date: 10 Nov 2026
+Billed To: Walk-in Customer
+
+Services:
+1. Resume writing package = Rs 4,999
+2. Skills assessment and experience review = Rs 2,999
+3. Education verification letter = Rs 999
+
+Subtotal: Rs 8,997
+GST 18%: Rs 1,619
+Total amount due: Rs 10,616
+Payment terms: immediate. This is a computer generated invoice.

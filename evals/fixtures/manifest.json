@@ -1,0 +1,482 @@
+{
+  "generated": "2026-11-13T20:51:39.432Z",
+  "seed": 20261114,
+  "resumes": [
+    {
+      "file": "resumes/01-sde-fresher-strong.txt",
+      "expect": "accept",
+      "archetype": "sde-fresher",
+      "quality": "strong",
+      "tokens": [
+        "Meera",
+        "EDUCATION",
+        "SKILLS",
+        "PROJECTS",
+        "Java",
+        "Python",
+        "Data Structures",
+        "Algorithms"
+      ]
+    },
+    {
+      "file": "resumes/02-sde-fresher-average.txt",
+      "expect": "accept",
+      "archetype": "sde-fresher",
+      "quality": "average",
+      "tokens": [
+        "Nisha",
+        "EDUCATION",
+        "SKILLS",
+        "PROJECTS",
+        "Java",
+        "Python",
+        "Data Structures",
+        "Algorithms"
+      ]
+    },
+    {
+      "file": "resumes/03-sde-fresher-weak.txt",
+      "expect": "accept",
+      "archetype": "sde-fresher",
+      "quality": "weak",
+      "tokens": [
+        "Ishita",
+        "EDUCATION",
+        "SKILLS",
+        "PROJECTS",
+        "Java",
+        "Python",
+        "Data Structures",
+        "Algorithms"
+      ]
+    },
+    {
+      "file": "resumes/04-backend-3y-strong.txt",
+      "expect": "accept",
+      "archetype": "backend-3y",
+      "quality": "strong",
+      "tokens": [
+        "Vikram",
+        "EDUCATION",
+        "SKILLS",
+        "PROJECTS",
+        "Go",
+        "PostgreSQL",
+        "Redis",
+        "Kafka"
+      ]
+    },
+    {
+      "file": "resumes/05-backend-3y-average.txt",
+      "expect": "accept",
+      "archetype": "backend-3y",
+      "quality": "average",
+      "tokens": [
+        "Meera",
+        "EDUCATION",
+        "SKILLS",
+        "PROJECTS",
+        "Go",
+        "PostgreSQL",
+        "Redis",
+        "Kafka"
+      ]
+    },
+    {
+      "file": "resumes/06-backend-3y-weak.txt",
+      "expect": "accept",
+      "archetype": "backend-3y",
+      "quality": "weak",
+      "tokens": [
+        "Karan",
+        "EDUCATION",
+        "SKILLS",
+        "PROJECTS",
+        "Go",
+        "PostgreSQL",
+        "Redis",
+        "Kafka"
+      ]
+    },
+    {
+      "file": "resumes/07-data-analyst-strong.txt",
+      "expect": "accept",
+      "archetype": "data-analyst",
+      "quality": "strong",
+      "tokens": [
+        "Aarav",
+        "EDUCATION",
+        "SKILLS",
+        "PROJECTS",
+        "SQL",
+        "Python",
+        "Pandas",
+        "Tableau"
+      ]
+    },
+    {
+      "file": "resumes/08-data-analyst-average.txt",
+      "expect": "accept",
+      "archetype": "data-analyst",
+      "quality": "average",
+      "tokens": [
+        "Ishita",
+        "EDUCATION",
+        "SKILLS",
+        "PROJECTS",
+        "SQL",
+        "Python",
+        "Pandas",
+        "Tableau"
+      ]
+    },
+    {
+      "file": "resumes/09-data-analyst-weak.txt",
+      "expect": "accept",
+      "archetype": "data-analyst",
+      "quality": "weak",
+      "tokens": [
+        "Arjun",
+        "EDUCATION",
+        "SKILLS",
+        "PROJECTS",
+        "SQL",
+        "Python",
+        "Pandas",
+        "Tableau"
+      ]
+    },
+    {
+      "file": "resumes/10-ml-engineer-strong.txt",
+      "expect": "accept",
+      "archetype": "ml-engineer",
+      "quality": "strong",
+      "tokens": [
+        "Rohan",
+        "EDUCATION",
+        "SKILLS",
+        "PROJECTS",
+        "Python",
+        "PyTorch",
+        "scikit-learn",
+        "NLP"
+      ]
+    },
+    {
+      "file": "resumes/11-ml-engineer-average.txt",
+      "expect": "accept",
+      "archetype": "ml-engineer",
+      "quality": "average",
+      "tokens": [
+        "Ishita",
+        "EDUCATION",
+        "SKILLS",
+        "PROJECTS",
+        "Python",
+        "PyTorch",
+        "scikit-learn",
+        "NLP"
+      ]
+    },
+    {
+      "file": "resumes/12-ml-engineer-weak.txt",
+      "expect": "accept",
+      "archetype": "ml-engineer",
+      "quality": "weak",
+      "tokens": [
+        "Vikram",
+        "EDUCATION",
+        "SKILLS",
+        "PROJECTS",
+        "Python",
+        "PyTorch",
+        "scikit-learn",
+        "NLP"
+      ]
+    },
+    {
+      "file": "resumes/13-pm-intern-strong.txt",
+      "expect": "accept",
+      "archetype": "pm-intern",
+      "quality": "strong",
+      "tokens": [
+        "Dev",
+        "EDUCATION",
+        "SKILLS",
+        "PROJECTS",
+        "User Research",
+        "Wireframing",
+        "SQL",
+        "Roadmapping"
+      ]
+    },
+    {
+      "file": "resumes/14-pm-intern-average.txt",
+      "expect": "accept",
+      "archetype": "pm-intern",
+      "quality": "average",
+      "tokens": [
+        "Karan",
+        "EDUCATION",
+        "SKILLS",
+        "PROJECTS",
+        "User Research",
+        "Wireframing",
+        "SQL",
+        "Roadmapping"
+      ]
+    },
+    {
+      "file": "resumes/15-pm-intern-weak.txt",
+      "expect": "accept",
+      "archetype": "pm-intern",
+      "quality": "weak",
+      "tokens": [
+        "Sneha",
+        "EDUCATION",
+        "SKILLS",
+        "PROJECTS",
+        "User Research",
+        "Wireframing",
+        "SQL",
+        "Roadmapping"
+      ]
+    },
+    {
+      "file": "resumes/16-ux-designer-strong.txt",
+      "expect": "accept",
+      "archetype": "ux-designer",
+      "quality": "strong",
+      "tokens": [
+        "Dev",
+        "EDUCATION",
+        "SKILLS",
+        "PROJECTS",
+        "Figma",
+        "Prototyping",
+        "User Research",
+        "Design Systems"
+      ]
+    },
+    {
+      "file": "resumes/17-ux-designer-average.txt",
+      "expect": "accept",
+      "archetype": "ux-designer",
+      "quality": "average",
+      "tokens": [
+        "Vikram",
+        "EDUCATION",
+        "SKILLS",
+        "PROJECTS",
+        "Figma",
+        "Prototyping",
+        "User Research",
+        "Design Systems"
+      ]
+    },
+    {
+      "file": "resumes/18-ux-designer-weak.txt",
+      "expect": "accept",
+      "archetype": "ux-designer",
+      "quality": "weak",
+      "tokens": [
+        "Ananya",
+        "EDUCATION",
+        "SKILLS",
+        "PROJECTS",
+        "Figma",
+        "Prototyping",
+        "User Research",
+        "Design Systems"
+      ]
+    },
+    {
+      "file": "resumes/19-marketing-grad-strong.txt",
+      "expect": "accept",
+      "archetype": "marketing-grad",
+      "quality": "strong",
+      "tokens": [
+        "Ananya",
+        "EDUCATION",
+        "SKILLS",
+        "PROJECTS",
+        "SEO",
+        "Content Strategy",
+        "Google Analytics",
+        "Social Media"
+      ]
+    },
+    {
+      "file": "resumes/20-marketing-grad-average.txt",
+      "expect": "accept",
+      "archetype": "marketing-grad",
+      "quality": "average",
+      "tokens": [
+        "Priya",
+        "EDUCATION",
+        "SKILLS",
+        "PROJECTS",
+        "SEO",
+        "Content Strategy",
+        "Google Analytics",
+        "Social Media"
+      ]
+    },
+    {
+      "file": "resumes/21-marketing-grad-weak.txt",
+      "expect": "accept",
+      "archetype": "marketing-grad",
+      "quality": "weak",
+      "tokens": [
+        "Ishita",
+        "EDUCATION",
+        "SKILLS",
+        "PROJECTS",
+        "SEO",
+        "Content Strategy",
+        "Google Analytics",
+        "Social Media"
+      ]
+    },
+    {
+      "file": "resumes/22-ece-engineer-strong.txt",
+      "expect": "accept",
+      "archetype": "ece-engineer",
+      "quality": "strong",
+      "tokens": [
+        "Priya",
+        "EDUCATION",
+        "SKILLS",
+        "PROJECTS",
+        "C",
+        "Embedded Systems",
+        "Python",
+        "MATLAB"
+      ]
+    },
+    {
+      "file": "resumes/23-ece-engineer-average.txt",
+      "expect": "accept",
+      "archetype": "ece-engineer",
+      "quality": "average",
+      "tokens": [
+        "Nisha",
+        "EDUCATION",
+        "SKILLS",
+        "PROJECTS",
+        "C",
+        "Embedded Systems",
+        "Python",
+        "MATLAB"
+      ]
+    },
+    {
+      "file": "resumes/24-ece-engineer-weak.txt",
+      "expect": "accept",
+      "archetype": "ece-engineer",
+      "quality": "weak",
+      "tokens": [
+        "Vikram",
+        "EDUCATION",
+        "SKILLS",
+        "PROJECTS",
+        "C",
+        "Embedded Systems",
+        "Python",
+        "MATLAB"
+      ]
+    }
+  ],
+  "nonResumes": [
+    {
+      "file": "non_resumes/invoice.txt",
+      "expect": "reject"
+    },
+    {
+      "file": "non_resumes/receipt.txt",
+      "expect": "reject"
+    },
+    {
+      "file": "non_resumes/restaurant-menu.txt",
+      "expect": "reject"
+    },
+    {
+      "file": "non_resumes/research-paper.txt",
+      "expect": "reject"
+    },
+    {
+      "file": "non_resumes/purchase-order.txt",
+      "expect": "reject"
+    },
+    {
+      "file": "non_resumes/bank-statement.txt",
+      "expect": "reject"
+    },
+    {
+      "file": "non_resumes/news-article.txt",
+      "expect": "reject"
+    },
+    {
+      "file": "non_resumes/lorem.txt",
+      "expect": "reject"
+    },
+    {
+      "file": "non_resumes/short-junk.txt",
+      "expect": "reject"
+    },
+    {
+      "file": "non_resumes/cover-letter-thin.txt",
+      "expect": "reject"
+    },
+    {
+      "file": "non_resumes/lease.txt",
+      "expect": "reject"
+    },
+    {
+      "file": "non_resumes/recipe.txt",
+      "expect": "reject"
+    },
+    {
+      "file": "non_resumes/meeting-minutes.txt",
+      "expect": "reject"
+    },
+    {
+      "file": "non_resumes/prescription.txt",
+      "expect": "reject"
+    },
+    {
+      "file": "non_resumes/travel-itinerary.txt",
+      "expect": "reject"
+    },
+    {
+      "file": "non_resumes/ebook-toc.txt",
+      "expect": "reject"
+    }
+  ],
+  "adversarial": [
+    {
+      "file": "resumes/25-adversarial-invoice-receipt.txt",
+      "idealExpectation": "accept",
+      "currentDesignExpectation": "accept",
+      "note": "Real resume whose projects involve invoices/receipts; previously rejected because >=2 negative keywords fired before resume signals were counted. Fixed: negatives only reject when resume signals are weak."
+    },
+    {
+      "file": "resumes/26-adversarial-restaurant-po.txt",
+      "idealExpectation": "accept",
+      "currentDesignExpectation": "accept",
+      "note": "Real resume with restaurant menu-item and purchase-order project work (3 negative keywords); strong resume structure must win."
+    },
+    {
+      "file": "resumes/27-adversarial-thin-billing.txt",
+      "idealExpectation": "accept",
+      "currentDesignExpectation": "accept",
+      "note": "Thin fresher resume (6 signals) with invoice+receipt projects; boundary case just above the 5-signal junk threshold."
+    },
+    {
+      "file": "non_resumes/stuffed-invoice.txt",
+      "idealExpectation": "reject",
+      "currentDesignExpectation": "reject",
+      "note": "Adversarial junk: a real invoice stuffed with resume keywords (resume/skills/experience/education = 4 signals). Must still be rejected."
+    }
+  ]
+}

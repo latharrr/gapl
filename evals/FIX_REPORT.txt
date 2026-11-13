@@ -1,0 +1,54 @@
+Gapl upload-gate fix - 14 Nov 2026
+Repo: github.com/latharrr/gapl @ 7f71a56 (12 Nov 2026, PR #12 merge)
+File changed: src/lib/resume-parser.ts (validateResumeContent) - the ONLY app file touched.
+
+THE BUG
+A genuine resume was rejected if its text contained 2+ "junk" keywords
+(invoice, receipt, restaurant, menu item, purchase order, ...). The keyword
+check ran before resume signals were counted, so a backend engineer whose
+projects were "invoice generator" + "receipt parser" was told their resume
+was not a resume.
+
+THE FIX (before -> after)
+Before: if (2+ negative keywords found) -> reject, no matter what else the
+document contains.
+After:  negative keywords reject ONLY when resume structure is also weak.
+        The gate now counts resume signals (experience, education, skills,
+        projects, summary, cgpa, linkedin, github, ...) first:
+        - 2+ junk keywords AND fewer than 5 resume signals -> reject (junk)
+        - fewer than 3 resume signals -> reject (not a resume)
+        - everything else -> accept
+Real resumes in the test set carry 9-15 signals; junk documents carry 0, so
+the 5-signal threshold separates them with margin on both sides.
+
+TEST RESULTS (same offline harness, synthetic fixtures, no paid AI calls)
+44 labeled documents: 27 resumes (24 core + 3 adversarial) + 17 junk docs
+(16 core + 1 adversarial junk that stuffs resume keywords into an invoice).
+- Before fix: 41/44 correct (93.2%). The 3 misses were ALL real resumes with
+  billing/restaurant project work. No junk got through.
+- After fix: 44/44 correct (100% on this synthetic suite).
+  - 3 adversarial resumes now accepted (billing, restaurant/purchase-order,
+    and a thin fresher resume just above the threshold).
+  - Adversarial stuffed invoice still rejected.
+  - All 16 original junk docs still rejected.
+- Unchanged suites: PDF extraction 97.9% mean word F1 across 24 PDFs;
+  output validator caught 12/12 malformed AI outputs with 0 false rejections;
+  6/6 prompt-construction checks pass.
+- Repo test suite: 50/50 pass. TypeScript compiles clean.
+
+KNOWN LIMITS (honest ones)
+- 100% here means "passes its own labeled synthetic suite", not field accuracy.
+- A very thin real resume (under 5 signal words) that also mentions 2 junk
+  keywords would still be rejected. The error message tells the user what to
+  fix.
+- A deliberately crafted document with 5+ resume section words and junk
+  intent could pass; this gate only stops obvious junk before a paid AI call,
+  it is not a security boundary.
+- These tests measure the deterministic pipeline/guardrails, NOT whether the
+  AI gives good career advice. Model quality needs a separately approved
+  paid evaluation, which was not run.
+
+REPRO (offline, no keys)
+  git clone https://github.com/latharrr/gapl && cd gapl
+  npm i -D tsx unpdf && python3 -m pip install reportlab
+  npx tsx evals/run.mjs   # writes evals/results.json

@@ -1,0 +1,15 @@
+CURRICULUM VITAE
+Vikram Verma
+vikram.verma12@example.com | +91 9884415996 | linkedin.com/in/vikram-verma | github.com/vikram12
+
+SUMMARY
+Fresher looking for a job.
+
+EDUCATION
+B.Tech, Delhi University, 2021-2025, CGPA 7.51/10
+
+SKILLS
+Python, PyTorch, scikit-learn, NLP
+
+PROJECTS
+- Trained a sentiment classifier on 200k product reviews (F1 0.87)

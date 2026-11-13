@@ -1,0 +1,24 @@
+CURRICULUM VITAE
+Vikram Khan
+vikram.khan4@example.com | +91 9552936697 | linkedin.com/in/vikram-khan | github.com/vikram4
+
+SUMMARY
+Backend Engineer, 3 years experience with shipped, measurable work. Looking for a role where I can own outcomes end to end.
+
+EDUCATION
+B.Tech, IIT Delhi, 2021-2025, CGPA 8.03/10
+
+SKILLS
+Go, PostgreSQL, Redis, Kafka, Docker, Kubernetes, AWS, gRPC
+
+EXPERIENCE
+Backend Engineer at a Series B e-commerce company (3 years): owned inventory service, led on-call rotation, mentored 2 junior engineers.
+
+PROJECTS
+- Designed a rate-limited notification service handling 2M messages/day
+- Migrated monolith checkout flow to event-driven services, cutting p95 latency 40%
+
+ACHIEVEMENTS
+- Won 2nd place at a national hackathon (800+ teams)
+- Open-source contributor: 12 merged PRs across 4 projects
+- Dean's list, top 5% of batch

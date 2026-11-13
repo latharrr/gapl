@@ -1,0 +1,14 @@
+Sneha Singh
+sneha.singh15@example.com | +91 9748456108 | linkedin.com/in/sneha-singh | github.com/sneha15
+
+SUMMARY
+Fresher looking for a job.
+
+EDUCATION
+B.Tech, IIIT Hyderabad, 2021-2025, CGPA 9.01/10
+
+SKILLS
+User Research, Wireframing, SQL, Roadmapping
+
+PROJECTS
+- Ran 15 user interviews and synthesized a prioritized pain-point list for a campus app

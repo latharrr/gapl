@@ -1,0 +1,10 @@
+PURCHASE ORDER
+PO Number: PO-77821
+Vendor: Krishna Office Supplies
+
+Item: A4 paper, 500 sheets x 40 reams
+Item: Ball pens, box of 50 x 10
+
+Total amount due: ₹28,400
+Delivery by: 20 Nov 2026
+Authorized signatory: Purchase Manager

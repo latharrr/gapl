@@ -1,0 +1,14 @@
+Arjun Das
+arjun.das9@example.com | +91 9867007923 | linkedin.com/in/arjun-das | github.com/arjun9
+
+SUMMARY
+Fresher looking for a job.
+
+EDUCATION
+B.Tech, IIT Delhi, 2021-2025, CGPA 9.15/10
+
+SKILLS
+SQL, Python, Pandas, Tableau
+
+PROJECTS
+- Analyzed 1.2M ride records to find demand hotspots, presented to city ops team

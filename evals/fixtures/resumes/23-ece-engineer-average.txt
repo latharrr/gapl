@@ -1,0 +1,22 @@
+Nisha Singh
+nisha.singh23@example.com | +91 9704897141 | linkedin.com/in/nisha-singh | github.com/nisha23
+
+SUMMARY
+Electronics Engineer pivoting to software seeking an entry-level opportunity to learn and contribute.
+
+EDUCATION
+B.Tech, VIT Vellore, 2021-2025, CGPA 6.57/10
+
+SKILLS
+C, Embedded Systems, Python, MATLAB, Arduino, Circuit Design, SQL, Linux
+
+EXPERIENCE
+Embedded Systems Intern at an automotive supplier: wrote C firmware for a sensor module, documented test procedures.
+
+PROJECTS
+- Built an Arduino-based air quality monitor logging to a Python dashboard
+- Simulated a 4-bit ALU in Verilog for coursework
+
+ACHIEVEMENTS
+- Completed 3 online certifications
+- Member of the college coding club

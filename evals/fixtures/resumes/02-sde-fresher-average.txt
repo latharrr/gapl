@@ -1,0 +1,22 @@
+Nisha Khan
+nisha.khan2@example.com | +91 9194023871 | linkedin.com/in/nisha-khan | github.com/nisha2
+
+SUMMARY
+Software Development Engineer (Fresher) seeking an entry-level opportunity to learn and contribute.
+
+EDUCATION
+B.Tech, IIT Delhi, 2021-2025, CGPA 8.29/10
+
+SKILLS
+Java, Python, Data Structures, Algorithms, SQL, Git, React, Node.js
+
+EXPERIENCE
+Software Engineering Intern at a fintech startup: shipped REST APIs in Node.js, wrote unit tests, fixed 30+ production bugs.
+
+PROJECTS
+- Built a full-stack hostel mess management app used by 500+ students
+- Developed a CLI attendance tracker in Python with SQLite storage
+
+ACHIEVEMENTS
+- Completed 3 online certifications
+- Member of the college coding club
