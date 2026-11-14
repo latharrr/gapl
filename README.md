@@ -2,7 +2,7 @@
 
 An application-readiness tool for job seekers, with an email and attribution back office for the founder. A candidate uploads a resume (PDF or text) and a job description; Gapl scores the fit, lists the gaps, builds a learning roadmap and helps rewrite the CV. By [Deepanshu Lathar](https://deepanshulathar.com).
 
-[Live app](https://gapl.vercel.app) | [Project status](PROJECT_STATUS.md) | [Report an issue](https://github.com/latharrr/gapl/issues)
+[Live app](https://gapl.143.lat) | [Project status](PROJECT_STATUS.md) | [Report an issue](https://github.com/latharrr/gapl/issues)
 
 ![CI](https://github.com/latharrr/gapl/actions/workflows/ci.yml/badge.svg)
 
@@ -13,6 +13,10 @@ An application-readiness tool for job seekers, with an email and attribution bac
 | **AI** | One gateway in `src/lib/ai-gateway.ts` with a primary model, a backup and optional last-resort fallbacks. The models named in the source are Anthropic Claude; which one a deployment runs depends on its keys and settings |
 | **Tests** | 50 unit tests (credits, payments, validation, webhooks, admin RBAC) plus an offline evaluation harness in `evals/` (44 labeled documents covering the resume upload gate, PDF extraction, output validation and prompt construction); CI runs lint, typecheck, tests and a production build |
 | **Scope** | Web app, AI gateway, email and attribution pipeline, admin tooling |
+
+## Evaluation
+
+An offline harness of 44 synthetic documents (27 resumes, 17 non-resumes) caught a bug where genuine resumes mentioning invoice or receipt projects were rejected as non-resumes. After the upload-gate fix the harness went from 41/44 to 44/44. These are synthetic pipeline tests, not a claim of real-world AI accuracy. Report: [evals/EVAL_REPORT.md](evals/EVAL_REPORT.md).
 
 ## What a candidate gets
 
