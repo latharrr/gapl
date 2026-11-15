@@ -61,6 +61,19 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${mona.variable} ${news.variable} ${cmu.variable}`} suppressHydrationWarning>
       <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              name: "Gapl",
+              url: "https://gapl.vercel.app",
+              description:
+                "Recruiters give your resume six seconds. Gapl shows what they saw, the line that sank it, and what to build to get shortlisted.",
+            }),
+          }}
+        />
         {/* js: lets CSS hold the sample resume's marks until they scroll into view; without JS they simply show.
             lite: phones, touch, low memory/cores, data saver or slow links get the light page (no film canvas,
             no smooth scroll, no blur), set before first paint so nothing heavy starts. */}
