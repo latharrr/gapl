@@ -11,20 +11,20 @@ function parseUserAgent(ua: string) {
 
   const uaLower = ua.toLowerCase();
 
-  // Browser check
-  if (uaLower.includes("firefox")) browser = "Firefox";
-  else if (uaLower.includes("chrome") && !uaLower.includes("chromium")) browser = "Chrome";
-  else if (uaLower.includes("safari") && !uaLower.includes("chrome")) browser = "Safari";
-  else if (uaLower.includes("edge")) browser = "Edge";
-  else if (uaLower.includes("opera") || uaLower.includes("opr")) browser = "Opera";
+  // Browser check. Edge and Opera also say "chrome", so they go first.
+  if (uaLower.includes("edg/") || uaLower.includes("edge")) browser = "Edge";
+  else if (uaLower.includes("opera") || uaLower.includes("opr/")) browser = "Opera";
+  else if (uaLower.includes("firefox") || uaLower.includes("fxios")) browser = "Firefox";
+  else if ((uaLower.includes("chrome") && !uaLower.includes("chromium")) || uaLower.includes("crios")) browser = "Chrome";
+  else if (uaLower.includes("safari")) browser = "Safari";
 
-  // OS check
+  // OS check. iPhone and iPad say "like Mac OS X", so they go before macOS.
   if (uaLower.includes("windows")) os = "Windows";
-  else if (uaLower.includes("macintosh") || uaLower.includes("mac os")) os = "macOS";
   else if (uaLower.includes("iphone") || uaLower.includes("ipad")) {
     os = "iOS";
     device = uaLower.includes("ipad") ? "Tablet" : "Mobile";
-  } else if (uaLower.includes("android")) {
+  } else if (uaLower.includes("macintosh") || uaLower.includes("mac os")) os = "macOS";
+  else if (uaLower.includes("android")) {
     os = "Android";
     device = "Mobile";
   } else if (uaLower.includes("linux")) os = "Linux";
